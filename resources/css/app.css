@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Sembunyikan elemen ber-atribut x-cloak sampai Alpine.js selesai load,
+   biar field yang di-toggle (mis. Harga Jual, Jumlah Stok di form produk)
+   tidak kedip nongol sekejap sebelum Alpine sempat sembunyikan. */
+[x-cloak] {
+    display: none !important;
+}
+
+/* Animasi "pop in" — dipakai buat elemen kecil kayak tombol tab (filter
+   kategori di katalog, filter status di daftar pesanan admin) biar begitu
+   halaman kebuka, tombol-tombolnya "muncul" satu-satu (bukan langsung nongol
+   diam kayak elemen statis biasa). Beda dari x-transition Alpine yang dipakai
+   di dropdown/toggle field (itu jalan pas STATE berubah karena diklik) — ini
+   jalan sekali pas elemennya pertama kali dirender ke layar (page load).
+
+   Dipakai bareng inline `style="animation-delay: ...ms"` per elemen (diisi
+   dari Blade pakai $loop->index) biar tombol-tombolnya muncul gantian
+   berurutan (efek "cascade"), bukan barengan sekaligus. */
+@keyframes pop-in {
+    from {
+        opacity: 0;
+        transform: scale(0.85);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Versi "pembungkus" dari animasi pop-in di atas — tinggal tempel class
+   `nav-pop-in` ke elemen induk (mis. <nav>, <div class="flex">), semua ANAK
+   LANGSUNG-nya otomatis pop-in gantian berurutan tanpa perlu nulis
+   animation-delay manual di tiap item satu-satu. Dipakai di menu navbar
+   admin & anggota (resources/views/layouts/navigation.blade.php,
+   resources/views/components/layouts/member.blade.php) supaya menu-nya
+   "hidup" tiap halaman kebuka, bukan cuma nongol diam. */
+.nav-pop-in > * {
+    animation: pop-in 0.3s ease-out backwards;
+}
+.nav-pop-in > *:nth-child(1) { animation-delay: 0ms; }
+.nav-pop-in > *:nth-child(2) { animation-delay: 40ms; }
+.nav-pop-in > *:nth-child(3) { animation-delay: 80ms; }
+.nav-pop-in > *:nth-child(4) { animation-delay: 120ms; }
+.nav-pop-in > *:nth-child(5) { animation-delay: 160ms; }
+.nav-pop-in > *:nth-child(6) { animation-delay: 200ms; }
+.nav-pop-in > *:nth-child(7) { animation-delay: 240ms; }
+.nav-pop-in > *:nth-child(8) { animation-delay: 280ms; }
