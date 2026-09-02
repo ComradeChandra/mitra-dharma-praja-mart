@@ -150,8 +150,26 @@ class OrderService
             ->get()
             ->keyBy('id');
 
+        // Diurutkan per id produk supaya dua pesanan bersamaan yang isinya
+        // sama selalu mengunci barisnya dengan urutan yang sama. Kalau
+        // urutannya bisa berbeda, keduanya bisa saling menunggu.
+        usort($items, fn (array $a, array $b) => $a['product_id'] <=> $b['product_id']);
+
         foreach ($items as $item) {
             $product = $products->get($item['product_id']);
+
+            // Stok dikurangi DULU, baru itemnya disimpan, dan urutan ini
+            // penting. Menyimpan order_item membuat database mengambil kunci
+            // baca pada baris produk karena ada relasi ke sana. Kalau
+            // pengurangan stok (yang butuh kunci tulis) dilakukan sesudahnya,
+            // dua pesanan bersamaan sama-sama memegang kunci baca lalu
+            // sama-sama menunggu kunci tulis, dan keduanya macet.
+            //
+            // Cuma berlaku buat produk yang stoknya dilacak. Produk pre-order
+            // murni tidak punya angka stok untuk dikurangi.
+            if ($product->has_stock_tracking) {
+                $this->kurangiStok($product, $item['quantity']);
+            }
 
             $order->orderItems()->create([
                 'product_id' => $product->id,
@@ -161,13 +179,6 @@ class OrderService
                 // dikosongkan dulu, baru diisi admin saat verifikasi.
                 'price_at_order' => $product->is_fluctuating ? null : $product->sell_price,
             ]);
-
-            // Stok cuma dikurangi untuk produk yang memang dilacak. Produk
-            // pre-order murni tidak punya angka stok. Hasilnya cuma kelihatan
-            // admin, pelanggan lihat status lewat Product::isAvailable().
-            if ($product->has_stock_tracking) {
-                $this->kurangiStok($product, $item['quantity']);
-            }
         }
     }
 
