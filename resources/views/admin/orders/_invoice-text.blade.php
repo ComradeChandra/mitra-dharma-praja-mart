@@ -26,7 +26,7 @@ Alamat: {{ $order->delivery_address }}
 
 Rincian Pesanan:
 @foreach ($order->orderItems as $item)
-{{ $loop->iteration }}. {{ $item->product->name }} — {{ $item->quantity }} x Rp{{ number_format($item->price_at_order, 0, ',', '.') }} = Rp{{ number_format($item->quantity * $item->price_at_order, 0, ',', '.') }}
+{{ $loop->iteration }}. {{ $item->product->name }} — {{ $item->product->formatJumlah($item->quantity) }} x Rp{{ number_format($item->price_at_order, 0, ',', '.') }} = Rp{{ number_format($item->quantity * $item->price_at_order, 0, ',', '.') }}
 @endforeach
 
 *Total: Rp{{ number_format($order->total_amount, 0, ',', '.') }}*

@@ -145,7 +145,7 @@
                                     <tr>
                                         <td class="px-5 py-2.5 text-sm font-medium text-gray-800">{{ $produk['nama'] }}</td>
                                         <td class="px-5 py-2.5 text-sm text-gray-400">{{ $produk['kategori'] }}</td>
-                                        <td class="px-5 py-2.5 text-sm text-gray-700 text-right font-semibold">{{ $produk['jumlahTerjual'] }}</td>
+                                        <td class="px-5 py-2.5 text-sm text-gray-700 text-right font-semibold">{{ $produk['jumlahTerjualTertulis'] }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

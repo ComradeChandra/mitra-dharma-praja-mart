@@ -68,6 +68,25 @@
                 />
                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
             </div>
+
+            {{-- Satuan sengaja opsional. Sebelum kolom ini ada, satuan biasa
+                 dititipkan di nama produk ("Beras Pandan Wangi 5kg") dan cara
+                 itu masih berlaku, jadi produk lama tidak perlu diubah. --}}
+            <div>
+                <x-input-label for="unit" value="Satuan (opsional)" />
+                <x-text-input
+                    id="unit"
+                    name="unit"
+                    type="text"
+                    class="block mt-1 w-full"
+                    placeholder="Contoh: renceng, karung, botol, dus"
+                    :value="old('unit', $product->unit ?? '')"
+                />
+                <p class="mt-1 text-xs text-gray-500">
+                    Muncul di sebelah angka jumlah, mis. &ldquo;3 renceng&rdquo;. Kosongkan kalau tidak perlu.
+                </p>
+                <x-input-error :messages="$errors->get('unit')" class="mt-2" />
+            </div>
         </div>
     </div>
 

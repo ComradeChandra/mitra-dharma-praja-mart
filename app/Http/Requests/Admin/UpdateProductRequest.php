@@ -21,6 +21,13 @@ class UpdateProductRequest extends FormRequest
         return [
             'category' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
+
+
+            // Satuan opsional, mis. "renceng", "karung", "botol". Dikosongkan
+
+            // berarti jumlah ditampilkan sebagai angka saja.
+
+            'unit' => ['nullable', 'string', 'max:20'],
             'buy_price' => ['required', 'numeric', 'min:0'],
             'sell_price' => ['nullable', 'numeric', 'min:0', 'required_unless:is_fluctuating,1'],
             'is_fluctuating' => ['nullable', 'boolean'],

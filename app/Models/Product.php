@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable([
     'category',
     'name',
+    'unit',
     'buy_price',
     'sell_price',
     'image_path',
@@ -59,6 +60,21 @@ class Product extends Model
         }
 
         return (int) $this->stock > 0;
+    }
+
+    /**
+     * Tulis angka jumlah beserta satuannya, mis. "3 renceng".
+     *
+     * Semua tampilan (form pesan, rekap, invoice) memanggil ini, tidak ada
+     * yang merangkai sendiri. Jadi kalau satuan nanti mau ditiadakan lagi,
+     * cukup ubah satu metode ini, bukan menyisir banyak berkas.
+     *
+     * Produk tanpa satuan mengembalikan angkanya saja, sama seperti sebelum
+     * kolom unit ada.
+     */
+    public function formatJumlah(int|float $jumlah): string
+    {
+        return $this->unit ? "{$jumlah} {$this->unit}" : (string) $jumlah;
     }
 
     /** Produk yang tampil di katalog pelanggan. */

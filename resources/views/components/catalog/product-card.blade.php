@@ -80,8 +80,19 @@
                     </svg>
                     Harga fluktuatif
                 </span>
+                {{-- Produk fluktuatif tidak memajang harga, tapi satuannya tetap
+                     perlu kelihatan supaya pemesan tahu dia memesan per apa. --}}
+                @if ($product->unit)
+                    <span class="ml-1 text-xs text-gray-500">per {{ $product->unit }}</span>
+                @endif
             @else
-                <p class="text-lg font-bold text-gray-900">Rp{{ number_format($product->sell_price, 0, ',', '.') }}</p>
+                <p class="text-lg font-bold text-gray-900">
+                    Rp{{ number_format($product->sell_price, 0, ',', '.') }}
+                    {{-- Satuan ditempel ke harga biar jelas harga itu untuk berapa banyak --}}
+                    @if ($product->unit)
+                        <span class="text-xs font-normal text-gray-500">/ {{ $product->unit }}</span>
+                    @endif
+                </p>
             @endif
         </div>
 

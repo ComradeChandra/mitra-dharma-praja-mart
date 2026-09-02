@@ -44,7 +44,13 @@
                                             @endif
                                             <div>
                                                 <p class="text-sm font-medium text-gray-900">{{ $product->name }}</p>
-                                                <p class="text-xs text-gray-400">{{ $product->category }}</p>
+                                                <p class="text-xs text-gray-400">
+                                                    {{ $product->category }}
+                                                    {{-- Satuan ditempel di sini biar pengurus gampang lihat produk mana yang belum diisi --}}
+                                                    @if ($product->unit)
+                                                        &middot; per {{ $product->unit }}
+                                                    @endif
+                                                </p>
                                             </div>
                                         </div>
                                     </td>

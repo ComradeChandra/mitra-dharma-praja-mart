@@ -71,7 +71,7 @@
                                             </p>
                                         </div>
                                         <div class="flex items-center gap-3 shrink-0">
-                                            <span class="text-sm font-semibold text-gray-800">{{ $produk['jumlahDibutuhkan'] }}</span>
+                                            <span class="text-sm font-semibold text-gray-800">{{ $produk['jumlahDibutuhkanTertulis'] }}</span>
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 transition-transform"
                                                  x-bind:class="open ? 'rotate-180' : ''"
                                                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -88,7 +88,7 @@
                                                         {{ $pemesan['nama'] }}
                                                         <span class="text-xs text-gray-400">· {{ $pemesan['asal'] }}</span>
                                                     </span>
-                                                    <span class="text-gray-500 font-medium">{{ $pemesan['jumlah'] }}</span>
+                                                    <span class="text-gray-500 font-medium">{{ $pemesan['jumlahTertulis'] }}</span>
                                                 </li>
                                             @endforeach
                                         </ul>
