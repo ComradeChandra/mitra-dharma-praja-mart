@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\OrderPeriod;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Logika pemesanan (Modul 3). Dipisah dari controller sesuai aturan service
@@ -165,8 +166,35 @@ class OrderService
             // pre-order murni tidak punya angka stok. Hasilnya cuma kelihatan
             // admin, pelanggan lihat status lewat Product::isAvailable().
             if ($product->has_stock_tracking) {
-                $product->decrement('stock', $item['quantity']);
+                $this->kurangiStok($product, $item['quantity']);
             }
+        }
+    }
+
+    /**
+     * Kurangi stok dengan syarat stoknya memang masih cukup.
+     *
+     * Syaratnya ditaruh di klausa WHERE, bukan dicek di PHP lebih dulu.
+     * Form Request sudah menolak pesanan yang melebihi stok, tapi
+     * pengecekannya membaca stok sebelum transaksi dimulai. Kalau dua orang
+     * memesan barang yang sama pada saat bersamaan, keduanya bisa lolos
+     * pengecekan itu lalu sama-sama mengurangi, dan stoknya jadi minus.
+     *
+     * Dengan syarat di WHERE, database sendiri yang memutuskan siapa yang
+     * kebagian. Kalau tidak ada baris yang terpengaruh berarti stoknya keburu
+     * habis, dan pesanannya dibatalkan seluruhnya karena masih di dalam
+     * DB::transaction().
+     */
+    private function kurangiStok(Product $product, int $jumlah): void
+    {
+        $berhasil = Product::whereKey($product->id)
+            ->where('stock', '>=', $jumlah)
+            ->decrement('stock', $jumlah);
+
+        if ($berhasil === 0) {
+            throw ValidationException::withMessages([
+                'quantity' => "Stok {$product->name} keburu habis dipesan orang lain. Coba kurangi jumlahnya.",
+            ]);
         }
     }
 

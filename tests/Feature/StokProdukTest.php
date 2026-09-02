@@ -122,3 +122,39 @@ test('tidak bisa pesan melebihi stok yang tersedia', function () {
     $this->assertDatabaseCount('orders', 0);
     expect($this->berstok->fresh()->stock)->toBe(50);
 });
+
+test('service menolak pengurangan kalau stok keburu habis', function () {
+    // Penjaga lapis terakhir. Form Request sudah menolak pesanan yang melebihi
+    // stok, tapi pengecekannya membaca stok sebelum transaksi jalan. Kalau dua
+    // orang memesan bersamaan, keduanya bisa lolos pengecekan itu. Di sini
+    // service dipanggil langsung supaya validasi form terlewati, meniru
+    // kondisi balapan tersebut.
+    $this->berstok->update(['stock' => 3]);
+
+    expect(fn () => app(\App\Services\OrderService::class)->createOrder(
+        $this->anggota,
+        $this->periode,
+        [['product_id' => $this->berstok->id, 'quantity' => 5]],
+        \App\Enums\DeliveryMethod::Ambil,
+        null,
+    ))->toThrow(\Illuminate\Validation\ValidationException::class);
+
+    // Pesanannya batal seluruhnya, stok tidak berubah, tidak ada item nyangkut.
+    $this->assertDatabaseCount('orders', 0);
+    $this->assertDatabaseCount('order_items', 0);
+    expect($this->berstok->fresh()->stock)->toBe(3);
+});
+
+test('stok tidak pernah jadi minus walau dipesan pas-pasan', function () {
+    $this->berstok->update(['stock' => 4]);
+
+    app(\App\Services\OrderService::class)->createOrder(
+        $this->anggota,
+        $this->periode,
+        [['product_id' => $this->berstok->id, 'quantity' => 4]],
+        \App\Enums\DeliveryMethod::Ambil,
+        null,
+    );
+
+    expect($this->berstok->fresh()->stock)->toBe(0);
+});
