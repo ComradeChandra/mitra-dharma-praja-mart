@@ -59,13 +59,7 @@
                         patah dua baris dan saling tabrakan. Jadi di layar sempit
                         semuanya masuk menu hamburger.
                     --}}
-                    <nav class="hidden lg:flex items-center gap-5 text-sm nav-pop-in">
-                        <a href="{{ route('member.dashboard') }}" class="whitespace-nowrap {{ request()->routeIs('member.dashboard') ? 'text-white font-semibold' : 'text-teal-100 hover:text-white' }}">Beranda</a>
-                        <a href="{{ route('catalog.index') }}" class="whitespace-nowrap text-teal-100 hover:text-white">Katalog</a>
-                        <a href="{{ route('member.orders.create') }}" class="whitespace-nowrap {{ request()->routeIs('member.orders.create') ? 'text-white font-semibold' : 'text-teal-100 hover:text-white' }}">Pesan Produk</a>
-                        <a href="{{ route('member.orders.index') }}" class="whitespace-nowrap {{ request()->routeIs('member.orders.index') || request()->routeIs('member.orders.show') ? 'text-white font-semibold' : 'text-teal-100 hover:text-white' }}">Pesanan Saya</a>
-                        <a href="{{ route('member.product-requests.index') }}" class="whitespace-nowrap {{ request()->routeIs('member.product-requests.*') ? 'text-white font-semibold' : 'text-teal-100 hover:text-white' }}">Permintaan Produk</a>
-                    </nav>
+                    <x-main-nav />
                 </div>
 
                 <div class="flex items-center gap-2 shrink-0">

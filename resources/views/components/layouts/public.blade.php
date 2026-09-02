@@ -32,13 +32,19 @@
         <header class="relative bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 shadow-md sticky top-0 z-40">
             <div class="absolute inset-0 opacity-[0.07] [background-image:radial-gradient(circle,white_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
 
-            <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
                 <a href="{{ route('catalog.index') }}" class="flex items-center gap-2.5 font-semibold text-white">
                     <span class="p-1 rounded-full bg-white shadow-sm">
                         <x-application-logo class="h-7 w-7" />
                     </span>
                     <span class="hidden sm:inline">Mitra Dharma Praja Mart</span>
                 </a>
+
+                {{-- Tautan navigasi menyesuaikan siapa yang masuk. Tanpa ini,
+                     anggota yang menekan "Katalog" kehilangan seluruh navnya,
+                     karena halaman katalog memakai layout ini, bukan layout
+                     anggota. --}}
+                <x-main-nav />
                 {{--
                     Sisi kanan header menyesuaikan siapa yang sedang masuk.
                     Sebelumnya di sini selalu ada 3 tautan berjajar ("Login

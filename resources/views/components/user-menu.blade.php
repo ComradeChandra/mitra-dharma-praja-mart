@@ -74,13 +74,8 @@
     {{-- ---------- NON-ANGGOTA ---------- --}}
     <div class="flex items-center gap-3 text-sm">
         <span class="hidden sm:inline text-teal-100 max-w-[14rem] truncate">{{ $opdNonAnggota->name }}</span>
-        <a href="{{ route('non-member.orders.create') }}" class="px-3 py-1.5 rounded-lg text-white hover:bg-white/10 transition">Pesan</a>
-        {{-- Label dipendekkan di HP biar header tidak sesak (lihat catatan sama
-             di components/layouts/non-member.blade.php) --}}
-        <a href="{{ route('non-member.product-requests.create') }}" class="px-3 py-1.5 rounded-lg text-teal-100 hover:text-white hover:bg-white/10 transition">
-            <span class="sm:hidden">Usul</span>
-            <span class="hidden sm:inline">Usulkan Produk</span>
-        </a>
+        {{-- Tautan "Katalog / Pesan / Usulkan Produk" sekarang dirender
+             x-main-nav di sisi kiri header, jadi tidak diulang di sini. --}}
         <form method="POST" action="{{ route('non-member.logout') }}">
             @csrf
             <button type="submit" class="px-3 py-1.5 rounded-lg text-teal-100 hover:text-white hover:bg-white/10 transition">Keluar</button>
