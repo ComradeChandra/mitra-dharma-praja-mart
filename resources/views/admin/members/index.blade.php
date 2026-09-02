@@ -2,9 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    {{ __('Data Anggota') }}
-                </h2>
+                <x-page-heading>{{ __('Data Anggota') }}</x-page-heading>
                 <p class="text-sm text-gray-400">{{ $members->total() }} anggota terdaftar</p>
             </div>
             <a href="{{ route('admin.members.create') }}">
@@ -22,11 +20,11 @@
                     <table class="min-w-full divide-y divide-gray-100">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Anggota</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">WhatsApp</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                <x-admin.th>Anggota</x-admin.th>
+                                <x-admin.th>Kode</x-admin.th>
+                                <x-admin.th>WhatsApp</x-admin.th>
+                                <x-admin.th>Status</x-admin.th>
+                                <x-admin.th align="right">Aksi</x-admin.th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">

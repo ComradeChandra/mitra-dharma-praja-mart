@@ -1,9 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Pesanan') }}
-            </h2>
+            <x-page-heading>{{ __('Pesanan') }}</x-page-heading>
             <p class="text-sm text-gray-400">{{ $orders->total() }} pesanan masuk</p>
         </div>
     </x-slot>
@@ -38,11 +36,11 @@
                     <table class="min-w-full divide-y divide-gray-100">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemesan</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periode</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <x-admin.th>Pemesan</x-admin.th>
+                                <x-admin.th>Periode</x-admin.th>
+                                <x-admin.th>Tanggal</x-admin.th>
+                                <x-admin.th>Total</x-admin.th>
+                                <x-admin.th>Status</x-admin.th>
                                 <th class="px-6 py-3"></th>
                             </tr>
                         </thead>

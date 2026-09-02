@@ -14,7 +14,7 @@
             {{-- ==================== KOLOM UTAMA ==================== --}}
             <div class="lg:col-span-2 space-y-6">
                 {{-- Kartu profil singkat --}}
-                <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-6">
+                <x-card class="p-6">
                     <h2 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Profil Kamu</h2>
                     <dl class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -26,7 +26,7 @@
                             <dd class="text-sm font-medium text-gray-900">{{ $member->whatsapp_number }}</dd>
                         </div>
                     </dl>
-                </div>
+                </x-card>
 
                 {{--
                     Belanja tahun berjalan, dasar hitung SHU (Modul 9 di CLAUDE.md).
@@ -94,7 +94,7 @@
             </div>
 
             {{-- ==================== KOLOM SAMPING: Cara Kerja ==================== --}}
-            <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-6 h-fit">
+            <x-card class="p-6 h-fit">
                 <h3 class="font-semibold text-gray-800 text-sm mb-4">Cara Kerja Koperasi</h3>
                 <ol class="space-y-5">
                     @foreach ([
@@ -114,7 +114,7 @@
                         </li>
                     @endforeach
                 </ol>
-            </div>
+            </x-card>
         </div>
     </div>
 </x-layouts.member>

@@ -10,12 +10,12 @@
 
         @if (! $period)
             {{-- Belum ada periode pemesanan yang dibuka admin --}}
-            <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm">
+            <x-card>
                 <x-admin.empty-state
                     title="Belum ada periode pemesanan yang dibuka"
                     description="Coba cek lagi nanti — admin akan buka periode pemesanan berikutnya."
                 />
-            </div>
+            </x-card>
         @else
             {{-- Info periode yang sedang berjalan --}}
             <div class="flex items-center gap-2 mb-4 px-4 py-2.5 rounded-lg bg-emerald-50 text-emerald-700 text-sm">
@@ -28,7 +28,7 @@
 
                 <x-input-error :messages="$errors->get('quantity')" class="mb-4" />
 
-                <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <x-card class="overflow-hidden">
                     @forelse ($productsByCategory as $category => $products)
                         <div class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                             {{ $category }}
@@ -42,7 +42,7 @@
                             description="Admin belum menambahkan produk ke katalog."
                         />
                     @endforelse
-                </div>
+                </x-card>
 
                 @if ($productsByCategory->isNotEmpty())
                     {{-- Alamatnya terisi otomatis dari data anggota, tapi tetap bisa diubah --}}

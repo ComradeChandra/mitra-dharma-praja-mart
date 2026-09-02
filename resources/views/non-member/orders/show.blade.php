@@ -6,13 +6,11 @@
 @endphp
 <x-layouts.non-member :opd="$opd" :title="'Bukti Pesanan — ' . config('app.name')">
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <a href="{{ route('non-member.orders.create') }}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">
-            ← Pesan Lagi
-        </a>
+        <x-back-link href="{{ route('non-member.orders.create') }}">Pesan Lagi</x-back-link>
 
         <x-alert type="success" :message="session('success')" />
 
-        <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <x-card class="overflow-hidden">
             {{-- Header: periode + status --}}
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                 <div>
@@ -59,7 +57,7 @@
                     {{ $order->total_amount !== null ? 'Rp'.number_format($order->total_amount, 0, ',', '.') : 'Menunggu verifikasi' }}
                 </span>
             </div>
-        </div>
+        </x-card>
 
         <p class="mt-4 text-xs text-gray-400 text-center">
             Simpan halaman ini sebagai bukti pesanan. Invoice lengkap akan dikirim admin

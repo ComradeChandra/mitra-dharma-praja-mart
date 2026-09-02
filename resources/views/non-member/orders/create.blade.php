@@ -10,12 +10,12 @@
 
         @if (! $period)
             {{-- Belum ada periode pemesanan yang dibuka admin --}}
-            <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm">
+            <x-card>
                 <x-admin.empty-state
                     title="Belum ada periode pemesanan yang dibuka"
                     description="Coba cek lagi nanti — admin akan buka periode pemesanan berikutnya."
                 />
-            </div>
+            </x-card>
         @else
             {{-- Info periode yang sedang berjalan --}}
             <div class="flex items-center gap-2 mb-4 px-4 py-2.5 rounded-lg bg-emerald-50 text-emerald-700 text-sm">
@@ -29,7 +29,7 @@
                 {{-- Non-anggota tidak punya akun personal, jadi nama & nomor WA
                      diketik manual di sini (beda dari anggota yang datanya sudah
                      ada di akun) — dipakai admin buat kirim invoice nanti. --}}
-                <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-5 mb-4 space-y-4">
+                <x-card class="p-5 mb-4 space-y-4">
                     <div>
                         <x-input-label for="non_member_name" value="Nama Kamu" />
                         <x-text-input
@@ -58,11 +58,11 @@
                         <p class="mt-1 text-xs text-gray-400">Buat kirim invoice belanja kamu nanti.</p>
                         <x-input-error :messages="$errors->get('whatsapp_number')" class="mt-2" />
                     </div>
-                </div>
+                </x-card>
 
                 <x-input-error :messages="$errors->get('quantity')" class="mb-4" />
 
-                <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <x-card class="overflow-hidden">
                     @forelse ($productsByCategory as $category => $products)
                         <div class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                             {{ $category }}
@@ -76,7 +76,7 @@
                             description="Admin belum menambahkan produk ke katalog."
                         />
                     @endforelse
-                </div>
+                </x-card>
 
                 @if ($productsByCategory->isNotEmpty())
                     {{-- Non-anggota tidak punya alamat tersimpan, jadi kolomnya kosong --}}

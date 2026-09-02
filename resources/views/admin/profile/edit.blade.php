@@ -1,8 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Profil Saya') }}
-        </h2>
+        <x-page-heading>{{ __('Profil Saya') }}</x-page-heading>
     </x-slot>
 
     <div class="py-10">
@@ -10,7 +8,7 @@
             <x-alert type="success" :message="session('success')" />
 
             {{-- Kartu 1: Informasi Profil (nama & email) --}}
-            <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-6">
+            <x-card class="p-6">
                 <h3 class="font-semibold text-gray-800">Informasi Profil</h3>
                 <p class="text-sm text-gray-400 mt-1 mb-5">Nama dan email yang dipakai buat login sebagai admin.</p>
 
@@ -49,11 +47,11 @@
                         <x-primary-button>Simpan Perubahan</x-primary-button>
                     </div>
                 </form>
-            </div>
+            </x-card>
 
             {{-- Kartu 2: Ubah Password (form terpisah, sengaja tidak digabung
                  sama form nama/email di atas biar validasinya independen) --}}
-            <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-6">
+            <x-card class="p-6">
                 <h3 class="font-semibold text-gray-800">Ubah Password</h3>
                 <p class="text-sm text-gray-400 mt-1 mb-5">Masukkan password lama buat konfirmasi sebelum menggantinya.</p>
 
@@ -104,7 +102,7 @@
                         <x-primary-button>Ganti Password</x-primary-button>
                     </div>
                 </form>
-            </div>
+            </x-card>
         </div>
     </div>
 </x-app-layout>

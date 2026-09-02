@@ -1,10 +1,8 @@
 <x-layouts.member :title="'Ajukan Permintaan Produk — ' . config('app.name')">
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <a href="{{ route('member.product-requests.index') }}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">
-            ← Kembali ke Riwayat Permintaan
-        </a>
+        <x-back-link href="{{ route('member.product-requests.index') }}">Kembali ke Riwayat Permintaan</x-back-link>
 
-        <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-6">
+        <x-card class="p-6">
             <h1 class="font-semibold text-gray-800 mb-1">Ajukan Permintaan Produk</h1>
             <p class="text-sm text-gray-400 mb-6">
                 Nggak nemu produk yang kamu cari di katalog? Kasih tau admin di sini, nanti
@@ -36,6 +34,6 @@
                     </a>
                 </div>
             </form>
-        </div>
+        </x-card>
     </div>
 </x-layouts.member>

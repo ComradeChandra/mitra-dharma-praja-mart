@@ -17,7 +17,7 @@
 --}}
 @props(['title', 'subtitle' => null, 'chartId'])
 
-<div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-5">
+<x-card class="p-5">
     <h3 class="font-semibold text-gray-800 text-sm">{{ $title }}</h3>
     @if ($subtitle)
         <p class="text-xs text-gray-400 mb-3">{{ $subtitle }}</p>
@@ -31,4 +31,4 @@
 
     {{-- Kotak legend manual, diisi JS begitu grafiknya selesai digambar --}}
     <div id="{{ $chartId }}-legend" class="flex flex-wrap items-center justify-center gap-2 mt-3"></div>
-</div>
+</x-card>

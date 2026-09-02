@@ -10,9 +10,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    {{ __('Rekap Periode') }}
-                </h2>
+                <x-page-heading>{{ __('Rekap Periode') }}</x-page-heading>
                 <p class="text-sm text-gray-400">{{ $orderPeriod->label }}</p>
             </div>
             <a href="{{ route('admin.order-periods.index') }}" class="text-sm text-gray-500 hover:text-gray-700">← Kembali</a>
@@ -54,7 +52,7 @@
                     Klik satu baris buat lihat siapa saja yang memesannya.
                 </div>
 
-                <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <x-card class="overflow-hidden">
                     @if ($products->isNotEmpty())
                         <div class="divide-y divide-gray-100">
                             @foreach ($products as $produk)
@@ -104,7 +102,7 @@
                             description="Rekap muncul begitu ada pesanan terverifikasi di periode ini."
                         />
                     @endif
-                </div>
+                </x-card>
             </div>
 
             {{-- ========== TAB 2: Distribusi per OPD ========== --}}
@@ -117,7 +115,7 @@
                 @if ($opdRecap->isNotEmpty())
                     <div class="space-y-3">
                         @foreach ($opdRecap as $opd)
-                            <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                            <x-card class="overflow-hidden">
                                 <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100">
                                     <div>
                                         <p class="text-sm font-semibold text-gray-800">{{ $opd['nama'] }}</p>
@@ -140,16 +138,16 @@
                                         </li>
                                     @endforeach
                                 </ul>
-                            </div>
+                            </x-card>
                         @endforeach
                     </div>
                 @else
-                    <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <x-card class="overflow-hidden">
                         <x-admin.empty-state
                             title="Belum ada pesanan non-anggota"
                             description="Rekap per-OPD muncul begitu ada staf OPD yang memesan di periode ini."
                         />
-                    </div>
+                    </x-card>
                 @endif
             </div>
 
@@ -163,7 +161,7 @@
 
                 <div class="grid gap-4 md:grid-cols-2">
                     {{-- Sudah belanja --}}
-                    <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <x-card class="overflow-hidden">
                         <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
                             <h3 class="font-semibold text-gray-800 text-sm">Sudah Belanja</h3>
                             <x-admin.badge color="green">{{ $anggotaSudah->count() }}</x-admin.badge>
@@ -186,10 +184,10 @@
                         @else
                             <p class="px-5 py-6 text-sm text-gray-400 text-center">Belum ada yang memesan.</p>
                         @endif
-                    </div>
+                    </x-card>
 
                     {{-- Belum belanja --}}
-                    <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <x-card class="overflow-hidden">
                         <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
                             <h3 class="font-semibold text-gray-800 text-sm">Belum Belanja</h3>
                             <x-admin.badge color="gray">{{ $anggotaBelum->count() }}</x-admin.badge>
@@ -206,7 +204,7 @@
                         @else
                             <p class="px-5 py-6 text-sm text-gray-400 text-center">Semua anggota aktif sudah memesan.</p>
                         @endif
-                    </div>
+                    </x-card>
                 </div>
             </div>
 

@@ -8,9 +8,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    {{ __('Detail Pesanan') }}
-                </h2>
+                <x-page-heading>{{ __('Detail Pesanan') }}</x-page-heading>
                 <p class="text-sm text-gray-400">{{ $order->orderPeriod->label }}</p>
             </div>
             <a href="{{ route('admin.orders.index') }}" class="text-sm text-gray-500 hover:text-gray-700">← Kembali</a>
@@ -22,7 +20,7 @@
             <x-alert type="success" :message="session('success')" />
 
             {{-- Info pemesan --}}
-            <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-6">
+            <x-card class="p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="font-semibold text-gray-800 text-sm">Info Pemesan</h3>
                     <x-admin.badge :color="$order->status->badgeColor()">
@@ -71,14 +69,14 @@
                         @endif
                     </div>
                 </dl>
-            </div>
+            </x-card>
 
             {{-- Daftar item + form verifikasi harga (kalau ada yang masih kosong) --}}
             <form method="POST" action="{{ route('admin.orders.verify', $order) }}">
                 @csrf
                 @method('PATCH')
 
-                <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <x-card class="overflow-hidden">
                     <div class="px-5 py-3 border-b border-gray-100">
                         <h3 class="font-semibold text-gray-800 text-sm">Item Pesanan</h3>
                     </div>
@@ -123,7 +121,7 @@
                             {{ $order->total_amount !== null ? 'Rp'.number_format($order->total_amount, 0, ',', '.') : 'Menunggu harga fluktuatif' }}
                         </span>
                     </div>
-                </div>
+                </x-card>
 
                 @if ($itemBelumBerharga->isNotEmpty())
                     <div class="mt-4">
@@ -138,7 +136,7 @@
                 punya total yang pasti (lihat Admin\OrderController::show()).
             --}}
             @if ($invoiceText)
-                <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <x-card class="overflow-hidden">
                     <div class="px-5 py-3 border-b border-gray-100">
                         <h3 class="font-semibold text-gray-800 text-sm">Invoice WhatsApp</h3>
                         <p class="text-xs text-gray-400">
@@ -173,7 +171,7 @@
                             <span class="text-sm text-teal-700 font-medium">✓ Sudah ditandai terkirim</span>
                         @endif
                     </div>
-                </div>
+                </x-card>
             @endif
         </div>
     </div>

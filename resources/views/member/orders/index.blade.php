@@ -12,7 +12,7 @@
 
         <x-alert type="success" :message="session('success')" />
 
-        <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <x-card class="overflow-hidden">
             @forelse ($orders as $order)
                 <a href="{{ route('member.orders.show', $order) }}" class="flex items-center justify-between gap-4 px-5 py-4 hover:bg-gray-50 {{ ! $loop->last ? 'border-b border-gray-50' : '' }}">
                     <div class="min-w-0">
@@ -35,6 +35,6 @@
                     description='Klik "+ Pesan Produk" kalau periode pemesanan sedang dibuka.'
                 />
             @endforelse
-        </div>
+        </x-card>
     </div>
 </x-layouts.member>

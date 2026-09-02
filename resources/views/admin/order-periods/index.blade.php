@@ -2,9 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    {{ __('Periode Pemesanan') }}
-                </h2>
+                <x-page-heading>{{ __('Periode Pemesanan') }}</x-page-heading>
                 <p class="text-sm text-gray-400">{{ $orderPeriods->total() }} periode dibuat</p>
             </div>
             <a href="{{ route('admin.order-periods.create') }}">
@@ -23,10 +21,10 @@
                     <table class="min-w-full divide-y divide-gray-100">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Label</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                <x-admin.th>Label</x-admin.th>
+                                <x-admin.th>Tanggal</x-admin.th>
+                                <x-admin.th>Status</x-admin.th>
+                                <x-admin.th align="right">Aksi</x-admin.th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">

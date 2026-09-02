@@ -1,8 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard Admin') }}
-        </h2>
+        <x-page-heading>{{ __('Dashboard Admin') }}</x-page-heading>
     </x-slot>
 
     <div class="py-10">
@@ -126,7 +124,7 @@
 
             {{-- Produk paling laku. Dibuat tabel, bukan grafik, sesuai permintaan;
                  biar nama produknya gampang dibaca persis (bukan cuma batang). --}}
-            <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <x-card class="overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-100">
                     <h3 class="font-semibold text-gray-800 text-sm">Produk Paling Laku</h3>
                     <p class="text-xs text-gray-400">Diurutkan dari jumlah terjual terbanyak, dari pesanan yang sudah terverifikasi.</p>
@@ -159,7 +157,7 @@
                         description="Data ini muncul begitu ada pesanan anggota yang sudah terverifikasi."
                     />
                 @endif
-            </div>
+            </x-card>
 
             {{-- Layout 2 kolom: konten utama (kiri, lebih lebar) + panel ringkasan (kanan) --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -226,7 +224,7 @@
                     </div>
 
                     {{-- Panel Anggota Terbaru --}}
-                    <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <x-card class="overflow-hidden">
                         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                             <h3 class="font-semibold text-gray-800 text-sm">Anggota Terbaru</h3>
                             <a href="{{ route('admin.members.index') }}" class="text-xs font-medium text-indigo-600 hover:text-indigo-800">Lihat semua →</a>
@@ -245,10 +243,10 @@
                         @empty
                             <p class="px-5 py-6 text-sm text-gray-400 text-center">Belum ada anggota diinput.</p>
                         @endforelse
-                    </div>
+                    </x-card>
 
                     {{-- Panel Produk Terbaru --}}
-                    <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <x-card class="overflow-hidden">
                         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                             <h3 class="font-semibold text-gray-800 text-sm">Produk Terbaru</h3>
                             <a href="{{ route('admin.products.index') }}" class="text-xs font-medium text-indigo-600 hover:text-indigo-800">Lihat semua →</a>
@@ -275,14 +273,14 @@
                         @empty
                             <p class="px-5 py-6 text-sm text-gray-400 text-center">Belum ada produk diinput.</p>
                         @endforelse
-                    </div>
+                    </x-card>
                 </div>
 
                 {{-- ==================== KOLOM SAMPING ==================== --}}
                 <div class="space-y-6">
 
                     {{-- Widget rasio anggota aktif/nonaktif, visual bar sederhana (CSS murni) --}}
-                    <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-5">
+                    <x-card class="p-5">
                         <h3 class="font-semibold text-gray-800 text-sm mb-4">Status Anggota</h3>
 
                         @php
@@ -298,7 +296,7 @@
                         <div class="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
                             <div class="h-full bg-gradient-to-r from-teal-500 to-teal-600 rounded-full transition-all" style="width: {{ $persenAktif }}%"></div>
                         </div>
-                    </div>
+                    </x-card>
 
                     {{--
                         Progres belanja periode berjalan. Cuma muncul
@@ -349,7 +347,7 @@
                     @endif
 
                     {{-- Aksi cepat --}}
-                    <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-5">
+                    <x-card class="p-5">
                         <h3 class="font-semibold text-gray-800 text-sm mb-4">Aksi Cepat</h3>
                         <div class="space-y-1.5">
                             @foreach ([
@@ -366,7 +364,7 @@
                                 </a>
                             @endforeach
                         </div>
-                    </div>
+                    </x-card>
 
                     <div class="rounded-xl border border-dashed border-gray-200 p-4 text-center text-sm text-gray-400">
                         Modul verifikasi harga fluktuatif, invoice WhatsApp, dan permintaan produk

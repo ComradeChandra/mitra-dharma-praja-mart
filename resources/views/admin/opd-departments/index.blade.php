@@ -2,9 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    {{ __('Data OPD') }}
-                </h2>
+                <x-page-heading>{{ __('Data OPD') }}</x-page-heading>
                 <p class="text-sm text-gray-400">{{ $opdDepartments->total() }} OPD terdaftar</p>
             </div>
             <a href="{{ route('admin.opd-departments.create') }}">
@@ -18,7 +16,7 @@
             {{-- Pesan sukses setelah create/update/delete, dikirim lewat session flash --}}
             <x-alert type="success" :message="session('success')" />
 
-            <div class="bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <x-card class="overflow-hidden">
                 @forelse ($opdDepartments as $opdDepartment)
                     {{-- List sederhana (bukan tabel) karena cuma 1 kolom data (nama) --}}
                     <div class="flex items-center justify-between gap-4 px-5 py-4 {{ ! $loop->last ? 'border-b border-gray-100' : '' }} hover:bg-gray-50">
@@ -45,7 +43,7 @@
                         description='Klik "+ Tambah OPD" buat mulai isi daftar instansi.'
                     />
                 @endforelse
-            </div>
+            </x-card>
 
             <div class="mt-4">
                 {{ $opdDepartments->links() }}
