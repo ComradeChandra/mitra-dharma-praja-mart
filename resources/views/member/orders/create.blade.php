@@ -1,5 +1,11 @@
 <x-layouts.member :title="'Pesan Produk — ' . config('app.name')">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    {{--
+        Seluruh isi halaman dibungkus satu komponen Alpine "formPesan"
+        (resources/js/order-form.js). Yang diurus di sana cuma penyaringan
+        tampilan dan ringkasan di bawah, bukan pengiriman datanya, jadi
+        halaman ini tetap bisa dipakai memesan walau JavaScript mati.
+    --}}
+    <div x-data="formPesan" class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div class="mb-4">
             <h1 class="font-semibold text-gray-800 text-lg">Pesan Produk</h1>
             <p class="text-sm text-gray-400">Isi jumlah produk yang mau kamu pesan, lalu kirim sekaligus.</p>
@@ -28,20 +34,34 @@
 
                 <x-input-error :messages="$errors->get('quantity')" class="mb-4" />
 
+                {{-- Kesalahan per produk ditampilkan di barisnya masing-masing,
+                     tapi barisnya bisa sedang tersembunyi oleh penyaring, jadi
+                     diberi penanda di atas juga. --}}
+                @if ($errors->has('quantity.*'))
+                    <x-alert type="error" message="Ada produk yang jumlahnya melebihi stok. Cek keterangan merah di daftar produk di bawah." />
+                @endif
+
+                @if ($productsByCategory->isNotEmpty())
+                    <x-order.filter-bar :categories="$productsByCategory->keys()" />
+                @endif
+
                 <x-card class="overflow-hidden">
                     @forelse ($productsByCategory as $category => $products)
-                        <div class="px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                            {{ $category }}
-                        </div>
-                        @foreach ($products as $product)
-                            <x-order.product-row :product="$product" :last="$loop->last" />
-                        @endforeach
+                        <x-order.category-group :category="$category" :products="$products" />
                     @empty
                         <x-admin.empty-state
                             title="Belum ada produk tersedia"
                             description="Admin belum menambahkan produk ke katalog."
                         />
                     @endforelse
+
+                    {{-- Muncul kalau kata pencarian tidak cocok dengan produk mana pun --}}
+                    <div x-show="tidakAdaHasil" x-cloak>
+                        <x-admin.empty-state
+                            title="Produk tidak ditemukan"
+                            description="Coba ganti kata pencarian, atau pilih kategori lain."
+                        />
+                    </div>
                 </x-card>
 
                 @if ($productsByCategory->isNotEmpty())
@@ -50,10 +70,7 @@
                         <x-order.delivery-picker :alamat-tersimpan="$alamatTersimpan" />
                     </div>
 
-                    <div class="mt-6 flex items-center gap-3">
-                        <x-primary-button>Kirim Pesanan</x-primary-button>
-                        <a href="{{ route('member.dashboard') }}" class="text-sm text-gray-500 hover:text-gray-700">Batal</a>
-                    </div>
+                    <x-order.summary-bar :batal="route('member.dashboard')" />
                 @endif
             </form>
         @endif

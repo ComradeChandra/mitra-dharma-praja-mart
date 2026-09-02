@@ -158,3 +158,29 @@ test('stok tidak pernah jadi minus walau dipesan pas-pasan', function () {
 
     expect($this->berstok->fresh()->stock)->toBe(0);
 });
+
+test('pesan kesalahan stok benar-benar sampai ke layar, bukan cuma ke session', function () {
+    // Ini pernah salah dan lolos cukup lama. Validator mendaftarkan errornya
+    // dengan kunci "quantity.{id}", sementara halaman pemesanan cuma
+    // menampilkan $errors->get('quantity') — yang tidak mencakup kunci
+    // berindeks itu. Akibatnya pesanan ditolak diam-diam: orang balik ke form
+    // tanpa satu pun keterangan kenapa pesanannya tidak masuk.
+    //
+    // Tes lama cuma memeriksa errornya ada di session, jadi tidak ketahuan.
+    // Yang diperiksa di sini adalah yang benar-benar dibaca orang di layar.
+    // Dikirim dulu, baru halamannya dibuka lagi. Tidak memakai
+    // followingRedirects() karena penolakan validasi memakai back(), dan di
+    // dalam tes tidak ada halaman sebelumnya, jadi larinya ke "/" bukan ke
+    // form pemesanan.
+    $this->actingAs($this->anggota, 'member')
+        ->post(route('member.orders.store'), [
+            'delivery_method' => 'ambil',
+            'quantity' => [$this->berstok->id => 51],
+        ]);
+
+    $this->actingAs($this->anggota, 'member')
+        ->get(route('member.orders.create'))
+        ->assertOk()
+        ->assertSee('Stok Beras Berstok tinggal 50, tidak bisa pesan 51')
+        ->assertSee('melebihi stok');
+});

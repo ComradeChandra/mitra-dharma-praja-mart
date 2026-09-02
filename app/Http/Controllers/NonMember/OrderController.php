@@ -39,7 +39,7 @@ class OrderController extends Controller
         $period = OrderPeriod::yangSedangDibuka();
 
         $productsByCategory = $period
-            ? Product::where('is_active', true)->orderBy('name')->get()->groupBy('category')
+            ? Product::aktif()->orderBy('name')->get()->groupBy('category')
             : collect();
 
         return view('non-member.orders.create', compact('opd', 'period', 'productsByCategory'));

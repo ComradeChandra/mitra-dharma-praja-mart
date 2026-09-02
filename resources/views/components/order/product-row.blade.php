@@ -24,7 +24,21 @@
     $bisaDipesan = $product->isAvailable();
 @endphp
 
-<div class="flex items-center gap-4 px-4 py-3.5 {{ ! $last ? 'border-b border-gray-50' : '' }} {{ ! $bisaDipesan ? 'opacity-60' : '' }}">
+{{-- x-show menyembunyikan baris yang tidak cocok dengan penyaring. Nama dan
+     kategori dioper apa adanya ke cocok(), bukan diambil dari daftar hasil
+     x-init, supaya tidak bergantung pada urutan jalannya kedua direktif itu.
+     Tanpa JavaScript, x-show diabaikan dan semua baris tetap tampil. --}}
+<div
+    x-show="cocok({{ Illuminate\Support\Js::from(mb_strtolower($product->name)) }}, {{ Illuminate\Support\Js::from($product->category) }}, {{ $product->id }})"
+    x-init="daftar({
+        id: {{ $product->id }},
+        nama: {{ Illuminate\Support\Js::from(mb_strtolower($product->name)) }},
+        kategori: {{ Illuminate\Support\Js::from($product->category) }},
+        harga: {{ $product->is_fluctuating ? 'null' : (int) $product->sell_price }},
+        awal: {{ (int) old('quantity.'.$product->id, 0) }},
+    })"
+    class="flex items-center gap-4 px-4 py-3.5 {{ ! $last ? 'border-b border-gray-50' : '' }} {{ ! $bisaDipesan ? 'opacity-60' : '' }}"
+>
     {{-- Thumbnail foto, atau kotak abu-abu placeholder kalau belum ada foto --}}
     @if ($product->image_path)
         <img
@@ -60,6 +74,12 @@
             sering belum ada di gudang saat dipesan, jadi angka stok cuma
             bikin bingung pemesan.
         --}}
+        {{-- Kesalahan per produk, mis. jumlah melebihi stok. Didaftarkan
+             validator dengan kunci "quantity.{id}", jadi harus diambil per
+             produk di sini. Kalau cuma diandalkan ke $errors->get('quantity')
+             di halaman induk, pesannya tidak pernah sampai ke pemesan. --}}
+        <x-input-error :messages="$errors->get('quantity.'.$product->id)" class="mt-1" />
+
         @if (! $bisaDipesan)
             <p class="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-gray-400">
                 <span class="h-1.5 w-1.5 rounded-full bg-gray-300"></span>
@@ -76,6 +96,7 @@
             id="quantity-{{ $product->id }}"
             name="quantity[{{ $product->id }}]"
             min="0"
+            x-model.number="jumlah[{{ $product->id }}]"
             value="{{ old('quantity.'.$product->id, 0) }}"
             @disabled(! $bisaDipesan)
             class="w-20 text-center rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
