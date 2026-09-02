@@ -17,18 +17,13 @@
 --}}
 @props(['product'])
 
-@php
-    // Nama kunci session non-anggota tidak ditulis di sini, cuma
-    // NonMemberSessionService yang tahu (lihat catatan di service itu).
-    $anggotaLogin = \Illuminate\Support\Facades\Auth::guard('member')->check();
-    $nonAnggotaLogin = ! $anggotaLogin
-        && app(\App\Services\NonMemberSessionService::class)->sedangLogin();
-@endphp
-
 <div class="group bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col hover:shadow-lg hover:border-gray-200 hover:-translate-y-0.5 transition duration-200">
     {{-- Foto produk, atau kotak abu-abu placeholder kalau belum ada foto.
          Sedikit zoom pas di-hover (group-hover) biar terasa hidup kayak online shop. --}}
-    <div class="relative aspect-square bg-gray-50 overflow-hidden">
+    {{-- Foto dan nama mengantar ke halaman detail produk. Tombol "Pesan" di
+         bawah TIDAK ikut, karena tujuannya beda: yang satu melihat-lihat,
+         yang satu langsung ke form pemesanan. --}}
+    <a href="{{ route('catalog.show', $product) }}" class="relative aspect-square bg-gray-50 overflow-hidden block">
         @if ($product->image_path)
             <img
                 src="{{ \Illuminate\Support\Facades\Storage::url($product->image_path) }}"
@@ -66,10 +61,12 @@
         <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[11px] font-medium bg-white/90 backdrop-blur-sm text-gray-600 shadow-sm">
             {{ $product->category }}
         </span>
-    </div>
+    </a>
 
     <div class="p-3.5 flex flex-col flex-1">
-        <h3 class="font-medium text-sm text-gray-900 line-clamp-2 min-h-[2.5rem]">{{ $product->name }}</h3>
+        <h3 class="font-medium text-sm text-gray-900 line-clamp-2 min-h-[2.5rem]">
+            <a href="{{ route('catalog.show', $product) }}" class="hover:text-indigo-600 transition">{{ $product->name }}</a>
+        </h3>
 
         {{-- Harga: badge "Fluktuatif" kalau harganya belum pasti, atau angka Rupiah besar --}}
         <div class="mt-1.5">
@@ -114,38 +111,7 @@
         @endif
 
         <div class="mt-3 pt-3 border-t border-gray-50">
-            @if ($anggotaLogin)
-                <a
-                    href="{{ route('member.orders.create') }}"
-                    class="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" />
-                    </svg>
-                    Pesan Sekarang
-                </a>
-            @elseif ($nonAnggotaLogin)
-                <a
-                    href="{{ route('non-member.orders.create') }}"
-                    class="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg bg-teal-600 text-white text-sm font-medium hover:bg-teal-700 transition"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18" />
-                    </svg>
-                    Pesan Sekarang
-                </a>
-            @else
-                <a
-                    href="{{ route('member.login') }}"
-                    title="Login sebagai anggota dulu buat pesan"
-                    class="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg bg-indigo-50 text-indigo-500 text-sm font-medium hover:bg-indigo-100 transition"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <rect x="4" y="10" width="16" height="10" rx="1.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M8 10V7a4 4 0 0 1 8 0v3" />
-                    </svg>
-                    Login buat Pesan
-                </a>
-            @endif
+            <x-catalog.order-cta />
         </div>
     </div>
 </div>

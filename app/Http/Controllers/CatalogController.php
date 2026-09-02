@@ -39,4 +39,31 @@ class CatalogController extends Controller
 
         return view('catalog.index', compact('productsByCategory', 'openPeriod', 'cari'));
     }
+
+    /**
+     * Halaman detail satu produk.
+     *
+     * Produk nonaktif ditolak dengan 404, bukan sekadar disembunyikan dari
+     * daftar. Kalau cuma disembunyikan, halamannya masih bisa dibuka dengan
+     * menebak-nebak angka di URL.
+     *
+     * Angka stok TIDAK pernah dikirim ke halaman ini. Yang ditampilkan cuma
+     * status tersedia atau tidak, lewat Product::isAvailable() (lihat aturan
+     * soal stok di CLAUDE.md).
+     */
+    public function show(Product $product): View
+    {
+        abort_unless($product->is_active, 404);
+
+        // Beberapa produk lain di kategori yang sama, biar dari halaman ini
+        // masih bisa melihat-lihat tanpa balik dulu ke katalog.
+        $serupa = Product::aktif()
+            ->where('category', $product->category)
+            ->whereKeyNot($product->id)
+            ->orderBy('name')
+            ->limit(4)
+            ->get();
+
+        return view('catalog.show', compact('product', 'serupa'));
+    }
 }

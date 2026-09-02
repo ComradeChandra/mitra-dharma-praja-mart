@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 // Halaman katalog produk PUBLIK, bisa dibuka siapa saja tanpa login.
 Route::get('/katalog', [CatalogController::class, 'index'])->name('catalog.index');
+Route::get('/katalog/{product}', [CatalogController::class, 'show'])->name('catalog.show');
 
 // Halaman "Masuk" terpadu, satu pintu buat anggota, non-anggota, & pengurus,
 // dipilih lewat dropdown peran. Cuma menampilkan formulirnya; proses login
