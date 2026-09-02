@@ -61,6 +61,17 @@ class Order extends Model
     }
 
     /**
+     * Nomor struk yang enak dibaca dan disebut lewat telepon, mis.
+     * "MDP-2609-0154": kode toko, tahun-bulan pesanan dibuat, lalu id-nya.
+     *
+     * Id aslinya tetap dipakai di URL dan di database. Ini murni tampilan,
+     * supaya pemesan punya patokan waktu menanyakan pesanannya ke pengurus.
+     */
+    public function nomorStruk(): string
+    {
+        return sprintf('MDP-%s-%04d', $this->created_at->format('ym'), $this->id);
+    }
+    /**
      * Relasi: pesanan ini termasuk periode pemesanan yang mana.
      */
     public function orderPeriod(): BelongsTo

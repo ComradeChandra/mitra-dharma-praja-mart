@@ -48,3 +48,41 @@
 .nav-pop-in > *:nth-child(6) { animation-delay: 200ms; }
 .nav-pop-in > *:nth-child(7) { animation-delay: 240ms; }
 .nav-pop-in > *:nth-child(8) { animation-delay: 280ms; }
+
+/* --------------------------------------------------------------------------
+   Aturan cetak — dipakai halaman struk pemesanan
+   (resources/views/struk/show.blade.php).
+
+   Tujuannya supaya "Cetak / Simpan PDF" di browser menghasilkan lembar yang
+   rapi: cuma struknya, tanpa navbar, tombol, atau latar hiasan.
+
+   Semua yang tidak boleh ikut tercetak diberi class "no-print".
+   -------------------------------------------------------------------------- */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    /* Latar gelap/gradien boros tinta dan bikin teks susah dibaca kalau
+       dicetak hitam-putih. */
+    body {
+        background: #fff !important;
+    }
+
+    /* Di layar struknya dikasih bingkai supaya terlihat seperti lembaran.
+       Di kertas bingkainya justru mubazir. */
+    .struk {
+        border: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+    }
+
+    /* Jangan sampai satu baris barang terpotong jadi dua halaman. */
+    .struk tr {
+        break-inside: avoid;
+    }
+
+    @page {
+        margin: 14mm;
+    }
+}

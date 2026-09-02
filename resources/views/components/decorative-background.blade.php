@@ -12,7 +12,7 @@
     semua konten (-z-10), dan 'pointer-events-none' supaya tidak menghalangi
     klik ke elemen asli di atasnya.
 --}}
-<div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-[#FAF6EF]">
+<div class="no-print fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-[#FAF6EF]">
     {{-- 4 titik cahaya statis di pojok layar. Yang kiri-atas hijau koperasi
          (warna identitas), sisanya warna hangat. Tanpa animasi & tanpa blur —
          kelembutannya murni dari radial-gradient yang memudar sendiri. --}}

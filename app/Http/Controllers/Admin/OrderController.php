@@ -71,6 +71,27 @@ class OrderController extends Controller
     }
 
     /**
+     * Struk resmi pesanan, halaman tersendiri yang siap dicetak.
+     *
+     * Beda dari sisi pemesan: tautan WhatsApp di sini sudah menuju nomor
+     * pemesannya, karena pengurus yang mengirimkan.
+     */
+    public function struk(Order $order): View
+    {
+        $order->load('orderItems.product', 'member', 'orderPeriod', 'opdDepartment');
+
+        $tautanWhatsApp = $order->status === OrderStatus::Pending
+            ? null
+            : $this->whatsAppInvoiceService->generateWhatsAppLink($order);
+
+        return view('struk.show', [
+            'order' => $order,
+            'tautanWhatsApp' => $tautanWhatsApp,
+            'kembali' => route('admin.orders.show', $order),
+        ]);
+    }
+
+    /**
      * Kunci harga produk fluktuatif yang masih kosong di pesanan ini, lalu
      * hitung ulang totalnya (lihat OrderService::verifyOrder()).
      */

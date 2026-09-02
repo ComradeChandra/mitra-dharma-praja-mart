@@ -27,6 +27,7 @@ Route::prefix('non-anggota')->name('non-member.')->group(function () {
         Route::get('pesan', [OrderController::class, 'create'])->name('orders.create');
         Route::post('pesan', [OrderController::class, 'store'])->name('orders.store');
         Route::get('pesanan/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::get('pesanan/{order}/struk', [OrderController::class, 'struk'])->name('orders.struk');
 
         // Usulan produk baru (Modul 8), sisi non-anggota. Cuma create/store:
         // tidak ada halaman riwayat karena tidak ada identitas personal yang

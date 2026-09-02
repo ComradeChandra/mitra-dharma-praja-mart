@@ -114,6 +114,34 @@ class OrderController extends Controller
     }
 
     /**
+     * Struk resmi pesanan, halaman tersendiri yang siap dicetak.
+     *
+     * Otorisasinya sama dengan show(): anggota cuma boleh membuka struk
+     * miliknya sendiri.
+     */
+    public function struk(Order $order): View
+    {
+        $member = Auth::guard('member')->user();
+
+        abort_unless($order->member_id === $member->id, 403);
+
+        $order->load('orderItems.product', 'member', 'orderPeriod');
+
+        // Tautan bagikan tanpa nomor tujuan, jadi anggota bebas memilih mau
+        // dikirim ke siapa. Pesanan yang totalnya belum final tidak dikasih
+        // tautan, karena angkanya masih bisa berubah.
+        $tautanWhatsApp = $order->status === OrderStatus::Pending
+            ? null
+            : $this->whatsAppInvoiceService->generateShareLink($order);
+
+        return view('struk.show', [
+            'order' => $order,
+            'tautanWhatsApp' => $tautanWhatsApp,
+            'kembali' => route('member.orders.show', $order),
+        ]);
+    }
+
+    /**
      * Syaratnya cuma satu: periodenya masih dibuka. Kembalikan redirect kalau
      * gagal, null kalau boleh lanjut.
      *

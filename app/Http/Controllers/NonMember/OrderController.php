@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\NonMember;
 
+use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\NonMember\StoreOrderRequest;
 use App\Models\OpdDepartment;
@@ -10,6 +11,7 @@ use App\Models\OrderPeriod;
 use App\Models\Product;
 use App\Services\NonMemberSessionService;
 use App\Services\OrderService;
+use App\Services\WhatsAppInvoiceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -27,6 +29,7 @@ class OrderController extends Controller
     public function __construct(
         private OrderService $orderService,
         private NonMemberSessionService $sesiNonAnggota,
+        private WhatsAppInvoiceService $whatsAppInvoiceService,
     ) {}
 
     /**
@@ -90,6 +93,31 @@ class OrderController extends Controller
         $order->load('orderItems.product', 'orderPeriod');
 
         return view('non-member.orders.show', compact('order'));
+    }
+
+    /**
+     * Struk resmi pesanan, halaman tersendiri yang siap dicetak.
+     *
+     * Otorisasinya sama dengan show(): cuma bisa dibuka dari sesi OPD yang
+     * memesan.
+     */
+    public function struk(Order $order): View
+    {
+        $opd = $this->opdSedangLogin();
+
+        abort_unless($order->opd_id === $opd->id, 403);
+
+        $order->load('orderItems.product', 'opdDepartment', 'orderPeriod');
+
+        $tautanWhatsApp = $order->status === OrderStatus::Pending
+            ? null
+            : $this->whatsAppInvoiceService->generateShareLink($order);
+
+        return view('struk.show', [
+            'order' => $order,
+            'tautanWhatsApp' => $tautanWhatsApp,
+            'kembali' => route('non-member.orders.show', $order),
+        ]);
     }
 
     /**

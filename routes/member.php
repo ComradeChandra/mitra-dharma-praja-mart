@@ -40,6 +40,8 @@ Route::prefix('anggota')->name('member.')->group(function () {
         Route::post('pesan', [OrderController::class, 'store'])->name('orders.store');
         Route::get('pesanan-saya', [OrderController::class, 'index'])->name('orders.index');
         Route::get('pesanan-saya/{order}', [OrderController::class, 'show'])->name('orders.show');
+        // Struk resmi yang siap dicetak atau disimpan jadi PDF lewat browser
+        Route::get('pesanan-saya/{order}/struk', [OrderController::class, 'struk'])->name('orders.struk');
 
         // Profil anggota, ubah foto, nomor WhatsApp, alamat, & password
         // sendiri. Nama & kode anggota tidak bisa diubah di sini (tetap

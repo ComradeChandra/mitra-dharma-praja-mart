@@ -29,7 +29,7 @@
         {{-- Tanpa overflow-hidden sengaja, lihat catatan di layouts/navigation.blade.php,
              overflow-hidden di header bisa motong dropdown/menu yang nongol
              di bawah tinggi header. inset-0 di bawah udah otomatis pas tanpa itu. --}}
-        <header class="relative bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 shadow-md sticky top-0 z-40">
+        <header class="no-print relative bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 shadow-md sticky top-0 z-40">
             <div class="absolute inset-0 opacity-[0.07] [background-image:radial-gradient(circle,white_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
 
             <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
@@ -61,7 +61,7 @@
             {{ $slot }}
         </main>
 
-        <footer class="mt-12 py-6 text-center text-xs text-gray-400">
+        <footer class="no-print mt-12 py-6 text-center text-xs text-gray-400">
             {{-- Semboyan resmi koperasi, diambil dari logonya --}}
             <p class="text-gray-500 font-medium tracking-wide">Kebersamaan untuk Kesejahteraan</p>
             <p class="mt-1">&copy; {{ date("Y") }} Koperasi Mitra Dharma Praja</p>

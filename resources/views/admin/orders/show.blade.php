@@ -149,7 +149,16 @@
                         <pre class="whitespace-pre-wrap text-sm text-gray-700 bg-gray-50 rounded-lg p-4 border border-gray-100 font-sans">{{ $invoiceText }}</pre>
                     </div>
 
-                    <div class="flex items-center gap-3 px-5 py-4 bg-gray-50 border-t border-gray-100">
+                    <div class="flex flex-wrap items-center gap-3 px-5 py-4 bg-gray-50 border-t border-gray-100">
+                        {{-- Struk resmi buat dicetak atau disimpan jadi PDF, mis.
+                             kalau pemesan minta bukti tertulis. --}}
+                        <a href="{{ route('admin.orders.struk', $order) }}"
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-white transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V4h12v5M6 18H4v-6h16v6h-2M8 14h8v6H8z" />
+                            </svg>
+                            Struk Resmi
+                        </a>
                         <a href="{{ $whatsAppLink }}" target="_blank" rel="noopener"
                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-teal-600 text-white text-sm font-medium hover:bg-teal-700 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">

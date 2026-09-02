@@ -63,6 +63,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // anggota, bukan admin).
     Route::get('pesanan', [OrderController::class, 'index'])->name('orders.index');
     Route::get('pesanan/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('pesanan/{order}/struk', [OrderController::class, 'struk'])->name('orders.struk');
     Route::patch('pesanan/{order}/verifikasi', [OrderController::class, 'verify'])->name('orders.verify');
     Route::patch('pesanan/{order}/tandai-terkirim', [OrderController::class, 'markInvoiced'])->name('orders.mark-invoiced');
 

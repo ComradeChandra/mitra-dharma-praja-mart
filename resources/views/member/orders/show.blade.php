@@ -68,7 +68,19 @@
                 verifikasi harga fluktuatif belum punya angka pasti.
             --}}
             @if ($tautanBagikan)
-                <div class="px-5 py-4 border-t border-gray-100">
+                <div class="px-5 py-4 border-t border-gray-100 space-y-2.5">
+                    {{-- Struk resmi: halaman tersendiri yang siap dicetak atau
+                         disimpan jadi PDF lewat dialog cetak browser. --}}
+                    <a
+                        href="{{ route('member.orders.struk', $order) }}"
+                        class="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V4h12v5M6 18H4v-6h16v6h-2M8 14h8v6H8z" />
+                        </svg>
+                        Lihat Struk Resmi
+                    </a>
+
                     <a
                         href="{{ $tautanBagikan }}"
                         target="_blank"

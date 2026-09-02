@@ -65,7 +65,12 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    // Koperasinya di Cimahi, jadi seluruh tanggal & jam mengikuti WIB.
+    // Bukan sekadar soal tampilan: periode pemesanan dibandingkan dengan
+    // tanggal hari ini (lihat OrderPeriod::scopeSedangDibuka), jadi kalau
+    // tetap UTC, periode yang diset tutup tanggal 30 baru benar-benar
+    // tertutup jam 07:00 WIB tanggal 1.
+    'timezone' => env('APP_TIMEZONE', 'Asia/Jakarta'),
 
     /*
     |--------------------------------------------------------------------------
