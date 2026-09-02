@@ -86,3 +86,43 @@ test('halaman katalog tidak lagi menyebut instansi yang salah', function () {
         ->assertDontSee('Pemkot Cimahi')
         ->assertDontSee('Pemerintah Kota Cimahi');
 });
+
+/**
+ * Apakah input dengan id ini dimatikan dari sisi server?
+ *
+ * Dicek dari atribut `disabled` yang berdiri sendiri, bukan sekadar string
+ * "disabled" di mana pun. Semua input di halaman ini punya
+ * `x-bind:disabled` buat Alpine, jadi pencocokan apa adanya akan selalu
+ * kena. Laravel merender `@disabled` tepat setelah `<input`.
+ */
+function inputMati(string $html, string $id): bool
+{
+    preg_match('/<input[^>]*id="'.preg_quote($id, '/').'"[^>]*>/', $html, $cocok);
+
+    return isset($cocok[0]) && str_starts_with($cocok[0], '<input disabled');
+}
+
+test('cuma form peran terpilih yang inputnya hidup', function () {
+    // Tiga form password dalam satu halaman bikin pengelola kata sandi browser
+    // bingung dan memunculkan prompt berulang. Form yang tidak dipilih
+    // inputnya dimatikan sejak render server, tidak menunggu Alpine jalan.
+    $html = $this->get(route('masuk'))->assertOk()->getContent();
+
+    // Peran bawaannya anggota, jadi kolom passwordnya harus bisa diisi.
+    expect(inputMati($html, 'password_anggota'))->toBeFalse();
+
+    // Dua form lainnya dimatikan.
+    expect(inputMati($html, 'access_code'))->toBeTrue();
+    expect(inputMati($html, 'password_pengurus'))->toBeTrue();
+});
+
+test('form peran yang dipilih ulang setelah gagal login ikut hidup', function () {
+    // Kalau login pengurus gagal, halaman kembali membawa peran=pengurus,
+    // jadi form itulah yang harus hidup, bukan form anggota.
+    $html = $this->withSession(['_old_input' => ['peran' => 'pengurus']])
+        ->get(route('masuk'))
+        ->getContent();
+
+    expect(inputMati($html, 'password_pengurus'))->toBeFalse();
+    expect(inputMati($html, 'password_anggota'))->toBeTrue();
+});

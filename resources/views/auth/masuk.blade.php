@@ -10,8 +10,14 @@
     kalau login gagal, halaman kembali ke formulir yang tadi dipakai, bukan
     lompat ke formulir anggota lagi.
 --}}
+@php
+    // Peran yang aktif saat halaman pertama dimuat. Dipakai buat menentukan
+    // form mana yang inputnya hidup sejak awal, tidak menunggu Alpine jalan.
+    $peranAwal = old('peran', 'anggota');
+@endphp
+
 <x-guest-layout subtitle="Koperasi Mitra Dharma Praja">
-    <div x-data="{ peran: '{{ old('peran', 'anggota') }}' }">
+    <div x-data="{ peran: '{{ $peranAwal }}' }">
 
         <div class="mb-5">
             <x-input-label for="peran" value="Masuk sebagai" />
@@ -45,6 +51,8 @@
                             id="member_code"
                             name="member_code"
                             required
+                            @disabled($peranAwal !== 'anggota')
+                            x-bind:disabled="peran !== 'anggota'"
                             class="block mt-1 w-full border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl shadow-sm"
                         >
                             <option value="" disabled {{ old('member_code') ? '' : 'selected' }}>— Pilih nama —</option>
@@ -70,7 +78,8 @@
                         class="block mt-1 w-full"
                         required
                         autocomplete="current-password"
-                        :disabled="$members->isEmpty()"
+                        :disabled="$peranAwal !== 'anggota' || $members->isEmpty()"
+                        x-bind:disabled="peran !== 'anggota'"
                     />
                 </div>
 
@@ -102,6 +111,8 @@
                         id="opd_department_id"
                         name="opd_department_id"
                         required
+                        @disabled($peranAwal !== 'non-anggota')
+                        x-bind:disabled="peran !== 'non-anggota'"
                         class="block mt-1 w-full border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl shadow-sm"
                     >
                         <option value="" disabled {{ old('opd_department_id') ? '' : 'selected' }}>— Pilih instansi —</option>
@@ -121,6 +132,9 @@
                         type="password"
                         class="block mt-1 w-full"
                         required
+                        autocomplete="off"
+                        :disabled="$peranAwal !== 'non-anggota'"
+                        x-bind:disabled="peran !== 'non-anggota'"
                     />
                 </div>
 
@@ -152,6 +166,8 @@
                         :value="old('email')"
                         required
                         autocomplete="username"
+                        :disabled="$peranAwal !== 'pengurus'"
+                        x-bind:disabled="peran !== 'pengurus'"
                     />
                 </div>
 
@@ -164,6 +180,8 @@
                         class="block mt-1 w-full"
                         required
                         autocomplete="current-password"
+                        :disabled="$peranAwal !== 'pengurus'"
+                        x-bind:disabled="peran !== 'pengurus'"
                     />
                 </div>
 
