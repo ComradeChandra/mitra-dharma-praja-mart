@@ -21,12 +21,17 @@ class DashboardController extends Controller
         // ke view lewat variabel biasa (bukan manggil Auth::guard() berkali-kali di Blade)
         $member = Auth::guard('member')->user();
 
-        // Total belanja anggota ini TAHUN INI, dasar hitung SHU (0,5–1% dari
-        // total belanja setahun, lihat CLAUDE.md Modul 9). Cuma
+        // Total belanja anggota ini TAHUN INI, dasar hitung SHU (lihat
+        // CLAUDE.md Modul 9). Cuma
         // angkanya saja yang ditampilkan (bukan rincian), sesuai arahan Ibu
         // pengurus: cukup angka totalnya, tidak perlu rincian per transaksi.
         $belanjaTahunIni = $this->recapService->memberYearlySpending($member);
 
-        return view('member.dashboard', compact('member', 'belanjaTahunIni'));
+        // Perkiraan SHU dihitung di service, bukan di Blade. Persentasenya
+        // ada di config/koperasi.php supaya gampang diganti begitu koperasi
+        // menetapkan angkanya.
+        $estimasiShu = $this->recapService->estimasiShu($belanjaTahunIni);
+
+        return view('member.dashboard', compact('member', 'belanjaTahunIni', 'estimasiShu'));
     }
 }

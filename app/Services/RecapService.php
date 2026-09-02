@@ -337,4 +337,32 @@ class RecapService
             ->whereYear('created_at', $year)
             ->sum('total_amount');
     }
+
+    /**
+     * Perkiraan SHU dari total belanja setahun.
+     *
+     * Persentasenya dibaca dari config/koperasi.php, TIDAK ditulis di sini
+     * maupun di tampilan. Koperasi belum menetapkan angkanya (di rapat disebut
+     * kisaran 0,5%-1%, "nanti kita ngobrol"), jadi begitu diputuskan cukup
+     * ganti nilai di config, tanpa menyentuh kode.
+     *
+     * Kalau batas bawah dan atasnya diisi sama, artinya persentasenya sudah
+     * pasti dan tampilannya berhenti berupa rentang.
+     *
+     * @return array{min: float, maks: float, persenMin: float, persenMaks: float, rentang: bool, sudahFinal: bool}
+     */
+    public function estimasiShu(float $belanjaSetahun): array
+    {
+        $persenMin = (float) config('koperasi.shu.persen_min');
+        $persenMaks = (float) config('koperasi.shu.persen_maks');
+
+        return [
+            'min' => $belanjaSetahun * $persenMin / 100,
+            'maks' => $belanjaSetahun * $persenMaks / 100,
+            'persenMin' => $persenMin,
+            'persenMaks' => $persenMaks,
+            'rentang' => $persenMin !== $persenMaks,
+            'sudahFinal' => (bool) config('koperasi.shu.sudah_final'),
+        ];
+    }
 }

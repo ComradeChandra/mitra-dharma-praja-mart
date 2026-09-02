@@ -31,8 +31,13 @@
                 {{--
                     Belanja tahun berjalan, dasar hitung SHU (Modul 9 di CLAUDE.md).
                     Cukup angka totalnya saja, tanpa rincian per pesanan, sesuai
-                    permintaan pengurus. Estimasi SHU ditulis sebagai rentang
-                    0,5%-1% karena persentase finalnya belum ditetapkan koperasi.
+                    permintaan pengurus.
+
+                    Angka estimasinya dihitung di RecapService::estimasiShu(),
+                    bukan di sini, dan persentasenya ada di config/koperasi.php.
+                    Dulu ditulis langsung di berkas ini dan tersebar di empat
+                    tempat, jadi begitu koperasi menetapkan angkanya orang
+                    harus mengubek tampilan.
                 --}}
                 <div class="relative overflow-hidden bg-gradient-to-br from-teal-600 to-teal-800 rounded-xl shadow-sm p-6 text-white">
                     <div class="absolute inset-0 opacity-[0.08] [background-image:radial-gradient(circle,white_1px,transparent_1px)] [background-size:18px_18px]"></div>
@@ -41,10 +46,22 @@
                         <p class="mt-1 text-2xl font-bold">Rp{{ number_format($belanjaTahunIni, 0, ',', '.') }}</p>
                         @if ($belanjaTahunIni > 0)
                             <p class="mt-2 text-sm text-teal-100">
-                                Estimasi SHU: Rp{{ number_format($belanjaTahunIni * 0.005, 0, ',', '.') }}
-                                – Rp{{ number_format($belanjaTahunIni * 0.01, 0, ',', '.') }}
-                                <span class="block text-xs text-teal-200 mt-0.5">(0,5%–1% dari total belanja, persentase pasti ditentukan koperasi di akhir tahun)</span>
-                            </p>
+                            Estimasi SHU:
+                            @if ($estimasiShu['rentang'])
+                                Rp{{ number_format($estimasiShu['min'], 0, ',', '.') }}
+                                – Rp{{ number_format($estimasiShu['maks'], 0, ',', '.') }}
+                            @else
+                                Rp{{ number_format($estimasiShu['maks'], 0, ',', '.') }}
+                            @endif
+
+                            <span class="block text-xs text-teal-200 mt-0.5">
+                                @if ($estimasiShu['rentang'])
+                                    ({{ rtrim(rtrim(number_format($estimasiShu['persenMin'], 1, ',', '.'), '0'), ',') }}%–{{ rtrim(rtrim(number_format($estimasiShu['persenMaks'], 1, ',', '.'), '0'), ',') }}% dari total belanja, persentase pasti ditentukan koperasi di akhir tahun)
+                                @else
+                                    ({{ rtrim(rtrim(number_format($estimasiShu['persenMaks'], 1, ',', '.'), '0'), ',') }}% dari total belanja)
+                                @endif
+                            </span>
+                        </p>
                         @else
                             <p class="mt-2 text-sm text-teal-100">Belum ada belanja terverifikasi tahun ini.</p>
                         @endif
