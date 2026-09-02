@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :title="'Dashboard Admin — ' . config('app.name')">
     <x-slot name="header">
         <x-page-heading>{{ __('Dashboard Admin') }}</x-page-heading>
     </x-slot>

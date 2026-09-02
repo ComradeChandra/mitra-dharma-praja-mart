@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :title="'Periode Pemesanan — ' . config('app.name')">
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>

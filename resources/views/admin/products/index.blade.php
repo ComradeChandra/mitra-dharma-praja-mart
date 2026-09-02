@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :title="'Katalog Produk — ' . config('app.name')">
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>

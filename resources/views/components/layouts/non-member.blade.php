@@ -10,7 +10,7 @@
     Props:
     - opd: model OpdDepartment yang lagi "login" di sesi ini
 --}}
-@props(['opd'])
+@props(['opd', 'title' => null])
 
 <html lang="id">
     <head>

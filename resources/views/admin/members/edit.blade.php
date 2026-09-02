@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :title="'Edit Anggota — ' . config('app.name')">
     <x-slot name="header">
         <x-page-heading>{{ __('Edit Anggota') }}</x-page-heading>
     </x-slot>

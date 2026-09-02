@@ -6,7 +6,7 @@
     $anggotaBelum = $memberStatus->where('sudahPesan', false);
 @endphp
 
-<x-app-layout>
+<x-app-layout :title="'Rekap Periode — ' . config('app.name')">
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>

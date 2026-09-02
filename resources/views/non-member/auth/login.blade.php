@@ -4,7 +4,7 @@
     CLAUDE.md). Bukan akun personal — pilih nama OPD + kode akses BERSAMA
     yang dibagikan admin ke stafnya, bukan bikin akun sendiri.
 --}}
-<x-guest-layout subtitle="Masuk sebagai Non-Anggota (per OPD)">
+<x-guest-layout :title="'Masuk Non-Anggota — ' . config('app.name')" subtitle="Masuk sebagai Non-Anggota (per OPD)">
     <div class="mb-4 text-sm text-gray-600">
         Masuk sebagai non-anggota (staf OPD). Pilih nama OPD kamu, lalu masukkan
         kode akses yang dibagikan admin koperasi ke OPD kamu.

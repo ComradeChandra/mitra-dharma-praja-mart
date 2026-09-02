@@ -16,7 +16,7 @@
     $peranAwal = old('peran', 'anggota');
 @endphp
 
-<x-guest-layout subtitle="Koperasi Mitra Dharma Praja">
+<x-guest-layout :title="'Masuk — ' . config('app.name')" subtitle="Koperasi Mitra Dharma Praja">
     <div x-data="{ peran: '{{ $peranAwal }}' }">
 
         <div class="mb-5">

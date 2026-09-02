@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :title="'Profil Saya — ' . config('app.name')">
     <x-slot name="header">
         <x-page-heading>{{ __('Profil Saya') }}</x-page-heading>
     </x-slot>

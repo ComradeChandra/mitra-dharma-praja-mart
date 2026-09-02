@@ -4,7 +4,7 @@
     $itemBelumBerharga = $order->orderItems->whereNull('price_at_order');
 @endphp
 
-<x-app-layout>
+<x-app-layout :title="'Detail Pesanan — ' . config('app.name')">
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>

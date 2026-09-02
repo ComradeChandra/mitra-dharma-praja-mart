@@ -7,7 +7,7 @@
     rapat: kode anggota seperti "0010 A" gampang salah ketik (spasi, huruf
     besar-kecil), dan pengurus minta namanya langsung kelihatan buat dipilih.
 --}}
-<x-guest-layout subtitle="Masuk sebagai Anggota">
+<x-guest-layout :title="'Masuk Anggota — ' . config('app.name')" subtitle="Masuk sebagai Anggota">
     <div class="mb-4 text-sm text-gray-600">
         Pilih nama kamu, lalu masukkan password yang dibuatkan pengurus.
     </div>

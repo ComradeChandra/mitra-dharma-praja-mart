@@ -6,8 +6,7 @@
     tahu usulan itu dari siapa. Tidak ada halaman riwayat usulan, alasannya
     sama dengan pesanan non-anggota (lihat NonMember\ProductRequestController).
 --}}
-<x-layouts.non-member :opd="$opd">
-    <x-slot:title>Usulkan Produk</x-slot:title>
+<x-layouts.non-member :opd="$opd" :title="'Usulkan Produk — ' . config('app.name')">
 
     <div class="py-10">
         <div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">

@@ -4,8 +4,7 @@
     Nama lengkap & kode anggota SENGAJA ditampilkan tapi tidak bisa diubah:
     keduanya tetap dikelola pengurus (lihat catatan di Member\ProfileController).
 --}}
-<x-layouts.member>
-    <x-slot:title>Profil Saya</x-slot:title>
+<x-layouts.member :title="'Profil Saya — ' . config('app.name')">
 
     <div class="py-10">
         <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">

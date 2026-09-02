@@ -1,4 +1,4 @@
-<x-guest-layout subtitle="Portal Pengurus Koperasi">
+<x-guest-layout :title="'Masuk Pengurus — ' . config('app.name')" subtitle="Portal Pengurus Koperasi">
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 

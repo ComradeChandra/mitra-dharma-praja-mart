@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :title="'Tambah OPD — ' . config('app.name')">
     <x-slot name="header">
         <x-page-heading>{{ __('Tambah OPD') }}</x-page-heading>
     </x-slot>
