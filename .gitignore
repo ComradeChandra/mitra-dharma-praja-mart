@@ -25,3 +25,9 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Dokumen kerja internal, sengaja tidak ikut repo.
+# CLAUDE.md memuat transkrip rapat lengkap dengan nama peserta, devlog.md
+# memuat catatan harian pengerjaan. Keduanya tetap ada di komputer lokal.
+/CLAUDE.md
+/devlog.md
