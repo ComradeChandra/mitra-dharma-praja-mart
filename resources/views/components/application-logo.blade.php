@@ -18,11 +18,20 @@
         ->first(fn (string $path) => file_exists(public_path($path)));
 @endphp
 
+@php
+    // Ukuran asli berkasnya, dipakai buat atribut width & height. Ukuran
+    // tampilnya sendiri tetap ditentukan class (h-7 w-7, w-16 h-16, dst),
+    // atribut ini cuma memberi tahu browser perbandingan sisinya supaya
+    // ruangnya sudah benar bahkan sebelum CSS selesai dimuat.
+    $ukuran = $logoAsli ? @getimagesize(public_path($logoAsli)) : false;
+@endphp
+
 @if ($logoAsli)
     {{-- object-contain: logo tidak gepeng/terpotong berapa pun rasio aslinya --}}
     <img
         src="{{ asset($logoAsli) }}"
         alt="Logo Koperasi Mitra Dharma Praja"
+        @if ($ukuran) width="{{ $ukuran[0] }}" height="{{ $ukuran[1] }}" @endif
         {{ $attributes->merge(['class' => 'object-contain']) }}
     >
 @else
