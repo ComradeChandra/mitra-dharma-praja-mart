@@ -95,44 +95,42 @@ class DemoDataSeeder extends Seeder
      */
     private function seedProduk(): void
     {
-        // [kategori, nama, harga beli, harga jual, fluktuatif, lacak stok, stok, aktif, satuan]
-        // Satuan boleh null; beberapa produk sengaja dikosongkan buat menunjukkan
-        // kolom itu opsional dan tampilannya tetap wajar tanpa satuan.
+        // [kategori, nama, harga beli, harga jual, fluktuatif, lacak stok, stok, aktif]
         $produk = [
-            ['Sembako', 'Beras Pandan Wangi 5kg', 65000, 72000, false, true, 40, true, 'karung'],
-            ['Sembako', 'Beras Premium 10kg', 125000, 138000, false, true, 25, true, 'karung'],
-            ['Sembako', 'Minyak Goreng 2L', 32000, 35000, false, true, 60, true, 'botol'],
-            ['Sembako', 'Gula Pasir 1kg', 15000, 17000, false, true, 80, true, 'bungkus'],
-            ['Sembako', 'Tepung Terigu 1kg', 11000, 13000, false, false, null, true, 'bungkus'],
-            ['Sembako', 'Kecap Manis 600ml', 22000, 25000, false, false, null, true, 'botol'],
+            ['Sembako', 'Beras Pandan Wangi 5kg', 65000, 72000, false, true, 40, true],
+            ['Sembako', 'Beras Premium 10kg', 125000, 138000, false, true, 25, true],
+            ['Sembako', 'Minyak Goreng 2L', 32000, 35000, false, true, 60, true],
+            ['Sembako', 'Gula Pasir 1kg', 15000, 17000, false, true, 80, true],
+            ['Sembako', 'Tepung Terigu 1kg', 11000, 13000, false, false, null, true],
+            ['Sembako', 'Kecap Manis 600ml', 22000, 25000, false, false, null, true],
 
-            ['Sayur & Segar', 'Telur Ayam 1kg', 28000, null, true, false, null, true, 'kg'],
-            ['Sayur & Segar', 'Bawang Merah 1kg', 35000, null, true, false, null, true, 'kg'],
-            ['Sayur & Segar', 'Cabai Merah 1kg', 45000, null, true, false, null, true, 'kg'],
+            ['Sayur & Segar', 'Telur Ayam 1kg', 28000, null, true, false, null, true],
+            ['Sayur & Segar', 'Bawang Merah 1kg', 35000, null, true, false, null, true],
+            ['Sayur & Segar', 'Cabai Merah 1kg', 45000, null, true, false, null, true],
 
-            ['Kebersihan', 'Sabun Cuci Piring 800ml', 14000, 16500, false, true, 50, true, 'botol'],
-            ['Kebersihan', 'Deterjen Bubuk 1,8kg', 38000, 42000, false, true, 30, true, 'bungkus'],
-            ['Kebersihan', 'Pewangi Pakaian 900ml', 19000, 22000, false, false, null, true, 'botol'],
+            ['Kebersihan', 'Sabun Cuci Piring 800ml', 14000, 16500, false, true, 50, true],
+            ['Kebersihan', 'Deterjen Bubuk 1,8kg', 38000, 42000, false, true, 30, true],
+            ['Kebersihan', 'Pewangi Pakaian 900ml', 19000, 22000, false, false, null, true],
             // Stok HABIS, buat memperlihatkan status "Tidak tersedia" di katalog.
-            ['Kebersihan', 'Pasta Gigi 190g', 16000, 18500, false, true, 0, true, 'tube'],
+            ['Kebersihan', 'Pasta Gigi 190g', 16000, 18500, false, true, 0, true],
 
-            ['Minuman', 'Kopi Bubuk 200g', 18000, 21000, false, true, 45, true, 'bungkus'],
-            ['Minuman', 'Teh Celup isi 50', 9000, 11000, false, false, null, true, 'kotak'],
-            ['Minuman', 'Susu Kental Manis 490g', 12000, 14000, false, true, 35, true, 'kaleng'],
-            ['Minuman', 'Air Mineral 1 Dus (48 gelas)', 22000, 26000, false, true, 20, true, 'dus'],
+            ['Minuman', 'Kopi Bubuk 200g', 18000, 21000, false, true, 45, true],
+            ['Minuman', 'Teh Celup isi 50', 9000, 11000, false, false, null, true],
+            ['Minuman', 'Susu Kental Manis 490g', 12000, 14000, false, true, 35, true],
+            ['Minuman', 'Air Mineral 1 Dus (48 gelas)', 22000, 26000, false, true, 20, true],
 
-            ['Makanan Ringan', 'Mie Instan 1 Dus (40 pcs)', 108000, 118000, false, true, 15, true, 'dus'],
-            ['Makanan Ringan', 'Biskuit Kaleng 650g', 45000, 52000, false, false, null, true, 'kaleng'],
+            ['Makanan Ringan', 'Mie Instan 1 Dus (40 pcs)', 108000, 118000, false, true, 15, true],
+            ['Makanan Ringan', 'Biskuit Kaleng 650g', 45000, 52000, false, false, null, true],
 
-            ['Alat Tulis', 'Buku Tulis 1 Lusin', 24000, 27000, false, false, null, true, null],
-            ['Alat Tulis', 'Pulpen 1 Lusin', 18000, 21000, false, true, 40, true, null],
+            ['Alat Tulis', 'Buku Tulis 1 Lusin', 24000, 27000, false, false, null, true],
+            ['Alat Tulis', 'Pulpen 1 Lusin', 18000, 21000, false, true, 40, true],
 
             // NONAKTIF, sengaja, biar terlihat produk nonaktif memang
             // disembunyikan dari katalog pelanggan.
-            ['Sembako', 'Beras Merah 2kg (stok lama)', 30000, 34000, false, false, null, false, null],
+            ['Sembako', 'Beras Merah 2kg (stok lama)', 30000, 34000, false, false, null, false],
         ];
 
-        foreach ($produk as [$kategori, $nama, $beli, $jual, $fluktuatif, $lacakStok, $stok, $aktif, $satuan]) {
+        foreach ($produk as [$kategori, $nama, $beli, $jual, $fluktuatif, $lacakStok, $stok, $aktif]) {
             Product::updateOrCreate(
                 ['name' => $nama],
                 [
@@ -143,7 +141,6 @@ class DemoDataSeeder extends Seeder
                     'has_stock_tracking' => $lacakStok,
                     'stock' => $stok,
                     'is_active' => $aktif,
-                    'unit' => $satuan,
                 ]
             );
         }

@@ -89,7 +89,7 @@
     </div>
 
     {{-- Input jumlah, nama field "quantity[{id}]", dibaca StoreOrderRequest::orderedItems() --}}
-    <div class="shrink-0 flex items-center gap-1.5">
+    <div class="shrink-0">
         <label for="quantity-{{ $product->id }}" class="sr-only">Jumlah {{ $product->name }}</label>
         <input
             type="number"
@@ -101,8 +101,5 @@
             @disabled(! $bisaDipesan)
             class="w-20 text-center rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
         >
-        @if ($product->unit)
-            <span class="text-xs text-gray-500 whitespace-nowrap">{{ $product->unit }}</span>
-        @endif
     </div>
 </div>

@@ -34,9 +34,6 @@
                         @if ($product->is_fluctuating)
                             <span class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-amber-50 text-amber-700">
                                 Harga fluktuatif
-                                @if ($product->unit)
-                                    &middot; per {{ $product->unit }}
-                                @endif
                             </span>
                             <p class="mt-2 text-xs text-gray-500 leading-relaxed">
                                 Harga barang ini naik-turun mengikuti pasar, jadi belum bisa dipastikan sekarang.
@@ -45,9 +42,6 @@
                         @else
                             <p class="text-2xl font-bold text-gray-900">
                                 Rp{{ number_format($product->sell_price, 0, ',', '.') }}
-                                @if ($product->unit)
-                                    <span class="text-sm font-normal text-gray-500">/ {{ $product->unit }}</span>
-                                @endif
                             </p>
                         @endif
                     </div>

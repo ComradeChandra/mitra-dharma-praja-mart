@@ -157,7 +157,7 @@ class RecapService
      * penyajian tapi cara mengumpulkan datanya sama. Tidak dibatasi tipe
      * pemesan, karena kebutuhan belanja grosir dihitung dari semua pesanan.
      *
-     * @return Collection<int, array{nama: string, kategori: string, jumlah: int, jumlahTertulis: string}>
+     * @return Collection<int, array{nama: string, kategori: string, jumlah: int}>
      */
     private function productQuantities(?OrderPeriod $period = null): Collection
     {
@@ -168,11 +168,6 @@ class RecapService
                 'nama' => $items->first()->product->name,
                 'kategori' => $items->first()->product->category,
                 'jumlah' => (int) $items->sum('quantity'),
-                // Angka yang sudah berikut satuannya, mis. "14 karung".
-                // Dirakit di Product::formatJumlah() supaya aturan penulisannya
-                // cuma ada di satu tempat. 'jumlah' di atas tetap integer murni
-                // karena dipakai buat urut dan hitung.
-                'jumlahTertulis' => $items->first()->product->formatJumlah((int) $items->sum('quantity')),
             ]);
     }
 
@@ -180,7 +175,7 @@ class RecapService
      * Produk terlaris sepanjang masa, diurutkan dari yang paling banyak
      * terjual. Ditampilkan sebagai tabel, bukan grafik.
      *
-     * @return Collection<int, array{nama: string, kategori: string, jumlahTerjual: int, jumlahTerjualTertulis: string}>
+     * @return Collection<int, array{nama: string, kategori: string, jumlahTerjual: int}>
      */
     public function topProducts(int $limit = 10): Collection
     {
@@ -192,7 +187,6 @@ class RecapService
                 'nama' => $produk['nama'],
                 'kategori' => $produk['kategori'],
                 'jumlahTerjual' => $produk['jumlah'],
-                'jumlahTerjualTertulis' => $produk['jumlahTertulis'],
             ]);
     }
 
@@ -217,7 +211,6 @@ class RecapService
                     ? 'Anggota'
                     : ($order->opdDepartment?->name ?? 'Non-Anggota'),
                 'jumlah' => (int) $item->quantity,
-                'jumlahTertulis' => $item->product->formatJumlah((int) $item->quantity),
             ]))
             ->groupBy('product_id')
             ->map(fn (Collection $baris) => $baris->sortBy('nama')->values());
@@ -231,7 +224,7 @@ class RecapService
      * Tiap baris membawa daftar pemesannya juga, jadi ketahuan barang itu
      * untuk siapa saja.
      *
-     * @return Collection<int, array{nama: string, kategori: string, jumlahDibutuhkan: int, jumlahDibutuhkanTertulis: string, pemesan: Collection}>
+     * @return Collection<int, array{nama: string, kategori: string, jumlahDibutuhkan: int, pemesan: Collection}>
      */
     public function productsForPeriod(OrderPeriod $period): Collection
     {
@@ -242,7 +235,6 @@ class RecapService
                 'nama' => $produk['nama'],
                 'kategori' => $produk['kategori'],
                 'jumlahDibutuhkan' => $produk['jumlah'],
-                'jumlahDibutuhkanTertulis' => $produk['jumlahTertulis'],
                 'pemesan' => $pemesan->get($productId, collect()),
             ])
             ->sortBy('nama')

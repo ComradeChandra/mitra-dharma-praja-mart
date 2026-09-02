@@ -15,7 +15,6 @@ beforeEach(function () {
     $this->beras = Product::create([
         'category' => 'Sembako',
         'name' => 'Beras Pandan Wangi',
-        'unit' => 'karung',
         'buy_price' => 65000,
         'sell_price' => 72000,
         'is_fluctuating' => false,
@@ -31,7 +30,6 @@ test('halaman detail menampilkan keterangan produknya', function () {
         ->assertSee('Beras Pandan Wangi')
         ->assertSee('Sembako')
         ->assertSee('Rp72.000')
-        ->assertSee('karung')
         ->assertSee('Tersedia');
 });
 
@@ -65,7 +63,6 @@ test('produk fluktuatif menampilkan penjelasan, bukan angka harga', function () 
     $telur = Product::create([
         'category' => 'Sayur & Segar',
         'name' => 'Telur Ayam',
-        'unit' => 'kg',
         'buy_price' => 28000,
         'sell_price' => null,
         'is_fluctuating' => true,

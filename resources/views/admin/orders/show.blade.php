@@ -86,7 +86,7 @@
                             <div class="flex items-center justify-between gap-4 px-5 py-3">
                                 <div class="min-w-0">
                                     <p class="text-sm font-medium text-gray-800 truncate">{{ $item->product->name }}</p>
-                                    <p class="text-xs text-gray-400">{{ $item->product->formatJumlah($item->quantity) }} &middot; {{ $item->product->category }}</p>
+                                    <p class="text-xs text-gray-400">{{ $item->quantity }} {{ $item->product->category }}</p>
                                 </div>
 
                                 @if ($item->price_at_order !== null)
