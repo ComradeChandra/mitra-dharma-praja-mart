@@ -36,12 +36,29 @@
                 class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
             >
         @else
-            <div class="w-full h-full flex items-center justify-center text-gray-300 text-xs gap-1 flex-col">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V7.5A1.5 1.5 0 0 1 4.5 6h15A1.5 1.5 0 0 1 21 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 16.5Z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m3 16 4.5-4.5a2 2 0 0 1 2.8 0L15 16m-3-3 1.5-1.5a2 2 0 0 1 2.8 0L21 15" />
-                </svg>
-                Belum ada foto
+            {{--
+                Belum ada foto. Warnanya diambil dari nama kategori lewat crc32,
+                jadi tiap kategori dapat rona sendiri yang konsisten. Tanpa ini,
+                katalog yang produknya belum berfoto tampil sebagai deretan
+                kotak abu-abu identik dan terkesan rusak.
+            --}}
+            @php
+                $rona = [
+                    ['bg-emerald-50', 'text-emerald-300'],
+                    ['bg-amber-50', 'text-amber-300'],
+                    ['bg-sky-50', 'text-sky-300'],
+                    ['bg-rose-50', 'text-rose-300'],
+                    ['bg-violet-50', 'text-violet-300'],
+                    ['bg-lime-50', 'text-lime-300'],
+                ];
+                [$latar, $tinta] = $rona[crc32($product->category) % count($rona)];
+            @endphp
+
+            <div class="w-full h-full flex items-center justify-center flex-col gap-1.5 {{ $latar }}">
+                <span class="text-2xl font-semibold {{ $tinta }}">
+                    {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($product->name, 0, 1)) }}
+                </span>
+                <span class="text-[11px] {{ $tinta }}">Belum ada foto</span>
             </div>
         @endif
 

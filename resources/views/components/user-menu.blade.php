@@ -91,7 +91,7 @@
     {{-- ---------- PENGURUS ---------- --}}
     <div class="flex items-center gap-3 text-sm">
         <span class="hidden sm:inline text-teal-100">{{ $admin->name }}</span>
-        <a href="{{ route('admin.dashboard') }}" class="px-3 py-1.5 rounded-lg bg-white/15 text-white hover:bg-white/25 transition">Dashboard</a>
+        <a href="{{ route('admin.dashboard') }}" class="px-3 py-1.5 rounded-lg bg-white/15 text-white hover:bg-white/25 transition">Kelola Koperasi</a>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="px-3 py-1.5 rounded-lg text-teal-100 hover:text-white hover:bg-white/10 transition">Keluar</button>

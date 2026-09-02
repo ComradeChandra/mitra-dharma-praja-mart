@@ -71,11 +71,11 @@ test('setelah non-anggota masuk, header menampilkan nama OPD-nya', function () {
         ->assertSee('Dinas Pendidikan');
 });
 
-test('setelah pengurus masuk, header menampilkan pintasan dashboard', function () {
+test('setelah pengurus masuk, header menampilkan pintasan ke area kelola', function () {
     $this->actingAs($this->admin)
         ->get(route('catalog.index'))
         ->assertSee('Admin Koperasi')
-        ->assertSee('Dashboard');
+        ->assertSee('Kelola Koperasi');
 });
 
 test('halaman katalog tidak lagi menyebut instansi yang salah', function () {

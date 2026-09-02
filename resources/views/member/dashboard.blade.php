@@ -85,7 +85,7 @@
                     <div class="relative flex items-center justify-between">
                         <div>
                             <h2 class="font-semibold">Ajukan Permintaan Produk</h2>
-                            <p class="mt-1 text-sm text-white/90">Nggak nemu produk yang kamu cari? Usulkan ke admin di sini.</p>
+                            <p class="mt-1 text-sm text-white/90">Nggak nemu produk yang kamu cari? Usulkan ke pengurus di sini.</p>
                         </div>
                         <span class="text-xl group-hover:translate-x-1 transition">→</span>
                     </div>
@@ -99,7 +99,7 @@
                 <ol class="space-y-5">
                     @foreach ([
                         ['title' => 'Cek Katalog', 'desc' => 'Lihat produk yang tersedia bulan ini.'],
-                        ['title' => 'Kirim Pesanan', 'desc' => 'Sampaikan produk & jumlah yang mau dipesan ke admin.'],
+                        ['title' => 'Kirim Pesanan', 'desc' => 'Sampaikan produk & jumlah yang mau dipesan ke pengurus.'],
                         ['title' => 'Koperasi Belanja', 'desc' => 'Setelah periode ditutup, koperasi belanjakan barangnya.'],
                         ['title' => 'Terima Invoice', 'desc' => 'Invoice & rincian tagihan dikirim lewat WhatsApp.'],
                     ] as $index => $step)

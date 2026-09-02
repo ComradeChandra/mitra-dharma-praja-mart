@@ -9,7 +9,7 @@
 --}}
 <x-guest-layout subtitle="Masuk sebagai Anggota">
     <div class="mb-4 text-sm text-gray-600">
-        Pilih nama kamu, lalu masukkan password yang dibuatkan admin.
+        Pilih nama kamu, lalu masukkan password yang dibuatkan pengurus.
     </div>
 
     {{-- Pesan error umum (mis. anggota/password salah) --}}

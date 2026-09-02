@@ -47,7 +47,7 @@
 
         @if ($product->is_fluctuating)
             <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 text-[11px] font-medium rounded-full bg-amber-50 text-amber-700">
-                Harga final saat verifikasi admin
+                Harga final saat verifikasi pengurus
             </span>
         @else
             <p class="mt-1 text-sm font-semibold text-gray-900">Rp{{ number_format($product->sell_price, 0, ',', '.') }}</p>
