@@ -26,9 +26,9 @@ const cek = (nama, dapat, harap) => {
     console.log(`  ${ok ? 'OK  ' : 'GAGAL'} ${nama}${ok ? '' : ` -> dapat ${JSON.stringify(dapat)}, harap ${JSON.stringify(harap)}`}`);
 };
 
-k.daftar({ id: 1, nama: 'beras pandan wangi', kategori: 'Sembako', harga: 72000, awal: 0 });
-k.daftar({ id: 2, nama: 'gula pasir 1kg',     kategori: 'Sembako', harga: 17000, awal: 0 });
-k.daftar({ id: 3, nama: 'telur ayam 1kg',     kategori: 'Sayur',   harga: null,  awal: 0 });
+k.daftar({ id: 1, nama: 'beras pandan wangi', label: 'Beras Pandan Wangi', kategori: 'Sembako', harga: 72000, awal: 0 });
+k.daftar({ id: 2, nama: 'gula pasir 1kg',     label: 'Gula Pasir 1kg',     kategori: 'Sembako', harga: 17000, awal: 0 });
+k.daftar({ id: 3, nama: 'telur ayam 1kg',     label: 'Telur Ayam 1kg',     kategori: 'Sayur',   harga: null,  awal: 0 });
 
 cek('tanpa penyaring, semua tampil', [1,2,3].map(i => k.cocok(k.katalog[i-1].nama, k.katalog[i-1].kategori, i)), [true,true,true]);
 
@@ -62,5 +62,18 @@ cek('atur ulang mengosongkan penyaring', [k.cari, k.kategori, k.hanyaDipilih], [
 cek('atur ulang TIDAK menghapus isian', k.banyakDipilih, 2);
 cek('format rupiah', k.rupiah(144000).replace(/ /g,' '), 'Rp144.000');
 
+// --- rincian pilihan, dipakai bilah ringkasan yang bisa dibuka.
+//     Ini BUKAN keranjang: jumlah tetap diisi langsung di baris produknya,
+//     yang diuji di sini cuma cara melihat kembali apa yang sudah diisi.
+k.cari = ''; k.kategori = 'semua'; k.hanyaDipilih = false;
+k.jumlah[1] = 2; k.jumlah[2] = 0; k.jumlah[3] = 1;
+
+cek('rincian cuma memuat yang sudah diisi', k.rincianDipilih.map((r) => r.label), ['Beras Pandan Wangi', 'Telur Ayam 1kg']);
+cek('subtotal tiap baris dihitung', k.rincianDipilih.find((r) => r.id === 1).subtotal, 144000);
+cek('produk fluktuatif tanpa subtotal', k.rincianDipilih.find((r) => r.id === 3).subtotal, null);
+
+k.hapusPilihan(1);
+cek('bisa hapus satu baris dari ringkasan', k.rincianDipilih.map((r) => r.id), [3]);
+cek('banyakDipilih ikut turun setelah dihapus', k.banyakDipilih, 1);
 console.log(`\n  ${lulus} lulus, ${gagal} gagal`);
 process.exit(gagal ? 1 : 0);

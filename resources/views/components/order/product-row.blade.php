@@ -33,6 +33,7 @@
     x-init="daftar({
         id: {{ $product->id }},
         nama: {{ Illuminate\Support\Js::from(mb_strtolower($product->name)) }},
+        label: {{ Illuminate\Support\Js::from($product->name) }},
         kategori: {{ Illuminate\Support\Js::from($product->category) }},
         harga: {{ $product->is_fluctuating ? 'null' : (int) $product->sell_price }},
         awal: {{ (int) old('quantity.'.$product->id, 0) }},

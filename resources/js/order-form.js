@@ -15,6 +15,9 @@ Alpine.data('formPesan', () => ({
     kategori: 'semua',
     hanyaDipilih: false,
 
+    // Rincian pilihan di bilah ringkasan sedang dibuka atau tidak.
+    rincianTerbuka: false,
+
     // --- keadaan isian
     // jumlah: { idProduk: angka }, terhubung ke input lewat x-model
     jumlah: {},
@@ -30,9 +33,11 @@ Alpine.data('formPesan', () => ({
      * dirinya sendiri, jadi halaman induknya tidak perlu menyuntik satu blok
      * JSON besar berisi seluruh katalog.
      */
-    daftar({ id, nama, kategori, harga, awal }) {
+    daftar({ id, nama, label, kategori, harga, awal }) {
         this.harga[id] = harga;
-        this.katalog.push({ id, nama, kategori });
+        // nama versi huruf kecil dipakai buat mencocokkan pencarian, label
+        // versi aslinya dipakai waktu menampilkan rincian pilihan.
+        this.katalog.push({ id, nama, label, kategori });
 
         if (this.jumlah[id] === undefined) {
             // "awal" berisi nilai old() dari server. Kalau pengiriman ditolak
@@ -74,6 +79,33 @@ Alpine.data('formPesan', () => ({
      */
     adaIsinya(daftarProduk, kategori) {
         return daftarProduk.some((p) => this.cocok(p.nama, kategori, p.id));
+    },
+
+    /**
+     * Rincian apa saja yang sudah diisi, buat ditampilkan di bilah ringkasan.
+     *
+     * Ini BUKAN keranjang belanja. Di rapat, keranjang ditolak: alurnya isi
+     * jumlah langsung di barisnya, lalu lihat totalnya, lalu konfirmasi. Yang
+     * ditambahkan di sini cuma cara melihat kembali apa yang sudah diisi,
+     * tanpa harus menyaring daftarnya dulu.
+     */
+    get rincianDipilih() {
+        return this.katalog
+            .filter((p) => this.jumlah[p.id] > 0)
+            .map((p) => ({
+                id: p.id,
+                label: p.label,
+                jumlah: this.jumlah[p.id],
+                harga: this.harga[p.id],
+                subtotal: this.harga[p.id] === null || this.harga[p.id] === undefined
+                    ? null
+                    : this.jumlah[p.id] * this.harga[p.id],
+            }));
+    },
+
+    /** Kosongkan satu baris dari ringkasan, tanpa perlu mencarinya lagi. */
+    hapusPilihan(id) {
+        this.jumlah[id] = 0;
     },
 
     /** Berapa jenis produk yang jumlahnya sudah diisi. */
