@@ -37,7 +37,7 @@
     'identitas' => null,
 ])
 
-<div x-data="formPesan" class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<div x-data="formPesan" class="max-w-3xl lg:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
     <div class="mb-4">
         <h1 class="font-semibold text-gray-800 text-lg">Pesan Produk</h1>
         <p class="text-sm text-gray-400">{{ $keterangan }}</p>
@@ -75,6 +75,18 @@
                 <x-alert type="error" message="Ada produk yang jumlahnya melebihi stok. Cek keterangan merah di daftar produk di bawah." />
             @endif
 
+            {{--
+                Layar lebar dibagi dua kolom: produk di kiri, "Cara Terima
+                Barang" dan ringkasan di kanan yang menempel — jadi pilihan
+                antar/ambil tetap kelihatan sambil menggulir daftar produk.
+
+                Di HP tetap menumpuk seperti biasa. Sengaja TIDAK memakai
+                kotak produk bergulir sendiri: layar HP tidak menyisakan ruang
+                untuk itu, dan gulir di dalam gulir bikin jari sering salah
+                sasaran.
+            --}}
+            <div class="lg:grid lg:grid-cols-3 lg:gap-6 lg:items-start">
+                <div class="lg:col-span-2">
             @if ($productsByCategory->isNotEmpty())
                 <x-order.filter-bar :categories="$productsByCategory->keys()" />
             @endif
@@ -97,14 +109,19 @@
                     />
                 </div>
             </x-card>
-
-            @if ($productsByCategory->isNotEmpty())
-                <div class="mt-6">
-                    <x-order.delivery-picker :alamat-tersimpan="$alamatTersimpan" />
                 </div>
 
-                <x-order.summary-bar :batal="$batal" />
-            @endif
+                @if ($productsByCategory->isNotEmpty())
+                    {{-- Kolom kanan. lg:top-20 menyisakan ruang buat header yang
+                         juga menempel. max-h + overflow cuma jaga-jaga kalau isinya
+                         lebih tinggi dari layar, supaya bagian bawahnya tidak
+                         terpotong dan tak terjangkau. --}}
+                    <div class="mt-6 lg:mt-0 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto space-y-4">
+                        <x-order.delivery-picker :alamat-tersimpan="$alamatTersimpan" />
+                        <x-order.summary-bar :batal="$batal" />
+                    </div>
+                @endif
+            </div>
         </form>
     @endif
 </div>

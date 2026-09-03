@@ -179,3 +179,43 @@ test('invoice pesanan ambil sendiri tidak mencantumkan baris alamat', function (
     expect($teks)->toContain('Ambil di koperasi');
     expect($teks)->not->toContain('Alamat:');
 });
+
+test('halaman pesan pakai dua kolom di layar lebar, menumpuk di HP', function () {
+    // Di layar lebar, "Cara Terima Barang" dan ringkasan pindah ke kolom kanan
+    // yang menempel, supaya pilihan antar/ambil tetap kelihatan sambil
+    // menggulir daftar produk.
+    //
+    // Sengaja TIDAK memakai kotak produk yang bergulir sendiri: di layar HP
+    // bilah cari + cara terima + bilah ringkasan sudah menghabiskan hampir
+    // seluruh tinggi layar, jadi daftar produknya cuma kebagian satu baris.
+    // Semua penataan ini lewat kelas lg:, jadi di HP susunannya tidak berubah.
+    $anggota = App\Models\Member::create([
+        'member_code' => '0009 A', 'full_name' => 'Uji Tata Letak',
+        'whatsapp_number' => '628199999999', 'password' => 'anggota123', 'is_active' => true,
+    ]);
+
+    App\Models\OrderPeriod::create([
+        'label' => 'Periode Tata Letak', 'start_date' => now()->subDay(),
+        'end_date' => now()->addDay(), 'status' => 'open',
+    ]);
+
+    App\Models\Product::create([
+        'category' => 'Sembako', 'name' => 'Beras Uji', 'buy_price' => 1000,
+        'sell_price' => 1200, 'is_fluctuating' => false,
+        'has_stock_tracking' => false, 'is_active' => true,
+    ]);
+
+    $html = $this->actingAs($anggota, 'member')
+        ->get(route('member.orders.create'))
+        ->assertOk()
+        ->getContent();
+
+    expect($html)->toContain('lg:grid lg:grid-cols-3');
+    expect($html)->toContain('lg:col-span-2');
+    expect($html)->toContain('lg:sticky lg:top-20');
+
+    // Bilah ringkasan tetap menempel di dasar layar pada HP, dan baru berhenti
+    // menempel di layar lebar karena kolomnya sendiri yang menempel.
+    expect($html)->toContain('sticky bottom-0');
+    expect($html)->toContain('lg:static');
+});

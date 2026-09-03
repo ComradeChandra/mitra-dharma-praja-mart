@@ -16,7 +16,11 @@
 --}}
 @props(['batal'])
 
-<div class="sticky bottom-0 z-30 -mx-4 sm:mx-0 mt-6 border-t border-gray-200 bg-white/95 backdrop-blur-sm shadow-[0_-4px_12px_-6px_rgba(0,0,0,0.12)]">
+{{-- Di HP bilah ini menempel di dasar layar supaya tombol kirim selalu
+     terjangkau tanpa menggulir sampai ujung. Di layar lebar dia ikut masuk
+     kolom kanan bersama "Cara Terima Barang", jadi tidak perlu menempel
+     lagi — kolomnya sendiri yang menempel. --}}
+<div class="sticky bottom-0 z-30 -mx-4 sm:mx-0 mt-6 border-t border-gray-200 bg-white/95 backdrop-blur-sm shadow-[0_-4px_12px_-6px_rgba(0,0,0,0.12)] lg:static lg:mt-0 lg:mx-0 lg:rounded-xl lg:border lg:border-gray-100 lg:shadow-sm">
     <div class="px-4 sm:px-5 py-3 flex items-center justify-between gap-4">
         <div class="min-w-0">
             <p class="text-xs text-gray-500">
