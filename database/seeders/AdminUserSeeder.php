@@ -26,7 +26,7 @@ class AdminUserSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@mitradharma.test'],
             [
-                'name' => 'Admin Koperasi',
+                'name' => 'Pengurus Koperasi',
                 'password' => Hash::make('admin12345'),
                 'email_verified_at' => now(),
             ]
