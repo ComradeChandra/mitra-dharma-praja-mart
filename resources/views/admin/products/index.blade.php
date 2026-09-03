@@ -15,6 +15,22 @@
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
             <x-alert type="success" :message="session('success')" />
 
+
+            <div class="mb-4">
+
+                <x-admin.search-box
+
+                    :action="route('admin.products.index')"
+
+                    :nilai="$cari"
+
+                    placeholder="Cari nama atau kategori produk"
+
+                />
+
+            </div>
+
+
             <x-admin.table-card>
                 @if ($products->isNotEmpty())
                     <table class="min-w-full divide-y divide-gray-100">
@@ -75,10 +91,18 @@
                         </tbody>
                     </table>
                 @else
-                    <x-admin.empty-state
-                        title="Belum ada produk"
-                        description='Klik "+ Tambah Produk" buat mulai isi katalog.'
-                    />
+                    {{-- Lihat catatan yang sama di admin/members/index.blade.php --}}
+                    @if ($cari !== '')
+                        <x-admin.empty-state
+                            title="Produk tidak ditemukan"
+                            :description="'Tidak ada produk yang cocok dengan kata kunci '.$cari.'. Coba kata kunci lain, atau hapus pencariannya.'"
+                        />
+                    @else
+                        <x-admin.empty-state
+                            title="Belum ada produk"
+                            description='Klik "+ Tambah Produk" buat mulai isi katalog.'
+                        />
+                    @endif
                 @endif
             </x-admin.table-card>
 

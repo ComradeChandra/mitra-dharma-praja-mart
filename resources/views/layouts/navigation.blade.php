@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="relative bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 shadow-md sticky top-0 z-40">
+<nav x-data="{ open: false }" class="no-print relative bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 shadow-md sticky top-0 z-40">
     {{--
         Tekstur titik-titik halus — sengaja TANPA overflow-hidden di <nav>.
         `inset-0` di bawah ini udah otomatis pas di dalam batas navbar tanpa

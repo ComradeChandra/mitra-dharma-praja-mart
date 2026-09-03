@@ -58,9 +58,20 @@
 
    Semua yang tidak boleh ikut tercetak diberi class "no-print".
    -------------------------------------------------------------------------- */
+/* Kebalikan dari no-print: cuma muncul di kertas, tidak di layar. Dipakai
+   buat kop pada lembar rekap belanja — di layar sudah ada judul halaman,
+   jadi kalau ditampilkan juga malah dobel. */
+.print-only {
+    display: none;
+}
+
 @media print {
     .no-print {
         display: none !important;
+    }
+
+    .print-only {
+        display: block;
     }
 
     /* Latar gelap/gradien boros tinta dan bikin teks susah dibaca kalau

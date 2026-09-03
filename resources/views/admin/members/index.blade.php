@@ -15,6 +15,14 @@
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
             <x-alert type="success" :message="session('success')" />
 
+            <div class="mb-4">
+                <x-admin.search-box
+                    :action="route('admin.members.index')"
+                    :nilai="$cari"
+                    placeholder="Cari nama atau kode anggota"
+                />
+            </div>
+
             <x-admin.table-card>
                 @if ($members->isNotEmpty())
                     <table class="min-w-full divide-y divide-gray-100">
@@ -58,10 +66,20 @@
                         </tbody>
                     </table>
                 @else
-                    <x-admin.empty-state
-                        title="Belum ada data anggota"
-                        description='Klik "+ Tambah Anggota" buat mulai isi daftar anggota koperasi.'
-                    />
+                    {{-- Bedakan "memang belum ada isinya" dari "pencariannya
+                         tidak ketemu" — kalau disamakan, mencari nama yang salah
+                         ketik bikin daftar anggota seolah-olah kosong. --}}
+                    @if ($cari !== '')
+                        <x-admin.empty-state
+                            title="Anggota tidak ditemukan"
+                            :description="'Tidak ada anggota yang cocok dengan kata kunci '.$cari.'. Coba kata kunci lain, atau hapus pencariannya.'"
+                        />
+                    @else
+                        <x-admin.empty-state
+                            title="Belum ada data anggota"
+                            description='Klik "+ Tambah Anggota" buat mulai isi daftar anggota koperasi.'
+                        />
+                    @endif
                 @endif
             </x-admin.table-card>
 

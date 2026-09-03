@@ -49,6 +49,30 @@ class Member extends Authenticatable
     }
 
     /**
+     * Cari berdasarkan nama atau kode anggota.
+     *
+     * Kata kunci kosong diabaikan, jadi pemanggilnya tidak perlu menulis if
+     * sendiri. Pencocokannya pakai LIKE supaya mengetik sebagian nama tetap
+     * ketemu, dan tidak peduli huruf besar-kecil.
+     *
+     * Dibutuhkan karena anggotanya nanti sekitar 100 orang, terbagi lima
+     * halaman — mencari satu nama tanpa ini berarti membolak-balik halaman.
+     */
+    public function scopeCari(Builder $query, ?string $kata): Builder
+    {
+        $kata = trim((string) $kata);
+
+        if ($kata === '') {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($kata) {
+            $q->where('full_name', 'like', "%{$kata}%")
+                ->orWhere('member_code', 'like', "%{$kata}%");
+        });
+    }
+
+    /**
      * Relasi: satu anggota bisa punya banyak riwayat pesanan.
      * Dipakai juga sebagai dasar hitung profil belanja tahunan/SHU.
      */

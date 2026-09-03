@@ -26,8 +26,25 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6"
              x-data="{ tab: '{{ in_array(request('tab'), ['produk', 'opd', 'anggota'], true) ? request('tab') : 'produk' }}' }">
 
-            {{-- Tab switcher --}}
-            <div class="flex items-center gap-1 flex-wrap">
+            {{--
+                Kop lembar cetak. Cuma muncul di kertas (class print-only) —
+                di layar sudah ada judul halaman, kalau ditampilkan juga malah
+                dobel. Yang tercetak adalah tab yang sedang dibuka, karena tab
+                lain memang disembunyikan Alpine.
+            --}}
+            <div class="print-only mb-4 pb-3 border-b-2 border-gray-800">
+                <p class="font-bold">Koperasi Mitra Dharma Praja</p>
+                <p class="text-sm">Rekap Periode: {{ $orderPeriod->label }}</p>
+                <p class="text-sm">
+                    Rentang: {{ $orderPeriod->start_date->translatedFormat('d F Y') }}
+                    &ndash; {{ $orderPeriod->end_date->translatedFormat('d F Y') }}
+                </p>
+                <p class="text-xs text-gray-600 mt-1">Dicetak {{ now()->translatedFormat('d F Y, H:i') }}</p>
+            </div>
+
+            {{-- Tab switcher. Diberi no-print karena tombolnya tidak ada gunanya
+                 di kertas, dan daftar belanjanya jadi lebih lega. --}}
+            <div class="no-print flex items-center gap-1 flex-wrap">
                 @foreach ([
                     'produk' => 'Belanja Grosir',
                     'opd' => 'Distribusi per OPD',
@@ -42,6 +59,22 @@
                         {{ $label }}
                     </button>
                 @endforeach
+
+                {{--
+                    Daftar belanja ini dibawa ke grosir, jadi perlu bisa
+                    dicetak. Tombolnya memanggil dialog cetak bawaan browser,
+                    yang juga punya pilihan "Save as PDF".
+                --}}
+                <button
+                    type="button"
+                    onclick="window.print()"
+                    class="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 transition"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V4h12v5M6 18H4v-6h16v6h-2M8 14h8v6H8z" />
+                    </svg>
+                    Cetak
+                </button>
             </div>
 
             {{-- ========== TAB 1: Belanja grosir per produk ========== --}}

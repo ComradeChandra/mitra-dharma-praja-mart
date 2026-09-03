@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\StoreMemberRequest;
 use App\Http\Requests\Admin\UpdateMemberRequest;
 use App\Models\Member;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /**
@@ -20,11 +21,14 @@ class MemberController extends Controller
     /**
      * Tampilkan daftar semua anggota, diurutkan dari yang terbaru diinput.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $members = Member::latest()->paginate(20);
+        // Kata kunci dari kotak cari. Kalau kosong, scope cari() mengabaikannya.
+        $cari = $request->string('cari')->trim()->toString();
 
-        return view('admin.members.index', compact('members'));
+        $members = Member::cari($cari)->latest()->paginate(20)->withQueryString();
+
+        return view('admin.members.index', compact('members', 'cari'));
     }
 
     public function create(): View

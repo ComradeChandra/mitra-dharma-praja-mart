@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\UpdateProductRequest;
 use App\Models\Product;
 use App\Services\ImageStorageService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /**
@@ -22,11 +23,15 @@ class ProductController extends Controller
 {
     public function __construct(private ImageStorageService $imageStorage) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $products = Product::latest()->paginate(15);
+        // Scope cari() sudah dipakai katalog publik, dipakai ulang di sini
+        // supaya aturan pencocokannya cuma ada satu.
+        $cari = $request->string('cari')->trim()->toString();
 
-        return view('admin.products.index', compact('products'));
+        $products = Product::cari($cari)->latest()->paginate(15)->withQueryString();
+
+        return view('admin.products.index', compact('products', 'cari'));
     }
 
     public function create(): View

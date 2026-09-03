@@ -30,7 +30,7 @@
                 nyambung dan background di belakangnya tetap kelihatan sedikit.
             --}}
             @isset($header)
-                <header class="bg-gradient-to-r from-teal-50/80 via-white/80 to-emerald-50/80 backdrop-blur-sm border-b border-teal-100">
+                <header class="no-print bg-gradient-to-r from-teal-50/80 via-white/80 to-emerald-50/80 backdrop-blur-sm border-b border-teal-100">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>

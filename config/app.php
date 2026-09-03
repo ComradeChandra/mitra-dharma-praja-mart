@@ -83,7 +83,14 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    // Bahasa aplikasi: Indonesia. Yang paling terasa nama bulan dan hari —
+    // Carbon::translatedFormat() mengikuti nilai ini, jadi kalau dibiarkan
+    // 'en' tanggal di struk dan rekap tertulis "04 July", bukan "04 Juli".
+    //
+    // Pesan validasi bawaan Laravel tidak punya terjemahan Indonesia dan
+    // jatuh ke fallback_locale di bawah, jadi tetap berbahasa Inggris.
+    // Pesan yang penting sudah ditulis sendiri di tiap Form Request.
+    'locale' => env('APP_LOCALE', 'id'),
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
