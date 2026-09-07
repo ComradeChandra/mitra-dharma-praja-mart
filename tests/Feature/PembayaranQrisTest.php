@@ -265,14 +265,19 @@ test('anggota tidak bisa menandai lunas lewat jalur pengurus', function () {
     expect($this->pesanan->fresh()->payment_status)->toBe(PaymentStatus::Unpaid);
 });
 
-test('non-anggota membayar pesanan OPD-nya sendiri', function () {
+test('non-anggota membayar pesanan yang dia kirim sendiri', function () {
     $pesananOpd = Order::create([
         'order_period_id' => $this->pesanan->order_period_id, 'user_type' => UserType::NonMember,
         'non_member_name' => 'Rina', 'opd_id' => $this->opd->id,
         'whatsapp_number' => '628133333333', 'status' => OrderStatus::Verified, 'total_amount' => 50000,
     ]);
 
-    $this->withSession(['non_member_opd_id' => $this->opd->id])
+    // non_member_order_ids-nya ikut diisi: itu penanda "pesanan ini saya yang
+    // kirim". Kode akses OPD dipakai sekantor, jadi opd_id saja tidak cukup.
+    $this->withSession([
+        'non_member_opd_id' => $this->opd->id,
+        'non_member_order_ids' => [$pesananOpd->id],
+    ])
         ->post(route('non-member.orders.declare-paid', $pesananOpd))
         ->assertRedirect();
 

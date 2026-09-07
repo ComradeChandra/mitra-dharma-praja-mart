@@ -14,18 +14,19 @@ use App\Services\NonMemberSessionService;
 use App\Services\OrderService;
 use App\Services\WhatsAppInvoiceService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
-
-
 
 /**
  * Pemesanan oleh non-anggota. Alurnya mirip versi anggota, dengan dua beda:
  *
  * Nama dan nomor WA diketik manual di form, karena non-anggota tidak punya
- * akun yang menyimpan data itu. Dan tidak ada halaman riwayat pesanan, karena
- * kode akses OPD dipakai bersama sekantor sehingga tidak ada identitas
- * personal yang bisa dipakai memfilter "pesanan saya". Setelah kirim, pemesan
+ * akun yang menyimpan data itu. Dan tidak ada halaman riwayat pesanan lintas
+ * waktu, karena kode akses OPD dipakai bersama sekantor sehingga tidak ada
+ * identitas personal yang bisa dipakai memfilter "pesanan saya". Yang dipakai
+ * sesi berjalan, lihat pastikanPesanannya() di bawah. Setelah kirim, pemesan
  * langsung diarahkan ke detail pesanannya sebagai struk.
  */
 class OrderController extends Controller
@@ -76,23 +77,26 @@ class OrderController extends Controller
             $request->deliveryAddress(),
         );
 
+        // Dicatat ke sesi supaya orang ini bisa membukanya lagi. Kode akses
+        // OPD dipakai bersama sekantor, jadi opd_id saja tidak cukup buat
+        // menentukan siapa pemiliknya.
+        $this->sesiNonAnggota->catatPesanan($order->id);
+
         return redirect()
-            ->route('non-member.orders.show', $order)
+            ->to($this->tautanPesanan($order))
             ->with('success', 'Pesanan berhasil dikirim! Koperasi akan belanjakan barangnya setelah periode ditutup.');
     }
 
     /**
      * Detail pesanan, dipakai sebagai struk setelah kirim.
      *
-     * Otorisasinya per OPD, bukan per orang. Siapa pun yang masuk dengan kode
-     * akses OPD yang sama boleh melihat pesanan OPD itu, tapi tidak bisa
-     * melihat punya OPD lain.
+     * Yang boleh membuka cuma orang yang mengirim pesanan ini, lihat
+     * pastikanPesanannya().
      */
-    public function show(Order $order): View
+    public function show(Request $request, Order $order): View
     {
-        $opd = $this->opdSedangLogin();
-
-        abort_unless($order->opd_id === $opd->id, 403);
+        $this->klaimLewatTautan($request, $order);
+        $this->pastikanPesanannya($order);
 
         $order->load('orderItems.product', 'orderPeriod');
 
@@ -102,14 +106,11 @@ class OrderController extends Controller
     /**
      * Struk resmi pesanan, halaman tersendiri yang siap dicetak.
      *
-     * Otorisasinya sama dengan show(): cuma bisa dibuka dari sesi OPD yang
-     * memesan.
+     * Otorisasinya sama dengan show().
      */
     public function struk(Order $order): View
     {
-        $opd = $this->opdSedangLogin();
-
-        abort_unless($order->opd_id === $opd->id, 403);
+        $this->pastikanPesanannya($order);
 
         $order->load('orderItems.product', 'opdDepartment', 'orderPeriod');
 
@@ -120,7 +121,7 @@ class OrderController extends Controller
         return view('struk.show', [
             'order' => $order,
             'tautanWhatsApp' => $tautanWhatsApp,
-            'kembali' => route('non-member.orders.show', $order),
+            'kembali' => $this->tautanPesanan($order),
         ]);
     }
 
@@ -129,14 +130,12 @@ class OrderController extends Controller
      */
     public function declarePaid(DeclarePaymentRequest $request, Order $order): RedirectResponse
     {
-        $opd = $this->opdSedangLogin();
-
-        abort_unless($order->opd_id === $opd->id, 403);
+        $this->pastikanPesanannya($order);
 
         $this->orderService->declarePaid($order, $request->file('payment_proof'));
 
         return redirect()
-            ->route('non-member.orders.show', $order)
+            ->to($this->tautanPesanan($order))
             ->with('success', 'Terima kasih. Pembayaran akan dicocokkan pengurus dengan rekening koperasi.');
     }
 
@@ -149,14 +148,68 @@ class OrderController extends Controller
      */
     public function paymentProof(Order $order)
     {
-        $opd = $this->opdSedangLogin();
-
-        abort_unless($order->opd_id === $opd->id, 403);
+        $this->pastikanPesanannya($order);
 
         abort_unless($order->payment_proof_path, 404);
         abort_unless(Storage::disk('local')->exists($order->payment_proof_path), 404);
 
         return Storage::disk('local')->response($order->payment_proof_path);
+    }
+
+    /**
+     * Tautan permanen ke halaman pesanan, dibubuhi tanda tangan.
+     *
+     * KENAPA PERLU: sesi cuma bertahan 2 jam, sedangkan pembayaran baru
+     * dilakukan setelah pengurus mengirim invoice — bisa beberapa hari
+     * kemudian. Tanpa ini, non-anggota tidak punya jalan sah untuk membuka
+     * lagi pesanannya sendiri, karena dia tidak punya akun personal dan tidak
+     * punya halaman riwayat.
+     *
+     * Tanda tangannya dihitung dari URL + APP_KEY, jadi tidak bisa dikarang
+     * sendiri oleh rekan sekantor yang cuma menaikkan angka di URL. Sengaja
+     * tanpa masa berlaku, karena pesanan lama pun masih boleh dilihat pemesan.
+     */
+    private function tautanPesanan(Order $order): string
+    {
+        return URL::signedRoute('non-member.orders.show', $order);
+    }
+
+    /**
+     * Terima kembali pemesan yang datang lewat tautan bertanda tangan.
+     *
+     * Tanda tangan yang sah membuktikan tautannya memang dari kami, jadi
+     * pesanannya dicatat ulang ke sesi. Setelah itu tombol struk dan
+     * pembayaran di halaman tersebut ikut jalan tanpa perlu ikut ditandatangani
+     * satu per satu.
+     *
+     * OPD-nya tetap dicek: tautan yang bocor ke kantor lain tidak boleh bisa
+     * dipakai.
+     */
+    private function klaimLewatTautan(Request $request, Order $order): void
+    {
+        if ($request->hasValidSignature() && $order->opd_id === $this->opdSedangLogin()->id) {
+            $this->sesiNonAnggota->catatPesanan($order->id);
+        }
+    }
+
+    /**
+     * Pastikan pesanan ini memang dibuat orang yang sedang membuka halaman.
+     *
+     * Dua lapis. Pertama pesanannya harus milik OPD yang sedang masuk, kedua
+     * harus tercatat di sesi orang ini. Lapis kedua yang penting: kode akses
+     * OPD dipakai bersama sekantor, jadi tanpa itu siapa pun yang punya kode
+     * kantor bisa membuka pesanan rekannya cuma dengan menaikkan angka di URL,
+     * termasuk bukti transfer yang memuat nomor rekening.
+     *
+     * Non-anggota memang tidak punya akun personal, dan itu keputusan yang
+     * sudah disetujui, jadi yang bisa dipakai membatasi cuma sesinya.
+     */
+    private function pastikanPesanannya(Order $order): void
+    {
+        $opd = $this->opdSedangLogin();
+
+        abort_unless($order->opd_id === $opd->id, 403);
+        abort_unless($this->sesiNonAnggota->pesanannya($order->id), 403);
     }
 
     /**
