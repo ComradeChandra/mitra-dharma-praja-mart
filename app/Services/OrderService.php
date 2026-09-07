@@ -152,7 +152,11 @@ class OrderService
             'paid_declared_at' => now(),
             // Bukti transfer opsional. Yang melampirkan memudahkan pengurus
             // mencocokkan; yang tidak, tetap dicek lewat mutasi.
-            'payment_proof_path' => $this->imageStorage->store($bukti, 'payment-proofs'),
+            // Disk 'local', BUKAN 'public'. Bukti transfer memuat nama
+            // pemilik rekening dan nomor rekening, jadi berkasnya tidak boleh
+            // bisa dibuka siapa pun yang kebetulan punya URL-nya. Disajikan
+            // lewat rute yang memeriksa izin dulu.
+            'payment_proof_path' => $this->imageStorage->store($bukti, 'payment-proofs', 'local'),
         ]);
 
         return $order;

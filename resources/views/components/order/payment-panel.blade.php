@@ -12,7 +12,7 @@
     - order  : model Order
     - action : URL tujuan tombol "Saya sudah bayar"
 --}}
-@props(['order', 'action'])
+@props(['order', 'action', 'buktiUrl' => null])
 
 @php
     $status = $order->payment_status;
@@ -66,7 +66,7 @@
             {{-- Bukti yang tadi diunggah ditampilkan kembali, supaya pemesan
                  bisa memastikan yang terkirim memang berkas yang benar. --}}
             @if ($order->payment_proof_path)
-                <a href="{{ \Illuminate\Support\Facades\Storage::url($order->payment_proof_path) }}"
+                <a href="{{ $buktiUrl }}"
                    target="_blank" rel="noopener"
                    class="mt-3 inline-flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-800">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">

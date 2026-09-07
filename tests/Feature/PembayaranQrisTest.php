@@ -103,7 +103,11 @@ test('setelah menyatakan bayar, QRIS tidak ditampilkan lagi', function () {
         ->assertDontSee('Nominal yang dibayar');
 });
 
-test('bukti transfer boleh dilampirkan dan tersimpan', function () {
+test('bukti transfer disimpan di disk privat, bukan disk publik', function () {
+    // Bukti transfer memuat nama pemilik rekening dan nomor rekening. Kalau
+    // disimpan di disk publik, siapa pun yang punya URL-nya bisa membukanya
+    // tanpa login. Sempat begitu, lalu dipindah ke disk 'local'.
+    Storage::fake('local');
     Storage::fake('public');
 
     $this->actingAs($this->anggota, 'member')
@@ -114,7 +118,53 @@ test('bukti transfer boleh dilampirkan dan tersimpan', function () {
     $this->pesanan->refresh();
 
     expect($this->pesanan->payment_proof_path)->not->toBeNull();
-    Storage::disk('public')->assertExists($this->pesanan->payment_proof_path);
+    Storage::disk('local')->assertExists($this->pesanan->payment_proof_path);
+    Storage::disk('public')->assertMissing($this->pesanan->payment_proof_path);
+});
+
+test('pemilik pesanan bisa membuka bukti transfernya sendiri', function () {
+    Storage::fake('local');
+
+    $this->actingAs($this->anggota, 'member')
+        ->post(route('member.orders.declare-paid', $this->pesanan), [
+            'payment_proof' => UploadedFile::fake()->image('bukti.jpg'),
+        ]);
+
+    $this->actingAs($this->anggota, 'member')
+        ->get(route('member.orders.payment-proof', $this->pesanan))
+        ->assertOk();
+});
+
+test('anggota lain tidak bisa membuka bukti transfer orang', function () {
+    Storage::fake('local');
+
+    $this->actingAs($this->anggota, 'member')
+        ->post(route('member.orders.declare-paid', $this->pesanan), [
+            'payment_proof' => UploadedFile::fake()->image('bukti.jpg'),
+        ]);
+
+    $this->actingAs($this->anggotaLain, 'member')
+        ->get(route('member.orders.payment-proof', $this->pesanan))
+        ->assertForbidden();
+});
+
+test('pengurus bisa membuka bukti transfer pesanan mana pun', function () {
+    Storage::fake('local');
+
+    $this->actingAs($this->anggota, 'member')
+        ->post(route('member.orders.declare-paid', $this->pesanan), [
+            'payment_proof' => UploadedFile::fake()->image('bukti.jpg'),
+        ]);
+
+    $this->actingAs($this->admin, 'web')
+        ->get(route('admin.orders.payment-proof', $this->pesanan))
+        ->assertOk();
+});
+
+test('pesanan tanpa bukti transfer mengembalikan 404', function () {
+    $this->actingAs($this->anggota, 'member')
+        ->get(route('member.orders.payment-proof', $this->pesanan))
+        ->assertNotFound();
 });
 
 test('bukti transfer boleh dikosongkan', function () {

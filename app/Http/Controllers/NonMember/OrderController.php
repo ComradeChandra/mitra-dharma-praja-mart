@@ -4,8 +4,8 @@ namespace App\Http\Controllers\NonMember;
 
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\NonMember\StoreOrderRequest;
 use App\Http\Requests\DeclarePaymentRequest;
+use App\Http\Requests\NonMember\StoreOrderRequest;
 use App\Models\OpdDepartment;
 use App\Models\Order;
 use App\Models\OrderPeriod;
@@ -14,7 +14,10 @@ use App\Services\NonMemberSessionService;
 use App\Services\OrderService;
 use App\Services\WhatsAppInvoiceService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+
+
 
 /**
  * Pemesanan oleh non-anggota. Alurnya mirip versi anggota, dengan dua beda:
@@ -135,6 +138,25 @@ class OrderController extends Controller
         return redirect()
             ->route('non-member.orders.show', $order)
             ->with('success', 'Terima kasih. Pembayaran akan dicocokkan pengurus dengan rekening koperasi.');
+    }
+
+    /**
+     * Sajikan bukti transfer yang diunggah pemesan.
+     *
+     * Berkasnya disimpan di disk privat, jadi tidak bisa dibuka langsung lewat
+     * URL. Isinya data rekening orang, dan sebelumnya sempat tersimpan di disk
+     * publik sehingga siapa pun yang punya tautannya bisa membukanya.
+     */
+    public function paymentProof(Order $order)
+    {
+        $opd = $this->opdSedangLogin();
+
+        abort_unless($order->opd_id === $opd->id, 403);
+
+        abort_unless($order->payment_proof_path, 404);
+        abort_unless(Storage::disk('local')->exists($order->payment_proof_path), 404);
+
+        return Storage::disk('local')->response($order->payment_proof_path);
     }
 
     /**

@@ -74,7 +74,7 @@
         </div>
 
         <div class="mt-6">
-            <x-order.payment-panel :order="$order" :action="route('non-member.orders.declare-paid', $order)" />
+            <x-order.payment-panel :order="$order" :action="route('non-member.orders.declare-paid', $order)" :bukti-url="route('non-member.orders.payment-proof', $order)" />
         </div>
 
         <p class="mt-4 text-xs text-gray-400 text-center">

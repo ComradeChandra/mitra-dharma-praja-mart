@@ -12,7 +12,9 @@ use App\Services\WhatsAppInvoiceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+
 
 /**
  * Sisi admin dari pemesanan (Modul 3, 5 & 7 di CLAUDE.md), admin melihat
@@ -37,21 +39,15 @@ class OrderController extends Controller
         $status = $request->query('status');
         $statusBayar = $request->query('bayar');
 
-        $query = Order::with('member', 'orderPeriod')->latest();
-
-        if ($status && OrderStatus::tryFrom($status)) {
-            $query->where('status', $status);
-        }
-
-        // Penyaringan status bayar terpisah dari status pesanan, karena
-        // keduanya bergerak sendiri-sendiri. Yang paling dipakai pengurus:
-        // menyaring "menunggu konfirmasi" buat dicocokkan ke mutasi rekening.
-        if ($statusBayar && PaymentStatus::tryFrom($statusBayar)) {
-            $query->where('payment_status', $statusBayar);
-        }
-
+        // Dua penyaring terpisah karena status pesanan dan status pembayaran
+        // bergerak sendiri-sendiri. Aturan penyaringannya ada di scope model.
         /** @var LengthAwarePaginator $orders */
-        $orders = $query->paginate(15)->withQueryString();
+        $orders = Order::with('member', 'orderPeriod')
+            ->statusPesanan($status)
+            ->statusPembayaran($statusBayar)
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
 
         return view('admin.orders.index', compact('orders', 'status', 'statusBayar'));
     }
@@ -110,6 +106,23 @@ class OrderController extends Controller
         return redirect()
             ->route('admin.orders.show', $order)
             ->with('success', 'Pembayaran ditandai lunas.');
+    }
+
+    /**
+     * Sajikan bukti transfer yang diunggah pemesan.
+     *
+     * Berkasnya disimpan di disk privat, jadi tidak bisa dibuka langsung lewat
+     * URL. Isinya data rekening orang, dan sebelumnya sempat tersimpan di disk
+     * publik sehingga siapa pun yang punya tautannya bisa membukanya.
+     */
+    public function paymentProof(Order $order)
+    {
+        // Pengurus boleh membuka bukti pesanan mana pun.
+
+        abort_unless($order->payment_proof_path, 404);
+        abort_unless(Storage::disk('local')->exists($order->payment_proof_path), 404);
+
+        return Storage::disk('local')->response($order->payment_proof_path);
     }
 
     /**

@@ -103,7 +103,7 @@
              di CLAUDE.md. Panelnya sendiri yang mengatur apa yang tampil
              sesuai status bayarnya. --}}
         <div class="mt-6">
-            <x-order.payment-panel :order="$order" :action="route('member.orders.declare-paid', $order)" />
+            <x-order.payment-panel :order="$order" :action="route('member.orders.declare-paid', $order)" :bukti-url="route('member.orders.payment-proof', $order)" />
         </div>
     </div>
 </x-layouts.member>

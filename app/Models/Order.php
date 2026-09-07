@@ -7,6 +7,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\UserType;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -80,6 +81,30 @@ class Order extends Model
     {
         return sprintf('MDP-%s-%04d', $this->created_at->format('ym'), $this->id);
     }
+    /**
+     * Saring per status pesanan. Nilai yang tidak dikenal diabaikan, jadi
+     * pemanggilnya tidak perlu menulis if sendiri (pola yang sama dengan
+     * Product::scopeCari).
+     */
+    public function scopeStatusPesanan(Builder $query, ?string $status): Builder
+    {
+        return $status && OrderStatus::tryFrom($status)
+            ? $query->where('status', $status)
+            : $query;
+    }
+
+    /**
+     * Saring per status pembayaran. Terpisah dari status pesanan karena
+     * keduanya bergerak sendiri-sendiri: pesanan bisa sudah terverifikasi tapi
+     * belum dibayar.
+     */
+    public function scopeStatusPembayaran(Builder $query, ?string $status): Builder
+    {
+        return $status && PaymentStatus::tryFrom($status)
+            ? $query->where('payment_status', $status)
+            : $query;
+    }
+
     /**
      * Relasi: pesanan ini termasuk periode pemesanan yang mana.
      */

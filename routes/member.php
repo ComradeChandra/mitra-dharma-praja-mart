@@ -44,6 +44,9 @@ Route::prefix('anggota')->name('member.')->group(function () {
         Route::get('pesanan-saya/{order}/struk', [OrderController::class, 'struk'])->name('orders.struk');
         // Pemesan menyatakan sudah bayar lewat QRIS. Lunasnya tetap ditentukan pengurus.
         Route::post('pesanan-saya/{order}/bayar', [OrderController::class, 'declarePaid'])->name('orders.declare-paid');
+        // Bukti transfer disimpan di disk privat, jadi disajikan lewat rute ini
+        // yang memeriksa pesanannya memang milik anggota yang sedang masuk.
+        Route::get('pesanan-saya/{order}/bukti-bayar', [OrderController::class, 'paymentProof'])->name('orders.payment-proof');
 
         // Profil anggota, ubah foto, nomor WhatsApp, alamat, & password
         // sendiri. Nama & kode anggota tidak bisa diubah di sini (tetap

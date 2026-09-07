@@ -180,7 +180,7 @@
 
                         {{-- Bukti transfer, kalau pemesan melampirkannya --}}
                         @if ($order->payment_proof_path)
-                            <a href="{{ \Illuminate\Support\Facades\Storage::url($order->payment_proof_path) }}"
+                            <a href="{{ route('admin.orders.payment-proof', $order) }}"
                                target="_blank" rel="noopener"
                                class="mt-3 inline-flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-800">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
