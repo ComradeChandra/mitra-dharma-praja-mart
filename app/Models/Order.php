@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\DeliveryMethod;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\UserType;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +29,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'delivery_address',
     'status',
     'total_amount',
+    'payment_status',
+    'payment_proof_path',
+    'paid_declared_at',
+    'payment_confirmed_at',
 ])]
 class Order extends Model
 {
@@ -44,6 +49,7 @@ class Order extends Model
      */
     protected $attributes = [
         'delivery_method' => DeliveryMethod::Ambil->value,
+        'payment_status' => PaymentStatus::Unpaid->value,
     ];
 
     /**
@@ -55,6 +61,9 @@ class Order extends Model
         return [
             'user_type' => UserType::class,
             'status' => OrderStatus::class,
+            'payment_status' => PaymentStatus::class,
+            'paid_declared_at' => 'datetime',
+            'payment_confirmed_at' => 'datetime',
             'delivery_method' => DeliveryMethod::class,
             'total_amount' => 'decimal:2',
         ];

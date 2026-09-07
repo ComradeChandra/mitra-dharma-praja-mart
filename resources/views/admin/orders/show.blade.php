@@ -149,6 +149,61 @@
                         <pre class="whitespace-pre-wrap text-sm text-gray-700 bg-gray-50 rounded-lg p-4 border border-gray-100 font-sans">{{ $invoiceText }}</pre>
                     </div>
 
+                    {{--
+                        Status pembayaran QRIS. Terpisah dari status pesanan karena
+                        dua hal berbeda: yang satu perjalanan pesanan, yang satu
+                        perjalanan uang. Pesanan bisa terverifikasi tapi belum dibayar.
+
+                        QRIS koperasi itu QRIS statis, jadi tidak ada webhook yang
+                        memberi tahu aplikasi kalau ada yang bayar. Pengurus yang
+                        mencocokkan ke mutasi rekening lalu menandai lunas di sini.
+                    --}}
+                    <div class="px-5 py-4 border-t border-gray-100">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-gray-700">Pembayaran</p>
+                                @if ($order->paid_declared_at)
+                                    <p class="text-xs text-gray-400 mt-0.5">
+                                        Pemesan menyatakan bayar {{ $order->paid_declared_at->translatedFormat('d M Y, H:i') }}
+                                    </p>
+                                @endif
+                                @if ($order->payment_confirmed_at)
+                                    <p class="text-xs text-gray-400 mt-0.5">
+                                        Dikonfirmasi {{ $order->payment_confirmed_at->translatedFormat('d M Y, H:i') }}
+                                    </p>
+                                @endif
+                            </div>
+                            <x-admin.badge :color="$order->payment_status->color()">
+                                {{ $order->payment_status->label() }}
+                            </x-admin.badge>
+                        </div>
+
+                        {{-- Bukti transfer, kalau pemesan melampirkannya --}}
+                        @if ($order->payment_proof_path)
+                            <a href="{{ \Illuminate\Support\Facades\Storage::url($order->payment_proof_path) }}"
+                               target="_blank" rel="noopener"
+                               class="mt-3 inline-flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V7.5A1.5 1.5 0 0 1 4.5 6h15A1.5 1.5 0 0 1 21 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 16.5Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m3 15 4.5-4.5L12 15l3-3 6 6" />
+                                </svg>
+                                Lihat bukti transfer
+                            </a>
+                        @endif
+
+                        @if ($order->payment_status !== \App\Enums\PaymentStatus::Paid && $order->total_amount !== null)
+                            <form method="POST" action="{{ route('admin.orders.confirm-payment', $order) }}" class="mt-3">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit"
+                                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition">
+                                    Konfirmasi Lunas
+                                </button>
+                                <span class="ml-2 text-xs text-gray-400">Tandai setelah uangnya kelihatan di rekening koperasi.</span>
+                            </form>
+                        @endif
+                    </div>
+
                     <div class="flex flex-wrap items-center gap-3 px-5 py-4 bg-gray-50 border-t border-gray-100">
                         {{-- Struk resmi buat dicetak atau disimpan jadi PDF, mis.
                              kalau pemesan minta bukti tertulis. --}}

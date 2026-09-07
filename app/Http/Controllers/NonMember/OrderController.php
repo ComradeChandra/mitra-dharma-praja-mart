@@ -5,6 +5,7 @@ namespace App\Http\Controllers\NonMember;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\NonMember\StoreOrderRequest;
+use App\Http\Requests\DeclarePaymentRequest;
 use App\Models\OpdDepartment;
 use App\Models\Order;
 use App\Models\OrderPeriod;
@@ -118,6 +119,22 @@ class OrderController extends Controller
             'tautanWhatsApp' => $tautanWhatsApp,
             'kembali' => route('non-member.orders.show', $order),
         ]);
+    }
+
+    /**
+     * Non-anggota menyatakan sudah membayar lewat QRIS.
+     */
+    public function declarePaid(DeclarePaymentRequest $request, Order $order): RedirectResponse
+    {
+        $opd = $this->opdSedangLogin();
+
+        abort_unless($order->opd_id === $opd->id, 403);
+
+        $this->orderService->declarePaid($order, $request->file('payment_proof'));
+
+        return redirect()
+            ->route('non-member.orders.show', $order)
+            ->with('success', 'Terima kasih. Pembayaran akan dicocokkan pengurus dengan rekening koperasi.');
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Member;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Member\StoreOrderRequest;
+use App\Http\Requests\DeclarePaymentRequest;
 use App\Models\Order;
 use App\Models\OrderPeriod;
 use App\Models\Product;
@@ -139,6 +140,25 @@ class OrderController extends Controller
             'tautanWhatsApp' => $tautanWhatsApp,
             'kembali' => route('member.orders.show', $order),
         ]);
+    }
+
+    /**
+     * Anggota menyatakan sudah membayar lewat QRIS.
+     *
+     * Ini pernyataan, bukan bukti uang sudah masuk. Yang menentukan lunas
+     * tetap pengurus setelah mencocokkan ke rekening.
+     */
+    public function declarePaid(DeclarePaymentRequest $request, Order $order): RedirectResponse
+    {
+        $member = Auth::guard('member')->user();
+
+        abort_unless($order->member_id === $member->id, 403);
+
+        $this->orderService->declarePaid($order, $request->file('payment_proof'));
+
+        return redirect()
+            ->route('member.orders.show', $order)
+            ->with('success', 'Terima kasih. Pembayaranmu akan dicocokkan pengurus dengan rekening koperasi.');
     }
 
     /**

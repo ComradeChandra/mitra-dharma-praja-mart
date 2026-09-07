@@ -73,6 +73,10 @@
             </a>
         </div>
 
+        <div class="mt-6">
+            <x-order.payment-panel :order="$order" :action="route('non-member.orders.declare-paid', $order)" />
+        </div>
+
         <p class="mt-4 text-xs text-gray-400 text-center">
             Simpan halaman ini sebagai bukti pesanan. Invoice lengkap akan dikirim admin
             lewat WhatsApp ke nomor yang kamu daftarkan.

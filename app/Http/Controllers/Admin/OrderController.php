@@ -92,6 +92,18 @@ class OrderController extends Controller
     }
 
     /**
+     * Pengurus mencocokkan ke rekening lalu menandai lunas.
+     */
+    public function confirmPayment(Order $order): RedirectResponse
+    {
+        $this->orderService->confirmPayment($order);
+
+        return redirect()
+            ->route('admin.orders.show', $order)
+            ->with('success', 'Pembayaran ditandai lunas.');
+    }
+
+    /**
      * Kunci harga produk fluktuatif yang masih kosong di pesanan ini, lalu
      * hitung ulang totalnya (lihat OrderService::verifyOrder()).
      */

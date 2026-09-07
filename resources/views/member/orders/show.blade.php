@@ -98,5 +98,12 @@
                 </div>
             @endif
         </x-card>
+
+        {{-- Pembayaran QRIS. Diminta Pak Emir 3 Sep 2026, lihat Lampiran C
+             di CLAUDE.md. Panelnya sendiri yang mengatur apa yang tampil
+             sesuai status bayarnya. --}}
+        <div class="mt-6">
+            <x-order.payment-panel :order="$order" :action="route('member.orders.declare-paid', $order)" />
+        </div>
     </div>
 </x-layouts.member>

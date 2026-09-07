@@ -4,12 +4,14 @@ namespace App\Services;
 
 use App\Enums\DeliveryMethod;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\UserType;
 use App\Models\Member;
 use App\Models\OpdDepartment;
 use App\Models\Order;
 use App\Models\OrderPeriod;
 use App\Models\Product;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -23,6 +25,15 @@ use Illuminate\Validation\ValidationException;
  */
 class OrderService
 {
+    /**
+     * Penyimpan gambar dipakai buat bukti transfer yang dilampirkan pemesan.
+     * Dipinjam dari service yang sama yang dipakai foto produk & foto profil,
+     * jadi aturan penyimpanannya seragam.
+     */
+    public function __construct(
+        private ImageStorageService $imageStorage,
+    ) {}
+
     /**
      * Buat pesanan baru dari anggota yang sedang login.
      *
@@ -119,6 +130,52 @@ class OrderService
         });
     }
 
+
+    /**
+     * Pemesan menyatakan sudah membayar lewat QRIS.
+     *
+     * Ini PERNYATAAN, bukan bukti uang sudah masuk. QRIS koperasi itu QRIS
+     * statis, jadi tidak ada webhook yang memberi tahu aplikasi. Yang
+     * menentukan lunas tetap pengurus setelah mencocokkan ke mutasi rekening
+     * (lihat confirmPayment di bawah).
+     *
+     * Cuma boleh kalau totalnya sudah final. Pesanan yang masih memuat produk
+     * fluktuatif belum punya angka yang bisa dibayar.
+     */
+    public function declarePaid(Order $order, ?UploadedFile $bukti = null): Order
+    {
+        abort_if($order->total_amount === null, 422, 'Nominalnya belum final, pengurus belum mengunci harga.');
+        abort_if($order->payment_status !== PaymentStatus::Unpaid, 422, 'Pembayaran pesanan ini sudah pernah dinyatakan.');
+
+        $order->update([
+            'payment_status' => PaymentStatus::AwaitingConfirmation,
+            'paid_declared_at' => now(),
+            // Bukti transfer opsional. Yang melampirkan memudahkan pengurus
+            // mencocokkan; yang tidak, tetap dicek lewat mutasi.
+            'payment_proof_path' => $this->imageStorage->store($bukti, 'payment-proofs'),
+        ]);
+
+        return $order;
+    }
+
+    /**
+     * Pengurus mencocokkan ke rekening lalu menyatakan lunas.
+     *
+     * Sengaja tidak menuntut pemesan menyatakan dulu: kadang orang membayar
+     * tanpa menekan tombol apa pun, dan pengurus tetap harus bisa menandainya
+     * setelah melihat uangnya masuk.
+     */
+    public function confirmPayment(Order $order): Order
+    {
+        abort_if($order->total_amount === null, 422, 'Nominalnya belum final, pengurus belum mengunci harga.');
+
+        $order->update([
+            'payment_status' => PaymentStatus::Paid,
+            'payment_confirmed_at' => now(),
+        ]);
+
+        return $order;
+    }
     /**
      * Tandai invoice sudah dikirim. Ini konfirmasi manual dari admin setelah
      * dia menekan kirim di WhatsApp-nya sendiri; sistem tidak punya cara tahu
