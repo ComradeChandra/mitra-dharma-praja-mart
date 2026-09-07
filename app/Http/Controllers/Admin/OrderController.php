@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\VerifyOrderRequest;
 use App\Models\Order;
@@ -34,6 +35,7 @@ class OrderController extends Controller
     public function index(Request $request): View
     {
         $status = $request->query('status');
+        $statusBayar = $request->query('bayar');
 
         $query = Order::with('member', 'orderPeriod')->latest();
 
@@ -41,10 +43,17 @@ class OrderController extends Controller
             $query->where('status', $status);
         }
 
+        // Penyaringan status bayar terpisah dari status pesanan, karena
+        // keduanya bergerak sendiri-sendiri. Yang paling dipakai pengurus:
+        // menyaring "menunggu konfirmasi" buat dicocokkan ke mutasi rekening.
+        if ($statusBayar && PaymentStatus::tryFrom($statusBayar)) {
+            $query->where('payment_status', $statusBayar);
+        }
+
         /** @var LengthAwarePaginator $orders */
         $orders = $query->paginate(15)->withQueryString();
 
-        return view('admin.orders.index', compact('orders', 'status'));
+        return view('admin.orders.index', compact('orders', 'status', 'statusBayar'));
     }
 
     /**

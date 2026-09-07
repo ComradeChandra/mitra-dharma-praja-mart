@@ -62,6 +62,20 @@
                 @endif
                 Pengurus akan mencocokkannya dengan rekening koperasi.
             </p>
+
+            {{-- Bukti yang tadi diunggah ditampilkan kembali, supaya pemesan
+                 bisa memastikan yang terkirim memang berkas yang benar. --}}
+            @if ($order->payment_proof_path)
+                <a href="{{ \Illuminate\Support\Facades\Storage::url($order->payment_proof_path) }}"
+                   target="_blank" rel="noopener"
+                   class="mt-3 inline-flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V7.5A1.5 1.5 0 0 1 4.5 6h15A1.5 1.5 0 0 1 21 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 16.5Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m3 15 4.5-4.5L12 15l3-3 6 6" />
+                    </svg>
+                    Lihat bukti yang kamu kirim
+                </a>
+            @endif
         </div>
 
     @else

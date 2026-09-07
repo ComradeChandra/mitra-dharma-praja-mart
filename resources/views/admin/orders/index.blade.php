@@ -22,9 +22,30 @@
                     {{-- animate-[pop-in_...] = tombol tab muncul gantian berurutan
                          pas halaman kebuka, lihat @keyframes di resources/css/app.css --}}
                     <a
-                        href="{{ route('admin.orders.index', $value ? ['status' => $value] : []) }}"
+                        href="{{ route('admin.orders.index', array_filter(['status' => $value, 'bayar' => $statusBayar])) }}"
                         class="px-3 py-1.5 rounded-lg text-sm font-medium transition animate-[pop-in_0.3s_ease-out_backwards] {{ $status === $value ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-100' }}"
                         style="animation-delay: {{ $loop->index * 40 }}ms"
+                    >
+                        {{ $label }}
+                    </a>
+                @endforeach
+            </div>
+
+            {{-- Bilah kedua: status pembayaran. Dipisah dari status pesanan
+                 karena keduanya bergerak sendiri-sendiri, dan pengurus sering
+                 perlu menyaring "menunggu konfirmasi" saja buat dicocokkan
+                 ke mutasi rekening. Filter yang satu tidak menghapus yang lain. --}}
+            <div class="flex items-center gap-1 mb-4 flex-wrap">
+                <span class="text-xs text-gray-400 mr-1">Pembayaran:</span>
+                @foreach ([
+                    null => 'Semua',
+                    \App\Enums\PaymentStatus::Unpaid->value => 'Belum Dibayar',
+                    \App\Enums\PaymentStatus::AwaitingConfirmation->value => 'Menunggu Konfirmasi',
+                    \App\Enums\PaymentStatus::Paid->value => 'Lunas',
+                ] as $value => $label)
+                    <a
+                        href="{{ route('admin.orders.index', array_filter(['status' => $status, 'bayar' => $value])) }}"
+                        class="px-3 py-1.5 rounded-lg text-sm font-medium transition {{ $statusBayar === $value ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-gray-100' }}"
                     >
                         {{ $label }}
                     </a>
@@ -41,6 +62,7 @@
                                 <x-admin.th>Tanggal</x-admin.th>
                                 <x-admin.th>Total</x-admin.th>
                                 <x-admin.th>Status</x-admin.th>
+                                <x-admin.th>Bayar</x-admin.th>
                                 <th class="px-6 py-3"></th>
                             </tr>
                         </thead>
@@ -59,6 +81,16 @@
                                         <x-admin.badge :color="$order->status->badgeColor()">
                                             {{ $order->status->label() }}
                                         </x-admin.badge>
+                                    </td>
+                                    <td class="px-6 py-3 whitespace-nowrap text-sm">
+                                        <x-admin.badge :color="$order->payment_status->color()">
+                                            {{ $order->payment_status->label() }}
+                                        </x-admin.badge>
+                                        {{-- Penanda kecil kalau pemesan melampirkan bukti transfer,
+                                             biar pengurus tahu mana yang lebih cepat dicocokkan --}}
+                                        @if ($order->payment_proof_path)
+                                            <span class="block text-[11px] text-gray-400 mt-0.5">ada bukti</span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-3 whitespace-nowrap text-right text-sm">
                                         <a href="{{ route('admin.orders.show', $order) }}" class="text-indigo-600 hover:text-indigo-800 font-medium">Lihat →</a>

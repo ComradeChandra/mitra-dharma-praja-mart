@@ -25,9 +25,16 @@
                             @endif
                         </p>
                     </div>
-                    <x-admin.badge :color="$order->status->badgeColor()">
-                        {{ $order->status->label() }}
-                    </x-admin.badge>
+                    {{-- Dua status ditampilkan berdampingan: perjalanan pesanan
+                         dan perjalanan uang. Keduanya bergerak sendiri-sendiri. --}}
+                    <div class="flex flex-col items-end gap-1 shrink-0">
+                        <x-admin.badge :color="$order->status->badgeColor()">
+                            {{ $order->status->label() }}
+                        </x-admin.badge>
+                        <x-admin.badge :color="$order->payment_status->color()">
+                            {{ $order->payment_status->label() }}
+                        </x-admin.badge>
+                    </div>
                 </a>
             @empty
                 <x-admin.empty-state
