@@ -103,16 +103,33 @@
 
     {{-- Status & catatan penutup --}}
     <footer class="mt-5 pt-4 border-t border-gray-300 text-xs text-gray-600 space-y-2">
-        <p>
-            <span class="text-gray-500">Status:</span>
-            <span class="font-semibold text-gray-900">{{ $order->status->label() }}</span>
-        </p>
+        <div class="flex flex-wrap gap-x-6 gap-y-1">
+            <p>
+                <span class="text-gray-500">Status pesanan:</span>
+                <span class="font-semibold text-gray-900">{{ $order->status->label() }}</span>
+            </p>
+
+            {{-- Status bayar ikut dicetak. Sebelum ada pembayaran QRIS, struk
+                 tidak menyebut soal uang sama sekali, jadi anggota yang sudah
+                 lunas mencetak lembar yang terlihat seperti belum bayar. --}}
+            <p>
+                <span class="text-gray-500">Pembayaran:</span>
+                <span class="font-semibold text-gray-900">{{ $order->payment_status->label() }}</span>
+                @if ($order->payment_confirmed_at)
+                    <span class="text-gray-500">({{ $order->payment_confirmed_at->translatedFormat('d M Y') }})</span>
+                @endif
+            </p>
+        </div>
 
         {{-- Ditegaskan supaya tidak dikira sudah lunas. Ini pre-order: barang
              dibelanjakan setelah pesanan terkumpul, tagihan menyusul. --}}
         <p class="leading-relaxed">
             <span class="font-semibold">Catatan:</span>
-            Struk ini adalah bukti <span class="font-semibold">pemesanan</span>, bukan bukti pembayaran.
+            @if ($order->payment_status === App\Enums\PaymentStatus::Paid)
+                Pembayaran pesanan ini sudah dicocokkan pengurus dengan rekening koperasi.
+            @else
+                Struk ini adalah bukti <span class="font-semibold">pemesanan</span>, bukan bukti pembayaran.
+            @endif
             Barang dibelanjakan koperasi setelah pesanan seluruh anggota terkumpul dalam satu periode.
             @if ($order->orderItems->contains(fn ($i) => $i->price_at_order === null))
                 Ada barang yang harganya masih menyusul dan akan dipastikan pengurus saat verifikasi,

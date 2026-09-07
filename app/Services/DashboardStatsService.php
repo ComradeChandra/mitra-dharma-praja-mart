@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\PaymentStatus;
 use App\Enums\ProductRequestStatus;
 use App\Models\Member;
 use App\Models\OpdDepartment;
+use App\Models\Order;
 use App\Models\OrderPeriod;
 use App\Models\Product;
 use App\Models\ProductRequest;
@@ -29,6 +31,7 @@ class DashboardStatsService
      *     anggotaTerbaru: \Illuminate\Support\Collection,
      *     produkTerbaru: \Illuminate\Support\Collection,
      *     permintaanMenunggu: int,
+     *     pembayaranMenunggu: int,
      * }
      */
     public function summary(): array
@@ -56,6 +59,13 @@ class DashboardStatsService
             // Jumlah permintaan produk yang belum ditinjau, badge di widget
             // "Aksi Cepat" biar admin langsung tau ada yang perlu ditindaklanjuti.
             'permintaanMenunggu' => ProductRequest::where('status', ProductRequestStatus::Pending)->count(),
+
+            // Pemesan yang sudah menyatakan bayar tapi belum dicocokkan ke
+            // mutasi rekening. Ini pekerjaan harian pengurus, dan angka
+            // "Pendapatan" di grafik dihitung dari pesanan terverifikasi tanpa
+            // peduli sudah dibayar atau belum, jadi tanpa penanda ini gampang
+            // mengira uangnya sudah masuk semua.
+            'pembayaranMenunggu' => Order::where('payment_status', PaymentStatus::AwaitingConfirmation)->count(),
         ];
     }
 }

@@ -305,3 +305,92 @@ test('status pembayaran terpisah dari status pesanan', function () {
     expect($this->pesanan->payment_status)->toBe(PaymentStatus::Paid);
     expect($this->pesanan->status)->toBe(OrderStatus::Verified);
 });
+
+test('harga tidak bisa diubah lagi setelah pembayaran berjalan', function () {
+    // Tanpa penjagaan ini, pengurus bisa mengubah harga pesanan yang sudah
+    // lunas dan catatannya jadi bohong: tertulis "Lunas Rp150.000" padahal
+    // yang dibayar Rp100.000. Selisih uang yang sudah berpindah bukan urusan
+    // aplikasi, jadi yang dilakukan cuma menahan supaya angkanya tidak berubah
+    // tanpa ada yang tahu.
+    $this->actingAs($this->anggota, 'member')
+        ->post(route('member.orders.declare-paid', $this->pesanan));
+
+    $item = $this->pesanan->orderItems()->first();
+
+    $this->actingAs($this->admin, 'web')
+        ->patch(route('admin.orders.verify', $this->pesanan), [
+            'prices' => [$item->id => 999999],
+        ])->assertStatus(422);
+
+    expect($this->pesanan->fresh()->total_amount)->toEqual(144000);
+});
+
+test('harga yang sudah terisi tidak bisa ditimpa lewat verifikasi', function () {
+    // Bukan karena penjagaan pembayaran, tapi karena VerifyOrderRequest cuma
+    // membuat aturan validasi untuk item yang harganya MASIH KOSONG. Harga
+    // yang sudah terkunci tidak ikut lolos validasi, jadi diabaikan.
+    // Penjagaan pembayaran di service adalah lapis keduanya, buat menutup
+    // pemanggilan verifyOrder dari jalur lain.
+    $item = $this->pesanan->orderItems()->first();
+
+    $this->actingAs($this->admin, 'web')
+        ->patch(route('admin.orders.verify', $this->pesanan), [
+            'prices' => [$item->id => 80000],
+        ]);
+
+    expect($this->pesanan->fresh()->total_amount)->toEqual(144000);
+});
+
+test('harga produk fluktuatif diisi lewat verifikasi', function () {
+    $telur = Product::create([
+        'category' => 'Sayur & Segar', 'name' => 'Telur Ayam', 'buy_price' => 28000,
+        'sell_price' => null, 'is_fluctuating' => true,
+        'has_stock_tracking' => false, 'is_active' => true,
+    ]);
+
+    $this->belumFinal->orderItems()->create([
+        'product_id' => $telur->id, 'quantity' => 3, 'price_at_order' => null,
+    ]);
+
+    $item = $this->belumFinal->orderItems()->first();
+
+    $this->actingAs($this->admin, 'web')
+        ->patch(route('admin.orders.verify', $this->belumFinal), [
+            'prices' => [$item->id => 32000],
+        ])->assertRedirect();
+
+    $this->belumFinal->refresh();
+
+    expect($this->belumFinal->total_amount)->toEqual(96000);
+    expect($this->belumFinal->status)->toBe(OrderStatus::Verified);
+});
+
+test('struk mencantumkan status pembayaran', function () {
+    // Sebelum ada pembayaran QRIS, struk tidak menyebut soal uang sama sekali,
+    // jadi anggota yang sudah lunas mencetak lembar yang terlihat seperti
+    // belum bayar.
+    $this->actingAs($this->anggota, 'member')
+        ->get(route('member.orders.struk', $this->pesanan))
+        ->assertOk()
+        ->assertSee('Belum Dibayar')
+        ->assertSee('bukan bukti pembayaran');
+
+    $this->actingAs($this->admin, 'web')
+        ->patch(route('admin.orders.confirm-payment', $this->pesanan));
+
+    $this->actingAs($this->anggota, 'member')
+        ->get(route('member.orders.struk', $this->pesanan))
+        ->assertSee('Lunas')
+        ->assertSee('sudah dicocokkan pengurus')
+        ->assertDontSee('bukan bukti pembayaran');
+});
+
+test('dashboard menandai pembayaran yang menunggu dicocokkan', function () {
+    $this->actingAs($this->anggota, 'member')
+        ->post(route('member.orders.declare-paid', $this->pesanan));
+
+    $this->actingAs($this->admin, 'web')
+        ->get(route('admin.dashboard'))
+        ->assertOk()
+        ->assertSee('Pembayaran menunggu dicocokkan');
+});

@@ -111,6 +111,21 @@ class OrderService
      */
     public function verifyOrder(Order $order, array $prices): Order
     {
+        // Harga tidak boleh diubah lagi begitu pembayarannya sudah berjalan.
+        // Tanpa penjagaan ini, pengurus bisa mengubah harga pesanan yang sudah
+        // lunas, dan catatannya jadi bohong: tertulis "Lunas Rp150.000"
+        // padahal yang dibayar Rp100.000.
+        //
+        // Sengaja DITOLAK, bukan diperbaiki diam-diam. Selisih uang yang sudah
+        // berpindah tidak bisa diselesaikan aplikasi; itu urusan pengurus dan
+        // pemesan, entah dikembalikan atau ditambah. Aplikasinya cuma menahan
+        // supaya angkanya tidak berubah tanpa ada yang tahu.
+        abort_if(
+            $order->payment_status !== PaymentStatus::Unpaid,
+            422,
+            'Pesanan ini pembayarannya sudah berjalan, harganya tidak bisa diubah lagi. Koordinasikan dulu dengan pemesannya.',
+        );
+
         return DB::transaction(function () use ($order, $prices) {
             foreach ($prices as $orderItemId => $price) {
                 $order->orderItems()
@@ -121,6 +136,10 @@ class OrderService
             $order->refresh();
             $total = $order->orderItems->sum(fn ($item) => $item->quantity * $item->price_at_order);
 
+            // Statusnya dikembalikan ke Verified, termasuk kalau tadinya sudah
+            // Invoiced. Ini disengaja: invoice yang terlanjur dikirim memuat
+            // harga lama, jadi harus dikirim ulang. Kalau statusnya dibiarkan
+            // Invoiced, pengurus mengira pemesan sudah menerima angka yang benar.
             $order->update([
                 'total_amount' => $total,
                 'status' => OrderStatus::Verified,

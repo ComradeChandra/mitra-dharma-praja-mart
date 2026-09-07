@@ -330,6 +330,22 @@
                         </a>
                     @endif
 
+                    {{-- Pembayaran yang menunggu dicocokkan ke mutasi rekening --}}
+                    @if ($pembayaranMenunggu > 0)
+                        <a href="{{ route('admin.orders.index', ['bayar' => App\Enums\PaymentStatus::AwaitingConfirmation->value]) }}"
+                           class="flex items-center justify-between gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 hover:bg-emerald-100 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="h-9 w-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">
+                                    {{ $pembayaranMenunggu }}
+                                </span>
+                                <span class="text-sm font-medium text-emerald-800">
+                                    Pembayaran menunggu dicocokkan
+                                </span>
+                            </div>
+                            <span class="text-emerald-600">&rarr;</span>
+                        </a>
+                    @endif
+
                     {{-- Permintaan produk yang belum ditinjau, ditonjolkan kalau ada --}}
                     @if ($permintaanMenunggu > 0)
                         <a href="{{ route('admin.product-requests.index') }}"
