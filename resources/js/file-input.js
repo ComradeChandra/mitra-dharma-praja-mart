@@ -38,6 +38,11 @@ Alpine.data('inputBerkas', () => ({
 
         this.sedangMemproses = true;
 
+        // Selama foto diperkecil (di HP bisa sepersekian detik), form ditahan
+        // browser: tanpa ini, orang yang langsung menekan tombol kirim akan
+        // mengirim foto aslinya yang besar, lalu ditolak server.
+        input.setCustomValidity('Sebentar, foto sedang diperkecil.');
+
         try {
             const kecil = await perkecil(berkas);
 
@@ -53,6 +58,7 @@ Alpine.data('inputBerkas', () => ({
             // Biarkan berkas aslinya; server yang memberi tahu kalau terlalu besar.
         } finally {
             this.sedangMemproses = false;
+            input.setCustomValidity('');
         }
     },
 }));
