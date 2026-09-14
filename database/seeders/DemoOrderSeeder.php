@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Enums\DeliveryMethod;
 use App\Enums\OrderPeriodStatus;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\ProductRequestStatus;
 use App\Enums\UserType;
 use App\Models\Member;
@@ -14,6 +15,7 @@ use App\Models\OrderPeriod;
 use App\Models\Product;
 use App\Models\ProductRequest;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 
 /**
  * Periode + pesanan + usulan produk CONTOH.
@@ -109,6 +111,7 @@ class DemoOrderSeeder extends Seeder
                 produkBerharga: $produkBerharga,
                 produkFluktuatif: $pakaiFluktuatif ? $produkFluktuatif : null,
                 urutan: $i,
+                lunas: $this->sudahLunas($final, $i),
             );
         }
 
@@ -120,6 +123,7 @@ class DemoOrderSeeder extends Seeder
                 produkBerharga: $produkBerharga,
                 produkFluktuatif: null,
                 urutan: $i,
+                lunas: $this->sudahLunas($final, $i),
             );
         }
     }
@@ -131,6 +135,7 @@ class DemoOrderSeeder extends Seeder
         $produkBerharga,
         $produkFluktuatif,
         int $urutan,
+        bool $lunas = false,
     ): void {
         $namaStaf = ['Rina Oktaviani', 'Firman Maulana', 'Dini Anggraeni', 'Yoga Pratama', 'Mega Puspita', 'Andri Nugraha'];
 
@@ -150,6 +155,13 @@ class DemoOrderSeeder extends Seeder
             'delivery_address' => $diantar ? $alamat : null,
             'status' => OrderStatus::Pending,
         ]);
+
+        // Tanggal kirim disebar di dalam rentang periodenya. Tanpa ini semua
+        // pesanan bertanggal hari seeder dijalankan, jadi pesanan periode Juli
+        // tertulis "dikirim September" dan nomor struknya ikut bulan yang salah
+        // (Order::nomorStruk() memakai bulan dari created_at).
+        $dikirim = $this->waktuKirim($periode, $urutan, $pemesan !== null);
+        $order->forceFill(['created_at' => $dikirim, 'updated_at' => $dikirim])->save();
 
         // 2–4 produk per pesanan, dipilih berputar biar sebarannya merata
         // (tidak semua orang memesan barang yang sama).
@@ -184,6 +196,68 @@ class DemoOrderSeeder extends Seeder
             // terverifikasi, biar filter status di daftar pesanan ada isinya.
             'status' => $urutan % 3 === 0 ? OrderStatus::Invoiced : OrderStatus::Verified,
         ]);
+
+        if ($lunas) {
+            $this->tandaiLunas($order);
+        }
+    }
+
+    /**
+     * Pesanan periode lampau dianggap sudah dibayar, KECUALI sebagian kecil
+     * yang sengaja dibiarkan menunggak. Tujuannya supaya di daftar pesanan
+     * admin tab "Lunas" ada isinya, dan tab "Belum Dibayar" juga punya
+     * contoh tunggakan lama, bukan cuma pesanan periode berjalan.
+     *
+     * Periode berjalan sengaja belum ada yang dibayar, supaya alur bayar
+     * QRIS bisa didemokan dari awal.
+     */
+    private function sudahLunas(bool $periodeLampau, int $urutan): bool
+    {
+        return $periodeLampau && $urutan % 7 !== 6;
+    }
+
+    /**
+     * Tandai lunas dengan jejak waktu yang masuk akal: pemesan menyatakan
+     * bayar tiga hari setelah memesan, pengurus mencocokkan keesokan harinya.
+     */
+    private function tandaiLunas(Order $order): void
+    {
+        $dinyatakan = $order->created_at->copy()->addDays(3)->setTime(19, 15);
+        $dikonfirmasi = $dinyatakan->copy()->addDay()->setTime(9, 30);
+
+        // Jangan sampai tercatat lunas di masa depan.
+        if ($dikonfirmasi->isFuture()) {
+            return;
+        }
+
+        $order->forceFill([
+            'payment_status' => PaymentStatus::Paid,
+            'paid_declared_at' => $dinyatakan,
+            'payment_confirmed_at' => $dikonfirmasi,
+        ])->save();
+    }
+
+    /**
+     * Waktu kirim yang masuk akal untuk pesanan contoh: di dalam rentang
+     * periodenya, jam kerja, dan tidak pernah di masa depan.
+     *
+     * Rumusnya sengaja tetap (bukan acak) supaya hasil seeder selalu sama
+     * setiap kali dijalankan, jadi skrip demo yang menyebut pesanan tertentu
+     * tidak berubah-ubah.
+     */
+    private function waktuKirim(OrderPeriod $periode, int $urutan, bool $anggota): Carbon
+    {
+        $mulai = $periode->start_date->copy()->startOfDay();
+        $akhir = $periode->end_date->isPast() ? $periode->end_date->copy()->endOfDay() : now();
+        $jumlahHari = (int) $mulai->diffInDays($akhir);
+
+        $waktu = $mulai
+            ->addDays(($urutan * 3 + ($anggota ? 0 : 1)) % ($jumlahHari + 1))
+            ->setTime(7 + ($urutan * 5) % 11, ($urutan * 17) % 60);
+
+        // Di periode yang sedang berjalan, jam hasil hitungan bisa jatuh
+        // setelah "sekarang" di hari yang sama.
+        return $waktu->isFuture() ? now()->subMinutes(10 * ($urutan + 1)) : $waktu;
     }
 
     /**
