@@ -31,5 +31,16 @@ return [
         // kalimat ini sebaiknya ikut diganti.
         'sudah_final' => (bool) env('SHU_SUDAH_FINAL', false),
     ],
-
+    /*
+    |--------------------------------------------------------------------------
+    | Akun pengurus pertama
+    |--------------------------------------------------------------------------
+    | Dipakai AdminUserSeeder. Di server WAJIB diisi lewat .env: ADMIN_EMAIL dan
+    | ADMIN_PASSWORD. Nilai bawaan di bawah cuma untuk laptop pengembang, dan
+    | seeder menolak jalan di server kalau password-nya masih bawaan.
+    */
+    'admin' => [
+        'email' => env('ADMIN_EMAIL', 'admin@mitradharma.test'),
+        'password' => env('ADMIN_PASSWORD', 'admin12345'),
+    ],
 ];

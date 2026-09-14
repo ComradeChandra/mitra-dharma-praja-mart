@@ -180,7 +180,8 @@ class OrderController extends Controller
      */
     private function klaimLewatTautan(Request $request, Order $order): void
     {
-        if ($request->hasValidSignature() && $order->opd_id === $this->opdSedangLogin()->id) {
+        // Relative: pasangan OrderLinkService, yang menandatangani tanpa domain.
+        if ($request->hasValidRelativeSignature() && $order->opd_id === $this->opdSedangLogin()->id) {
             $this->sesiNonAnggota->catatPesanan($order->id);
         }
     }

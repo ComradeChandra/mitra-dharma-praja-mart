@@ -25,7 +25,7 @@ class OrderLinkService
      * beberapa hari kemudian. Non-anggota tidak punya akun maupun halaman
      * riwayat, jadi tautan inilah satu-satunya jalan kembali ke pesanannya.
      *
-     * Tanda tangannya dihitung dari URL + APP_KEY, jadi tidak bisa dikarang
+     * Tanda tangannya dihitung dari alamat halaman + APP_KEY, jadi tidak bisa dikarang
      * sendiri oleh rekan sekantor yang cuma menaikkan angka di URL (lihat
      * NonMember\OrderController::klaimLewatTautan()). Sengaja tanpa masa
      * berlaku, karena pesanan lama pun masih boleh dilihat pemesannya.
@@ -34,6 +34,9 @@ class OrderLinkService
     {
         return $order->user_type === UserType::Member
             ? route('member.orders.show', $order)
-            : URL::signedRoute('non-member.orders.show', $order);
+            // absolute: false = tanda tangan dihitung dari alamat halamannya
+            // saja, tanpa domain dan http/https. Tautan tetap sah walau hosting
+            // memasang HTTPS lewat proxy atau domainnya kelak pindah.
+            : url(URL::signedRoute('non-member.orders.show', $order, absolute: false));
     }
 }

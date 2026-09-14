@@ -55,6 +55,16 @@ return [
     'url' => env('APP_URL', 'http://localhost'),
 
     /*
+    | Proxy tepercaya. Isi TRUSTED_PROXIES=* di .env kalau hosting memasang
+    | proxy/CDN di depan aplikasi (mis. Cloudflare, Render, Railway). Tanpa
+    | ini, aplikasi mengira dirinya diakses lewat http walau pengunjung memakai
+    | https. Kosongkan kalau aplikasi langsung menghadap internet: mempercayai
+    | proxy yang tidak ada membuat alamat IP pengunjung bisa dipalsukan.
+    */
+
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------

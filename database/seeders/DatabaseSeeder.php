@@ -16,13 +16,20 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        $this->call([
-            // Urutan penting: OPD & Admin duluan (data dasar), lalu anggota &
-            // produk contoh, baru pesanan contoh (yang butuh keduanya sudah ada).
-            OpdDepartmentSeeder::class,
-            AdminUserSeeder::class,
-            DemoDataSeeder::class,
-            DemoOrderSeeder::class,
-        ]);
+        // Di server sungguhan cuma akun pengurus yang dibuat. OPD, anggota,
+        // dan produk asli diinput lewat halaman admin.
+        $this->call(AdminUserSeeder::class);
+
+        // Data contoh HANYA untuk laptop pengembang & tes. Kalau ikut ke
+        // server, db:seed mengisi 24 anggota palsu, 48 pesanan palsu, dan 10 OPD
+        // dengan kode akses yang sama ("opd12345") yang tertulis di repo ini.
+        // Urutan penting: OPD dulu, lalu anggota & produk, baru pesanan.
+        if (app()->environment('local', 'testing')) {
+            $this->call([
+                OpdDepartmentSeeder::class,
+                DemoDataSeeder::class,
+                DemoOrderSeeder::class,
+            ]);
+        }
     }
 }

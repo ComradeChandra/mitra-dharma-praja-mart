@@ -69,7 +69,7 @@ test('pesanan non-anggota produk non-fluktuatif langsung terverifikasi & totalny
     $order = Order::first();
     // Tautannya bertanda tangan, bukan URL polos: itu satu-satunya cara
     // non-anggota membuka lagi pesanannya setelah sesi 2 jam habis.
-    $response->assertRedirect(URL::signedRoute('non-member.orders.show', $order));
+    $response->assertRedirect(url(URL::signedRoute('non-member.orders.show', $order, absolute: false)));
 
     expect($order->user_type)->toBe(UserType::NonMember);
     expect($order->member_id)->toBeNull();
@@ -215,7 +215,7 @@ test('tautan bertanda tangan mengembalikan akses setelah sesi habis', function (
     // pengurus mengirim invoice, bisa beberapa hari kemudian, sedangkan sesi
     // cuma bertahan 2 jam. Tanpa ini pemesan terkunci dari pesanannya sendiri.
     $pesanan = kirimPesananNonAnggota($this->opd, $this->beras->id, 'Teh Teti');
-    $tautan = URL::signedRoute('non-member.orders.show', $pesanan);
+    $tautan = url(URL::signedRoute('non-member.orders.show', $pesanan, absolute: false));
 
     $this->flushSession();
 
@@ -233,7 +233,7 @@ test('tautan tanpa tanda tangan yang sah tetap ditolak', function () {
 
 test('tautan bertanda tangan tidak bisa dipakai dari OPD lain', function () {
     $pesanan = kirimPesananNonAnggota($this->opd, $this->beras->id, 'Teh Teti');
-    $tautan = URL::signedRoute('non-member.orders.show', $pesanan);
+    $tautan = url(URL::signedRoute('non-member.orders.show', $pesanan, absolute: false));
 
     $opdLain = OpdDepartment::create(['name' => 'Dinas Kesehatan', 'access_code' => 'opd54321']);
 

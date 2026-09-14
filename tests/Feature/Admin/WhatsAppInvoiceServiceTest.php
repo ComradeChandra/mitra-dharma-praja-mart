@@ -129,7 +129,7 @@ test('invoice non-anggota menyertakan tautan bertanda tangan yang benar-benar bi
     $pesanan->orderItems()->create(['product_id' => $this->beras->id, 'quantity' => 1, 'price_at_order' => 70000]);
 
     $teks = $this->service->generateInvoiceText($pesanan);
-    $tautan = URL::signedRoute('non-member.orders.show', $pesanan);
+    $tautan = url(URL::signedRoute('non-member.orders.show', $pesanan, absolute: false));
 
     expect($teks)->toContain($tautan);
 
