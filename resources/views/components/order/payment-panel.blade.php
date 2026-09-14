@@ -105,7 +105,7 @@
                     <x-input-label for="payment_proof" value="Bukti transfer (boleh dikosongkan)" />
                     <x-file-input name="payment_proof" accept="image/jpeg,image/png" class="mt-1" />
                     <p class="mt-1 text-xs text-gray-400">
-                        Kalau dilampirkan, pengurus lebih cepat mencocokkannya. JPG atau PNG, maksimal 2MB.
+                        Kalau dilampirkan, pengurus lebih cepat mencocokkannya. JPG atau PNG; foto yang besar otomatis diperkecil.
                     </p>
                     <x-input-error :messages="$errors->get('payment_proof')" class="mt-2" />
                 </div>

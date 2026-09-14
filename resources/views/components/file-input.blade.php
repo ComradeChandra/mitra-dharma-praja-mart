@@ -11,6 +11,10 @@
     Sebelumnya tiga form menulis gayanya masing-masing (foto produk, foto
     profil, bukti transfer), jadi sekalian disatukan di sini.
 
+    Foto yang lebih besar dari batas server diperkecil dulu di browser
+    sebelum dikirim (resources/js/file-input.js). Foto kamera HP 3–8 MB,
+    batas server 2 MB.
+
     Props:
     - name   : nama field yang dikirim ke server
     - id     : bawaannya sama dengan name
@@ -24,7 +28,7 @@
     $id ??= $name;
 @endphp
 
-<div x-data="{ namaBerkas: '' }" {{ $attributes->merge(['class' => 'flex items-center gap-3']) }}>
+<div x-data="inputBerkas" {{ $attributes->merge(['class' => 'flex items-center gap-3']) }}>
     {{-- Input aslinya tetap ada dan tetap yang dikirim ke server, cuma tidak
          kelihatan. "peer" dipakai supaya fokus keyboard di input ini tetap
          kelihatan lewat cincin di tombol penggantinya. --}}
@@ -34,7 +38,7 @@
         type="file"
         @if ($accept) accept="{{ $accept }}" @endif
         class="peer sr-only"
-        x-on:change="namaBerkas = $event.target.files.length ? $event.target.files[0].name : ''"
+        x-on:change="pilih($event)"
     >
 
     <label
@@ -50,6 +54,6 @@
     <span
         class="min-w-0 truncate text-sm"
         x-bind:class="namaBerkas ? 'text-gray-800' : 'text-gray-400'"
-        x-text="namaBerkas || 'Belum ada berkas dipilih'"
+        x-text="sedangMemproses ? 'Memperkecil foto…' : (namaBerkas || 'Belum ada berkas dipilih')"
     >Belum ada berkas dipilih</span>
 </div>

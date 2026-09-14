@@ -44,8 +44,10 @@
 
                     <div class="min-w-0 flex-1">
                         <x-input-label for="photo" value="Foto Profil" />
-                        <x-file-input name="photo" accept="image/*" class="mt-1" />
-                        <p class="mt-1 text-xs text-gray-400">JPG, PNG, atau WEBP. Maksimal 2 MB. Boleh dikosongkan.</p>
+                        {{-- Jenisnya disebut satu per satu, bukan image/*: dengan begitu iPhone
+                             otomatis mengubah foto HEIC jadi JPEG, yang diterima server. --}}
+                        <x-file-input name="photo" accept="image/jpeg,image/png,image/webp" class="mt-1" />
+                        <p class="mt-1 text-xs text-gray-400">JPG, PNG, atau WEBP. Foto yang besar otomatis diperkecil. Boleh dikosongkan.</p>
                         <x-input-error :messages="$errors->get('photo')" class="mt-2" />
                     </div>
                 </div>

@@ -25,7 +25,7 @@
         @endif
 
         <x-file-input name="image" accept="image/jpeg,image/png" />
-        <p class="mt-1.5 text-xs text-gray-400">Opsional — JPG/PNG, maksimal 2MB.</p>
+        <p class="mt-1.5 text-xs text-gray-400">Opsional — JPG/PNG. Foto yang besar otomatis diperkecil.</p>
         <x-input-error :messages="$errors->get('image')" class="mt-2" />
     </div>
 
