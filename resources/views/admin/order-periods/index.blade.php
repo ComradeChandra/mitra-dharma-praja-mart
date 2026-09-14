@@ -57,7 +57,7 @@
                                     </td>
                                     <td class="px-6 py-3 whitespace-nowrap text-right text-sm">
                                         <div class="flex items-center justify-end gap-4">
-                                            <a href="{{ route('admin.order-periods.rekap', $orderPeriod) }}" class="text-indigo-600 hover:text-indigo-800 font-medium">Rekap</a>
+                                            <a href="{{ route('admin.order-periods.rekap', $orderPeriod) }}" class="text-emerald-700 hover:text-emerald-900 font-medium">Rekap</a>
                                             <x-admin.edit-link :href="route('admin.order-periods.edit', $orderPeriod)" />
                                             <x-admin.delete-form
                                                 :action="route('admin.order-periods.destroy', $orderPeriod)"

@@ -22,7 +22,7 @@
             <select
                 id="opd_department_id"
                 name="opd_department_id"
-                class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm block mt-1 w-full"
+                class="border-gray-300 focus:border-emerald-600 focus:ring-emerald-600 rounded-lg shadow-sm block mt-1 w-full"
                 required
                 autofocus
             >

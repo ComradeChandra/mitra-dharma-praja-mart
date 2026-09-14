@@ -97,7 +97,7 @@
                 type="button"
                 x-ref="tombolKirimFinal"
                 @click="kirimSekarang()"
-                class="flex-1 py-2.5 rounded-lg bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-700 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                class="flex-1 py-2.5 rounded-lg bg-emerald-700 text-sm font-semibold text-white hover:bg-emerald-800 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
             >
                 Ya, kirim pesanan
             </button>

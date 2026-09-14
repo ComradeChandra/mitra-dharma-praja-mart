@@ -105,7 +105,7 @@
                                                 step="1"
                                                 value="{{ old('prices.'.$item->id) }}"
                                                 placeholder="Harga per pcs"
-                                                class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                                                class="w-full rounded-lg border-gray-300 focus:border-emerald-600 focus:ring-emerald-600 text-sm"
                                             >
                                         </div>
                                         <x-input-error :messages="$errors->get('prices.'.$item->id)" class="mt-1" />
@@ -182,7 +182,7 @@
                         @if ($order->payment_proof_path)
                             <a href="{{ route('admin.orders.payment-proof', $order) }}"
                                target="_blank" rel="noopener"
-                               class="mt-3 inline-flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-800">
+                               class="mt-3 inline-flex items-center gap-2 text-sm text-emerald-700 hover:text-emerald-900">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V7.5A1.5 1.5 0 0 1 4.5 6h15A1.5 1.5 0 0 1 21 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 16.5Z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m3 15 4.5-4.5L12 15l3-3 6 6" />

@@ -32,7 +32,7 @@
                     name="member_code"
                     required
                     autofocus
-                    class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                    class="block mt-1 w-full border-gray-300 focus:border-emerald-600 focus:ring-emerald-600 rounded-md shadow-sm"
                 >
                     <option value="" disabled {{ old('member_code') ? '' : 'selected' }}>
                         — Pilih nama —

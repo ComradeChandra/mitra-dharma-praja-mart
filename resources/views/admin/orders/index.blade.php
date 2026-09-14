@@ -29,7 +29,7 @@
                          pas halaman kebuka, lihat @keyframes di resources/css/app.css --}}
                     <a
                         href="{{ route('admin.orders.index', array_filter(['status' => $value, 'bayar' => $statusBayar])) }}"
-                        class="px-3 py-1.5 rounded-lg text-sm font-medium transition animate-[pop-in_0.3s_ease-out_backwards] {{ ($status ?? '') === $value ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-100' }}"
+                        class="px-3 py-1.5 rounded-lg text-sm font-medium transition animate-[pop-in_0.3s_ease-out_backwards] {{ ($status ?? '') === $value ? 'bg-emerald-700 text-white' : 'text-gray-500 hover:bg-gray-100' }}"
                         style="animation-delay: {{ $loop->index * 40 }}ms"
                     >
                         {{ $label }}
@@ -99,7 +99,7 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-3 whitespace-nowrap text-right text-sm">
-                                        <a href="{{ route('admin.orders.show', $order) }}" class="text-indigo-600 hover:text-indigo-800 font-medium">Lihat →</a>
+                                        <a href="{{ route('admin.orders.show', $order) }}" class="text-emerald-700 hover:text-emerald-900 font-medium">Lihat →</a>
                                     </td>
                                 </tr>
                             @endforeach

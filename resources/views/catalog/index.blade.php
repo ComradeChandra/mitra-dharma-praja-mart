@@ -64,7 +64,7 @@
                     <button
                         type="button"
                         @click="activeCategory = 'Semua'"
-                        :class="activeCategory === 'Semua' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                        :class="activeCategory === 'Semua' ? 'bg-emerald-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
                         class="shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition animate-[pop-in_0.3s_ease-out_backwards]"
                     >
                         Semua
@@ -73,7 +73,7 @@
                         <button
                             type="button"
                             @click="activeCategory = {{ \Illuminate\Support\Js::from($category) }}"
-                            :class="activeCategory === {{ \Illuminate\Support\Js::from($category) }} ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                            :class="activeCategory === {{ \Illuminate\Support\Js::from($category) }} ? 'bg-emerald-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
                             class="shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition animate-[pop-in_0.3s_ease-out_backwards]"
                             style="animation-delay: {{ ($loop->index + 1) * 40 }}ms"
                         >

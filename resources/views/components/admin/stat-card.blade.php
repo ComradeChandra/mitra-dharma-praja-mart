@@ -8,12 +8,12 @@
     - value : angka/teks yang ditampilkan besar
     - href  : opsional, URL tujuan kalau kartu diklik
     - hint  : opsional, teks kecil tambahan di bawah angka
-    - color : 'indigo' | 'amber' | 'teal' | 'violet' — warna badge ikon (default 'indigo')
+    - color : 'emerald' | 'amber' | 'teal' | 'violet' — warna badge ikon (default 'emerald')
 
     Slot:
     - icon : isi dengan path SVG (tanpa tag <svg> pembungkus, itu sudah disiapkan di sini)
 --}}
-@props(['label', 'value', 'href' => null, 'hint' => null, 'color' => 'indigo'])
+@props(['label', 'value', 'href' => null, 'hint' => null, 'color' => 'emerald'])
 
 @php
     $tag = $href ? 'a' : 'div';
@@ -22,7 +22,7 @@
         'amber' => 'bg-amber-50 text-amber-600',
         'teal' => 'bg-teal-50 text-teal-600',
         'violet' => 'bg-violet-50 text-violet-600',
-        default => 'bg-indigo-50 text-indigo-600',
+        default => 'bg-emerald-50 text-emerald-700',
     };
 @endphp
 

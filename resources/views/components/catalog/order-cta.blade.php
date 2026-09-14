@@ -3,13 +3,13 @@
     App\View\Components\Catalog\OrderCta; berkas ini cuma soal tampilan.
 
     Warnanya dibedakan per peran supaya tetap sama dengan sebelum tombol ini
-    dijadikan komponen: anggota indigo, non-anggota teal, tamu versi redup.
+    dijadikan komponen: anggota emerald, non-anggota teal, tamu versi redup.
 --}}
 @php
     $gaya = match ($peran) {
-        'anggota' => 'bg-indigo-600 text-white hover:bg-indigo-700',
+        'anggota' => 'bg-emerald-700 text-white hover:bg-emerald-800',
         'non-anggota' => 'bg-teal-600 text-white hover:bg-teal-700',
-        default => 'bg-indigo-50 text-indigo-500 hover:bg-indigo-100',
+        default => 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100',
     };
 @endphp
 

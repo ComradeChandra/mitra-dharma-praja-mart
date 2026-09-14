@@ -17,7 +17,7 @@
                 <div class="shrink-0 flex items-center gap-2.5">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5">
                         {{-- Bungkus logo pakai "halo" putih tipis, badge logo aslinya
-                             berwarna indigo, kalau ditaruh langsung di atas navbar
+                             berwarna emerald, kalau ditaruh langsung di atas navbar
                              teal dia bakal kurang kontras nyatu sama background --}}
                         <span class="p-1 rounded-full bg-white shadow-sm">
                             <x-application-logo class="h-7 w-7" />

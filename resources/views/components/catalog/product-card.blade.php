@@ -32,7 +32,8 @@
             >
         @else
             {{--
-                Belum ada foto. Warnanya diambil dari nama kategori lewat crc32,
+                Produk tanpa foto: monogram huruf pertama di atas rona kategori.
+                Warnanya diambil dari nama kategori lewat crc32,
                 jadi tiap kategori dapat rona sendiri yang konsisten. Tanpa ini,
                 katalog yang produknya belum berfoto tampil sebagai deretan
                 kotak abu-abu identik dan terkesan rusak.
@@ -49,11 +50,12 @@
                 [$latar, $tinta] = $rona[crc32($product->category) % count($rona)];
             @endphp
 
-            <div class="w-full h-full flex items-center justify-center flex-col gap-1.5 {{ $latar }}">
-                <span class="text-2xl font-semibold {{ $tinta }}">
+            {{-- Tulisan "Belum ada foto" sengaja dihapus: di produk jadi itu terbaca
+                 seperti halaman yang belum selesai. --}}
+            <div class="w-full h-full flex items-center justify-center {{ $latar }}" aria-hidden="true">
+                <span class="text-5xl font-semibold tracking-tight {{ $tinta }}">
                     {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($product->name, 0, 1)) }}
                 </span>
-                <span class="text-[11px] {{ $tinta }}">Belum ada foto</span>
             </div>
         @endif
 
@@ -65,7 +67,7 @@
 
     <div class="p-3.5 flex flex-col flex-1">
         <h3 class="font-medium text-sm text-gray-900 line-clamp-2 min-h-[2.5rem]">
-            <a href="{{ route('catalog.show', $product) }}" class="hover:text-indigo-600 transition">{{ $product->name }}</a>
+            <a href="{{ route('catalog.show', $product) }}" class="hover:text-emerald-700 transition">{{ $product->name }}</a>
         </h3>
 
         {{-- Harga: badge "Fluktuatif" kalau harganya belum pasti, atau angka Rupiah besar --}}

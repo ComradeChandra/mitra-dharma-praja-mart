@@ -66,7 +66,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <x-admin.chart-card
                     title="Keuntungan per Periode"
-                    subtitle="Batang = pendapatan kotor & modal beli · Garis = pendapatan bersih"
+                    subtitle="Pendapatan kotor dan modal beli per periode · garis = pendapatan bersih"
                     chartId="revenue-chart"
                 >
                     {{--
@@ -82,25 +82,29 @@
                     --}}
                     <canvas id="revenue-chart" data-chart="{{ json_encode([
                         'labels' => $revenueKosong ? ['Belum ada data'] : $revenueChart['labels'],
+                        'format' => 'rupiah',
                         'bars' => [
-                            ['label' => 'Pendapatan Kotor', 'data' => $revenueKosong ? [0] : $revenueChart['gross'], 'color' => '#818cf8'],
-                            ['label' => 'Modal Beli', 'data' => $revenueKosong ? [0] : $revenueChart['modal'], 'color' => '#fb923c'],
+                            ['label' => 'Pendapatan Kotor', 'data' => $revenueKosong ? [0] : $revenueChart['gross'], 'color' => '#059669'],
+                            ['label' => 'Modal Beli', 'data' => $revenueKosong ? [0] : $revenueChart['modal'], 'color' => '#b45309'],
                         ],
-                        'line' => ['label' => 'Pendapatan Bersih', 'data' => $revenueKosong ? [0] : $revenueChart['net'], 'color' => '#16a34a'],
+                        'line' => ['label' => 'Pendapatan Bersih', 'data' => $revenueKosong ? [0] : $revenueChart['net'], 'color' => '#2a78d6'],
                     ]) }}"></canvas>
                 </x-admin.chart-card>
 
                 <x-admin.chart-card
                     title="Anggota Paling Sering Belanja"
-                    subtitle="Batang = jumlah pesanan · Garis = total nilai belanja (Rp)"
+                    subtitle="Jumlah pesanan per anggota · sentuh batang untuk melihat total belanjanya"
                     chartId="top-members-chart"
                 >
                     <canvas id="top-members-chart" data-chart="{{ json_encode([
                         'labels' => $topMembersKosong ? ['Belum ada data'] : $topMembersChart['labels'],
+                        'format' => 'angka',
+                        'mendatar' => true,
                         'bars' => [
-                            ['label' => 'Jumlah Pesanan', 'data' => $topMembersKosong ? [0] : $topMembersChart['orderCounts'], 'color' => '#2dd4bf'],
+                            ['label' => 'Jumlah pesanan', 'data' => $topMembersKosong ? [0] : $topMembersChart['orderCounts'], 'color' => '#059669'],
                         ],
-                        'line' => ['label' => 'Total Belanja (Rp)', 'data' => $topMembersKosong ? [0] : $topMembersChart['totalValues'], 'color' => '#a78bfa', 'axis' => 'y1'],
+                        // Satu sumbu saja: total belanja pindah ke tooltip, bukan garis di sumbu kedua.
+                        'keterangan' => $topMembersKosong ? [] : collect($topMembersChart['totalValues'])->map(fn ($nilai) => 'Total belanja Rp'.number_format($nilai, 0, ',', '.'))->all(),
                     ]) }}"></canvas>
                 </x-admin.chart-card>
 
@@ -109,15 +113,17 @@
                      24 Agt 2026 (lihat CLAUDE.md, Lampiran B). --}}
                 <x-admin.chart-card
                     title="Distribusi per OPD"
-                    subtitle="Batang = jumlah pesanan · Garis = total nilai belanja (Rp) — non-anggota"
+                    subtitle="Jumlah pesanan non-anggota per OPD · sentuh batang untuk melihat total belanjanya"
                     chartId="opd-chart"
                 >
                     <canvas id="opd-chart" data-chart="{{ json_encode([
                         'labels' => $opdKosong ? ['Belum ada data'] : $opdChart['labels'],
+                        'format' => 'angka',
+                        'mendatar' => true,
                         'bars' => [
-                            ['label' => 'Jumlah Pesanan', 'data' => $opdKosong ? [0] : $opdChart['orderCounts'], 'color' => '#fb923c'],
+                            ['label' => 'Jumlah pesanan', 'data' => $opdKosong ? [0] : $opdChart['orderCounts'], 'color' => '#059669'],
                         ],
-                        'line' => ['label' => 'Total Belanja (Rp)', 'data' => $opdKosong ? [0] : $opdChart['totalValues'], 'color' => '#f472b6', 'axis' => 'y1'],
+                        'keterangan' => $opdKosong ? [] : collect($opdChart['totalValues'])->map(fn ($nilai) => 'Total belanja Rp'.number_format($nilai, 0, ',', '.'))->all(),
                     ]) }}"></canvas>
                 </x-admin.chart-card>
             </div>
@@ -172,7 +178,7 @@
                             :value="$stats['totalAnggota']"
                             :hint="$stats['anggotaAktif'] . ' aktif'"
                             :href="route('admin.members.index')"
-                            color="indigo"
+                            color="emerald"
                         >
                             <x-slot:icon>
                                 <circle cx="9" cy="7" r="3" />
@@ -227,11 +233,11 @@
                     <x-card class="overflow-hidden">
                         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                             <h3 class="font-semibold text-gray-800 text-sm">Anggota Terbaru</h3>
-                            <a href="{{ route('admin.members.index') }}" class="text-xs font-medium text-indigo-600 hover:text-indigo-800">Lihat semua →</a>
+                            <a href="{{ route('admin.members.index') }}" class="text-xs font-medium text-emerald-700 hover:text-emerald-900">Lihat semua →</a>
                         </div>
                         @forelse ($anggotaTerbaru as $anggota)
                             <div class="flex items-center gap-3 px-5 py-3 {{ ! $loop->last ? 'border-b border-gray-50' : '' }}">
-                                <span class="h-8 w-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-semibold shrink-0">
+                                <span class="h-8 w-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-semibold shrink-0">
                                     {{ Str::upper(Str::substr($anggota->full_name, 0, 1)) }}
                                 </span>
                                 <div class="min-w-0 flex-1">
@@ -249,7 +255,7 @@
                     <x-card class="overflow-hidden">
                         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                             <h3 class="font-semibold text-gray-800 text-sm">Produk Terbaru</h3>
-                            <a href="{{ route('admin.products.index') }}" class="text-xs font-medium text-indigo-600 hover:text-indigo-800">Lihat semua →</a>
+                            <a href="{{ route('admin.products.index') }}" class="text-xs font-medium text-emerald-700 hover:text-emerald-900">Lihat semua →</a>
                         </div>
                         @forelse ($produkTerbaru as $produk)
                             <div class="flex items-center gap-3 px-5 py-3 {{ ! $loop->last ? 'border-b border-gray-50' : '' }}">
@@ -314,7 +320,7 @@
                            class="block bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition duration-150">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="font-semibold text-gray-800 text-sm">Sudah Belanja</h3>
-                                <span class="text-xs text-indigo-600 font-medium">Lihat daftar →</span>
+                                <span class="text-xs text-emerald-700 font-medium">Lihat daftar →</span>
                             </div>
 
                             <div class="flex items-end justify-between mb-2">
@@ -324,7 +330,7 @@
                                 </span>
                             </div>
                             <div class="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all" style="width: {{ $persenBelanja }}%"></div>
+                                <div class="h-full bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-full transition-all" style="width: {{ $persenBelanja }}%"></div>
                             </div>
                             <p class="mt-2 text-xs text-gray-400 truncate">Periode {{ $periodeAktif->label }}</p>
                         </a>
@@ -369,7 +375,7 @@
                             @foreach ([
                                 ['label' => 'Lihat Pesanan Masuk', 'href' => route('admin.orders.index'), 'color' => 'text-rose-600 bg-rose-50', 'icon' => '→'],
                                 ['label' => 'Tambah Produk', 'href' => route('admin.products.create'), 'color' => 'text-amber-600 bg-amber-50'],
-                                ['label' => 'Tambah Anggota', 'href' => route('admin.members.create'), 'color' => 'text-indigo-600 bg-indigo-50'],
+                                ['label' => 'Tambah Anggota', 'href' => route('admin.members.create'), 'color' => 'text-emerald-700 bg-emerald-50'],
                                 ['label' => 'Buat Periode', 'href' => route('admin.order-periods.create'), 'color' => 'text-emerald-600 bg-emerald-50'],
                                 ['label' => 'Tambah OPD', 'href' => route('admin.opd-departments.create'), 'color' => 'text-teal-600 bg-teal-50'],
                                 ['label' => 'Lihat Permintaan Produk', 'href' => route('admin.product-requests.index'), 'color' => 'text-violet-600 bg-violet-50', 'icon' => '→'],

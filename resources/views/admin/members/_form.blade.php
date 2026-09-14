@@ -63,7 +63,7 @@
             name="address"
             rows="2"
             placeholder="Dipakai sebagai isian awal alamat pengantaran. Boleh dikosongkan."
-            class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm text-sm"
+            class="block mt-1 w-full border-gray-300 focus:border-emerald-600 focus:ring-emerald-600 rounded-lg shadow-sm text-sm"
         >{{ old('address', $member->address ?? '') }}</textarea>
         <x-input-error :messages="$errors->get('address')" class="mt-2" />
     </div>
@@ -88,7 +88,7 @@
                     id="password"
                     name="password"
                     :type="showPassword ? 'text' : 'password'"
-                    class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm block w-full pr-20"
+                    class="border-gray-300 focus:border-emerald-600 focus:ring-emerald-600 rounded-lg shadow-sm block w-full pr-20"
                     placeholder="{{ isset($member) ? 'Kosongkan kalau tidak ingin ganti password' : 'Minimal 8 karakter' }}"
                     minlength="8"
                     {{ isset($member) ? '' : 'required' }}
@@ -96,7 +96,7 @@
                 <button
                     type="button"
                     @click="showPassword = ! showPassword"
-                    class="absolute inset-y-0 right-0 px-3 text-xs font-medium text-indigo-600 hover:text-indigo-800"
+                    class="absolute inset-y-0 right-0 px-3 text-xs font-medium text-emerald-700 hover:text-emerald-900"
                 >
                     <span x-text="showPassword ? 'Sembunyikan' : 'Lihat'"></span>
                 </button>

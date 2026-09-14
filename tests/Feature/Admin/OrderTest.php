@@ -209,13 +209,13 @@ test('tab "Semua" tersorot saat daftar pesanan dibuka tanpa penyaring', function
     // tidak ada satu tab pun yang tersorot.
     $html = $this->actingAs($this->admin)->get(route('admin.orders.index'))->getContent();
 
-    expect($html)->toMatch('/bg-indigo-600 text-white[^>]*>\s*Semua\s*</');
+    expect($html)->toMatch('/bg-emerald-700 text-white[^>]*>\s*Semua\s*</');
     expect($html)->toMatch('/bg-emerald-600 text-white[^>]*>\s*Semua\s*</');
 });
 
 test('tab penyaring yang dipilih tersorot, tab "Semua" tidak', function () {
     $html = $this->actingAs($this->admin)->get(route('admin.orders.index', ['status' => 'pending']))->getContent();
 
-    expect($html)->toMatch('/bg-indigo-600 text-white[^>]*>\s*Menunggu Verifikasi\s*</');
-    expect($html)->not->toMatch('/bg-indigo-600 text-white[^>]*>\s*Semua\s*</');
+    expect($html)->toMatch('/bg-emerald-700 text-white[^>]*>\s*Menunggu Verifikasi\s*</');
+    expect($html)->not->toMatch('/bg-emerald-700 text-white[^>]*>\s*Semua\s*</');
 });

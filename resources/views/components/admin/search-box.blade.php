@@ -26,7 +26,7 @@
         value="{{ $nilai }}"
         placeholder="{{ $placeholder }}"
         aria-label="{{ $placeholder }}"
-        class="block w-full pl-9 pr-20 py-2 text-sm rounded-lg border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
+        class="block w-full pl-9 pr-20 py-2 text-sm rounded-lg border-gray-200 focus:border-emerald-600 focus:ring-emerald-600"
     >
 
     {{-- Tombol "hapus" cuma muncul kalau memang sedang ada kata kunci aktif --}}

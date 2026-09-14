@@ -122,7 +122,7 @@
                         ['title' => 'Bayar lewat QRIS', 'desc' => 'Pindai QRIS koperasi di halaman pesanan, lalu tekan "Saya sudah bayar".'],
                     ] as $index => $step)
                         <li class="flex gap-3">
-                            <span class="shrink-0 h-6 w-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">
+                            <span class="shrink-0 h-6 w-6 rounded-full bg-emerald-700 text-white text-xs font-bold flex items-center justify-center">
                                 {{ $index + 1 }}
                             </span>
                             <div>

@@ -32,7 +32,7 @@
             {{ $attributes->merge(['class' => 'peer sr-only']) }}
         >
         {{-- Track --}}
-        <span class="w-10 h-6 bg-gray-200 peer-checked:bg-indigo-600 rounded-full transition-colors duration-200"></span>
+        <span class="w-10 h-6 bg-gray-200 peer-checked:bg-emerald-700 rounded-full transition-colors duration-200"></span>
         {{-- Thumb --}}
         <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 peer-checked:translate-x-4"></span>
     </span>

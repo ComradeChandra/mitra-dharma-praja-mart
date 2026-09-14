@@ -100,7 +100,7 @@
             x-model.number="jumlah[{{ $product->id }}]"
             value="{{ old('quantity.'.$product->id, 0) }}"
             @disabled(! $bisaDipesan)
-            class="w-20 text-center rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+            class="w-20 text-center rounded-lg border-gray-300 focus:border-emerald-600 focus:ring-emerald-600 text-sm disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
         >
     </div>
 </div>

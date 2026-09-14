@@ -53,7 +53,7 @@
                     <button
                         type="button"
                         x-on:click="tab = '{{ $key }}'"
-                        x-bind:class="tab === '{{ $key }}' ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-100'"
+                        x-bind:class="tab === '{{ $key }}' ? 'bg-emerald-700 text-white' : 'text-gray-500 hover:bg-gray-100'"
                         class="px-3 py-1.5 rounded-lg text-sm font-medium transition"
                     >
                         {{ $label }}
@@ -162,7 +162,7 @@
                                     @foreach ($opd['pemesan'] as $pemesan)
                                         <li class="flex items-center justify-between px-5 py-2.5 text-sm">
                                             <a href="{{ route('admin.orders.show', $pemesan['id']) }}"
-                                               class="text-indigo-600 hover:text-indigo-800 font-medium">
+                                               class="text-emerald-700 hover:text-emerald-900 font-medium">
                                                 {{ $pemesan['nama'] }}
                                             </a>
                                             <span class="text-gray-500">
@@ -186,7 +186,7 @@
 
             {{-- ========== TAB 3: Status belanja anggota ========== --}}
             <div x-show="tab === 'anggota'" x-cloak class="space-y-4">
-                <div class="rounded-lg bg-indigo-50 border border-indigo-100 px-4 py-3 text-sm text-indigo-800">
+                <div class="rounded-lg bg-emerald-50 border border-emerald-100 px-4 py-3 text-sm text-emerald-900">
                     <span class="font-semibold">{{ $anggotaSudah->count() }} dari {{ $memberStatus->count() }}</span>
                     anggota aktif sudah kirim pesanan di periode ini. Daftar "belum" di bawah
                     bisa dipakai buat mengingatkan lewat WhatsApp.
@@ -231,7 +231,7 @@
                                             <span class="mt-0.5 flex justify-end gap-2 text-xs">
                                                 @foreach ($baris['pesanan'] as $pesanan)
                                                     <a href="{{ route('admin.orders.show', $pesanan) }}"
-                                                       class="text-indigo-600 hover:text-indigo-800 font-medium">
+                                                       class="text-emerald-700 hover:text-emerald-900 font-medium">
                                                         {{ $baris['pesanan']->count() > 1 ? $pesanan->created_at->translatedFormat('d M') : 'Lihat' }} →
                                                     </a>
                                                 @endforeach

@@ -25,7 +25,7 @@
 
                     :nilai="$cari"
 
-                    placeholder="Cari nama atau kategori produk"
+                    placeholder="Cari produk atau kategori"
 
                 />
 

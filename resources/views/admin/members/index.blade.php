@@ -20,7 +20,7 @@
                 <x-admin.search-box
                     :action="route('admin.members.index')"
                     :nilai="$cari"
-                    placeholder="Cari nama atau kode anggota"
+                    placeholder="Cari nama atau kode"
                 />
             </div>
 
@@ -42,7 +42,7 @@
                                     <td class="px-6 py-3 whitespace-nowrap">
                                         <div class="flex items-center gap-3">
                                             {{-- Avatar bulat berisi huruf depan nama, biar tabel tidak cuma teks --}}
-                                            <span class="shrink-0 h-8 w-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-semibold">
+                                            <span class="shrink-0 h-8 w-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-semibold">
                                                 {{ Str::upper(Str::substr($member->full_name, 0, 1)) }}
                                             </span>
                                             <span class="text-sm font-medium text-gray-900">{{ $member->full_name }}</span>
