@@ -110,8 +110,11 @@
 
                 {{-- Distribusi per OPD (Modul 6, "per-OPD"). khusus non-anggota,
                      baru bisa dibangun sekarang setelah non-anggota SUDAH FIX
-                     24 Agt 2026 (lihat CLAUDE.md, Lampiran B). --}}
+                     24 Agt 2026 (lihat CLAUDE.md, Lampiran B).
+                     Selebar dua kolom: grafik ketiga di grid dua kolom tadinya
+                     menyisakan sel kosong, dan nama OPD yang panjang jadi lega. --}}
                 <x-admin.chart-card
+                    class="lg:col-span-2"
                     title="Distribusi per OPD"
                     subtitle="Jumlah pesanan non-anggota per OPD · sentuh batang untuk melihat total belanjanya"
                     chartId="opd-chart"

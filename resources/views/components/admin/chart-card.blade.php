@@ -1,8 +1,11 @@
 {{--
-    Kartu pembungkus 1 grafik di dashboard admin — DRY dipakai buat 2 grafik
-    (Keuntungan per Periode & Anggota Paling Sering Belanja) yang layoutnya
-    sama persis (judul, subjudul, area canvas dengan tinggi tetap), biar
-    tidak copy-paste markup kartu yang sama 2x.
+    Kartu pembungkus 1 grafik di dashboard admin — DRY dipakai buat 3 grafik
+    (Keuntungan per Periode, Anggota Paling Sering Belanja, Distribusi per OPD)
+    yang layoutnya sama persis (judul, subjudul, area canvas dengan tinggi
+    tetap), biar tidak copy-paste markup kartu yang sama berkali-kali.
+
+    Class tambahan diteruskan ke kartunya, mis. class="lg:col-span-2" supaya
+    grafik ketiga memenuhi baris bawah dan grid tidak menyisakan sel kosong.
 
     Props:
     - title    : judul grafik
@@ -17,7 +20,7 @@
 --}}
 @props(['title', 'subtitle' => null, 'chartId'])
 
-<x-card class="p-5">
+<x-card {{ $attributes->merge(['class' => 'p-5']) }}>
     <h3 class="font-semibold text-gray-800 text-sm">{{ $title }}</h3>
     @if ($subtitle)
         <p class="text-xs text-gray-400 mb-3">{{ $subtitle }}</p>
