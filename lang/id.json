@@ -1,0 +1,16 @@
+{
+    "Showing": "Menampilkan",
+    "to": "sampai",
+    "of": "dari",
+    "results": "data",
+    "Pagination Navigation": "Navigasi halaman",
+    "Go to page :page": "Ke halaman :page",
+    "Unauthorized": "Kamu belum masuk",
+    "Payment Required": "Pembayaran diperlukan",
+    "Forbidden": "Kamu tidak punya akses ke halaman ini",
+    "Not Found": "Halaman tidak ditemukan",
+    "Page Expired": "Halaman sudah kedaluwarsa",
+    "Too Many Requests": "Terlalu banyak percobaan",
+    "Server Error": "Terjadi kesalahan di server",
+    "Service Unavailable": "Aplikasi sedang dalam perbaikan"
+}
