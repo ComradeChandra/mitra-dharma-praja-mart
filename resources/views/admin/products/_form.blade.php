@@ -24,13 +24,7 @@
             <img src="{{ \Illuminate\Support\Facades\Storage::url($product->image_path) }}" alt="{{ $product->name }}" class="h-20 w-20 object-cover rounded-lg border border-gray-200 mb-3">
         @endif
 
-        <input
-            id="image"
-            name="image"
-            type="file"
-            accept="image/jpeg,image/png"
-            class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-        >
+        <x-file-input name="image" accept="image/jpeg,image/png" />
         <p class="mt-1.5 text-xs text-gray-400">Opsional — JPG/PNG, maksimal 2MB.</p>
         <x-input-error :messages="$errors->get('image')" class="mt-2" />
     </div>

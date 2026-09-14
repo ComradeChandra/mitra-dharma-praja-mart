@@ -44,13 +44,7 @@
 
                     <div class="min-w-0 flex-1">
                         <x-input-label for="photo" value="Foto Profil" />
-                        <input
-                            id="photo"
-                            name="photo"
-                            type="file"
-                            accept="image/*"
-                            class="mt-1 block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
-                        >
+                        <x-file-input name="photo" accept="image/*" class="mt-1" />
                         <p class="mt-1 text-xs text-gray-400">JPG, PNG, atau WEBP. Maksimal 2 MB. Boleh dikosongkan.</p>
                         <x-input-error :messages="$errors->get('photo')" class="mt-2" />
                     </div>

@@ -90,6 +90,7 @@
 
             <p class="mt-3 text-xs text-gray-500 text-center leading-relaxed">
                 Pindai dengan aplikasi apa pun yang berlogo QRIS, lalu masukkan nominal di atas.
+                Kalau membuka dari HP, simpan gambarnya lalu pilih dari galeri di aplikasi pembayaranmu.
             </p>
 
             {{--
@@ -102,13 +103,7 @@
 
                 <div>
                     <x-input-label for="payment_proof" value="Bukti transfer (boleh dikosongkan)" />
-                    <input
-                        id="payment_proof"
-                        name="payment_proof"
-                        type="file"
-                        accept="image/jpeg,image/png"
-                        class="mt-1 block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
-                    >
+                    <x-file-input name="payment_proof" accept="image/jpeg,image/png" class="mt-1" />
                     <p class="mt-1 text-xs text-gray-400">
                         Kalau dilampirkan, pengurus lebih cepat mencocokkannya. JPG atau PNG, maksimal 2MB.
                     </p>
