@@ -92,6 +92,7 @@ async function renderComboChart(canvasId) {
                     backgroundColor: bar.color,
                     borderRadius: 6,
                     yAxisID: 'y',
+                    order: 1,
                 })),
                 {
                     type: 'line',
@@ -101,6 +102,10 @@ async function renderComboChart(canvasId) {
                     backgroundColor: data.line.color,
                     tension: 0.3,
                     yAxisID: pakaiSumbuKedua ? 'y1' : 'y',
+                    // Chart.js menggambar dataset ber-order kecil paling atas.
+                    // Tanpa ini garisnya tertimpa batang, dan di grafik yang
+                    // batangnya tinggi semua garisnya nyaris tidak kelihatan.
+                    order: 0,
                 },
             ],
         },

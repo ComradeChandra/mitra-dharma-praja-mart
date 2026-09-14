@@ -49,6 +49,23 @@
 .nav-pop-in > *:nth-child(7) { animation-delay: 240ms; }
 .nav-pop-in > *:nth-child(8) { animation-delay: 280ms; }
 
+/* Hormati setelan "kurangi animasi" di HP/laptop pengguna. Sebagian orang
+   pusing melihat gerakan di layar dan sengaja menyalakan setelan ini; tanpa
+   aturan di bawah, animasi pop-in dan transisi tetap jalan buat mereka.
+   Durasinya dibuat nyaris nol (bukan dimatikan), supaya elemen tetap sampai
+   ke keadaan akhirnya dan tidak tertinggal tak terlihat. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 /* --------------------------------------------------------------------------
    Aturan cetak — dipakai halaman struk pemesanan
    (resources/views/struk/show.blade.php).

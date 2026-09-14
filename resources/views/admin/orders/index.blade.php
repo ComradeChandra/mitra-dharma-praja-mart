@@ -7,11 +7,17 @@
     </x-slot>
 
     <div class="py-10">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+        {{-- 6xl, bukan 5xl: sejak ada kolom "Bayar", tabelnya lebih lebar dari
+             5xl dan tombol "Lihat" terpotong di laptop 1366px. --}}
+        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
             <x-alert type="success" :message="session('success')" />
 
             {{-- Tab filter status, link sederhana pakai query string, bukan JS/Alpine,
-                 biar hasil filternya juga langsung ke-bookmark/refresh dengan benar. --}}
+                 biar hasil filternya juga langsung ke-bookmark/refresh dengan benar.
+
+                 Pembandingnya pakai ($status ?? ''): kunci array null di PHP otomatis
+                 jadi string kosong, jadi $value untuk "Semua" itu "", bukan null.
+                 Tanpa ini tab "Semua" tidak pernah tersorot. --}}
             <div class="flex items-center gap-1 mb-4">
                 @foreach ([
                     null => 'Semua',
@@ -23,7 +29,7 @@
                          pas halaman kebuka, lihat @keyframes di resources/css/app.css --}}
                     <a
                         href="{{ route('admin.orders.index', array_filter(['status' => $value, 'bayar' => $statusBayar])) }}"
-                        class="px-3 py-1.5 rounded-lg text-sm font-medium transition animate-[pop-in_0.3s_ease-out_backwards] {{ $status === $value ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-100' }}"
+                        class="px-3 py-1.5 rounded-lg text-sm font-medium transition animate-[pop-in_0.3s_ease-out_backwards] {{ ($status ?? '') === $value ? 'bg-indigo-600 text-white' : 'text-gray-500 hover:bg-gray-100' }}"
                         style="animation-delay: {{ $loop->index * 40 }}ms"
                     >
                         {{ $label }}
@@ -45,7 +51,7 @@
                 ] as $value => $label)
                     <a
                         href="{{ route('admin.orders.index', array_filter(['status' => $status, 'bayar' => $value])) }}"
-                        class="px-3 py-1.5 rounded-lg text-sm font-medium transition {{ $statusBayar === $value ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-gray-100' }}"
+                        class="px-3 py-1.5 rounded-lg text-sm font-medium transition {{ ($statusBayar ?? '') === $value ? 'bg-emerald-600 text-white' : 'text-gray-500 hover:bg-gray-100' }}"
                     >
                         {{ $label }}
                     </a>

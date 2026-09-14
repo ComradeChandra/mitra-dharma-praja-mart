@@ -105,9 +105,11 @@ test('nama & nomor WA wajib diisi buat non-anggota (tidak punya akun tersimpan)'
     $this->assertDatabaseCount('orders', 0);
 });
 
-test('BEDA dari anggota: non-anggota BOLEH kirim lebih dari 1 pesanan di periode yang sama', function () {
-    // Kode akses OPD dipakai bersama banyak staf, jadi "1 pesanan per periode"
-    // tidak berlaku (beda dari anggota yang 1 akun = 1 pesanan per periode).
+test('non-anggota BOLEH kirim lebih dari 1 pesanan di periode yang sama', function () {
+    // Kode akses OPD dipakai bersama banyak staf, jadi satu sesi OPD wajar
+    // mengirim beberapa pesanan atas nama orang yang berbeda. Anggota juga
+    // boleh memesan lebih dari sekali (lihat tests/Feature/Member/OrderTest),
+    // aturan "1 pesanan per periode" sudah lama dicabut.
     $this->withSession(sesiNonAnggota($this->opd))->post(route('non-member.orders.store'), [
         'delivery_method' => 'ambil',
         'non_member_name' => 'Teh Teti',

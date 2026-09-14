@@ -210,7 +210,7 @@
 
                         <x-admin.stat-card
                             label="Lihat Katalog"
-                            value="↗"
+                            value="Buka"
                             hint="Tampilan publik"
                             :href="route('catalog.index')"
                             color="violet"
@@ -382,10 +382,6 @@
                         </div>
                     </x-card>
 
-                    <div class="rounded-xl border border-dashed border-gray-200 p-4 text-center text-sm text-gray-400">
-                        Modul verifikasi harga fluktuatif, invoice WhatsApp, dan permintaan produk
-                        non-anggota akan menyusul di tahap berikutnya.
-                    </div>
                 </div>
             </div>
         </div>

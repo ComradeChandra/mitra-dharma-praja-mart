@@ -202,3 +202,20 @@ test('admin bisa lihat rekap belanja grosir 1 periode', function () {
         ->assertSee('Telur Ayam 1kg')
         ->assertSee('2'); // jumlah dibutuhkan
 });
+
+test('tab "Semua" tersorot saat daftar pesanan dibuka tanpa penyaring', function () {
+    // Kunci array null di PHP berubah jadi string kosong, jadi dulu tab
+    // "Semua" tidak pernah dianggap aktif: pengurus membuka halaman dan
+    // tidak ada satu tab pun yang tersorot.
+    $html = $this->actingAs($this->admin)->get(route('admin.orders.index'))->getContent();
+
+    expect($html)->toMatch('/bg-indigo-600 text-white[^>]*>\s*Semua\s*</');
+    expect($html)->toMatch('/bg-emerald-600 text-white[^>]*>\s*Semua\s*</');
+});
+
+test('tab penyaring yang dipilih tersorot, tab "Semua" tidak', function () {
+    $html = $this->actingAs($this->admin)->get(route('admin.orders.index', ['status' => 'pending']))->getContent();
+
+    expect($html)->toMatch('/bg-indigo-600 text-white[^>]*>\s*Menunggu Verifikasi\s*</');
+    expect($html)->not->toMatch('/bg-indigo-600 text-white[^>]*>\s*Semua\s*</');
+});
