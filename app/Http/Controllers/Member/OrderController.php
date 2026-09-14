@@ -16,8 +16,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
-
-
 /**
  * Pemesanan oleh anggota (Modul 3). Anggota mengisi jumlah langsung di daftar
  * produk, tanpa keranjang, lalu kirim. Statusnya pending, atau langsung
@@ -51,6 +49,11 @@ class OrderController extends Controller
             // Alamat tersimpan anggota, dipakai sebagai isian awal kolom
             // alamat pengantaran, tapi tetap boleh diubah per pesanan.
             'alamatTersimpan' => $member->address,
+            // Pesanan yang sudah terkirim di periode ini, ditampilkan di atas
+            // form supaya orang tidak mengirim ulang karena mengira gagal.
+            'pesananTerkirim' => $period
+                ? $member->orders()->where('order_period_id', $period->id)->latest()->get()
+                : collect(),
         ]);
     }
 

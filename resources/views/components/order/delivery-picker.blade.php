@@ -46,6 +46,9 @@
                     name="delivery_method"
                     value="{{ $metode->value }}"
                     x-model="cara"
+                    {{-- dibaca jendela konfirmasi sebelum kirim (x-order.confirm-dialog) --}}
+                    data-label="{{ $metode->label() }}"
+                    data-butuh-alamat="{{ $metode->butuhAlamat() ? '1' : '0' }}"
                     class="mt-0.5 text-emerald-600 focus:ring-emerald-500 border-gray-300"
                 >
                 <span class="min-w-0">

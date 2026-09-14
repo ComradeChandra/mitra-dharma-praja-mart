@@ -51,7 +51,17 @@ class OrderController extends Controller
             ? Product::aktif()->orderBy('name')->get()->groupBy('category')
             : collect();
 
-        return view('non-member.orders.create', compact('opd', 'period', 'productsByCategory'));
+        // Cuma pesanan yang dikirim dari sesi ini. Kode akses OPD dipakai
+        // sekantor, jadi pesanan OPD yang sama belum tentu milik orang ini.
+        $pesananTerkirim = $period
+            ? Order::whereIn('id', $this->sesiNonAnggota->daftarPesanan())
+                ->where('opd_id', $opd->id)
+                ->where('order_period_id', $period->id)
+                ->latest()
+                ->get()
+            : collect();
+
+        return view('non-member.orders.create', compact('opd', 'period', 'productsByCategory', 'pesananTerkirim'));
     }
 
     /**

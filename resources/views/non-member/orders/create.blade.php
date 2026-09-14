@@ -7,6 +7,7 @@
         :products-by-category="$productsByCategory"
         :action="route('non-member.orders.store')"
         :batal="route('catalog.index')"
+        :pesanan-terkirim="$pesananTerkirim"
     >
         <x-slot:identitas>
             {{-- Nama & nomor WA diketik manual, dipakai admin buat kirim invoice --}}

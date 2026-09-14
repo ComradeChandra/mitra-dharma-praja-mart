@@ -3,9 +3,10 @@
 // (non-member/orders/create.blade.php).
 //
 // Semua produk tetap dirender server seperti biasa; file ini cuma
-// menyembunyikan/menampilkan baris yang tidak cocok dan menghitung ringkasan
-// di bawah. Jadi kalau JavaScript mati, halamannya masih utuh dan tetap bisa
-// dipakai memesan, cuma tanpa fitur cari dan tanpa ringkasan.
+// menyembunyikan/menampilkan baris yang tidak cocok, menghitung ringkasan di
+// bawah, dan membuka jendela konfirmasi sebelum kirim. Jadi kalau JavaScript
+// mati, halamannya masih utuh dan tetap bisa dipakai memesan, cuma tanpa
+// fitur cari, ringkasan, dan konfirmasi.
 
 import Alpine from 'alpinejs';
 
@@ -27,6 +28,32 @@ Alpine.data('formPesan', () => ({
     // katalog: salinan ringkas semua produk di halaman ini, dipakai buat tahu
     // apakah pencarian sama sekali tidak menemukan apa-apa
     katalog: [],
+
+    // --- jendela konfirmasi sebelum kirim (x-order.confirm-dialog)
+    konfirmasiTerbuka: false,
+    // true sesaat setelah "Ya, kirim pesanan" ditekan, supaya periksaDulu()
+    // tidak membuka jendelanya lagi waktu form benar-benar dikirim.
+    sudahDikonfirmasi: false,
+    // cara terima & identitas pemesan, dibaca dari form saat jendela dibuka
+    ringkasKirim: { cara: '', butuhAlamat: false, alamat: '', nama: '', wa: '' },
+    // Kapan jendela konfirmasi terakhir dibuka. Di HP jendelanya muncul dari
+    // bawah, tepat di posisi tombol "Kirim Pesanan", jadi ketukan kedua dari
+    // ketukan ganda bisa jatuh di "Ya, kirim pesanan" dan langsung mengirim
+    // tanpa sempat dibaca. Klik yang datang sesaat setelah jendela muncul
+    // diabaikan (lihat baruSajaDibuka()).
+    dibukaPada: 0,
+
+    init() {
+        // Browser bisa memulihkan halaman ini utuh dari cache waktu orang
+        // menekan "kembali" setelah mengirim, lengkap dengan angka yang
+        // terakhir diisi. Form pesan selalu dimulai bersih, supaya barang dari
+        // pesanan sebelumnya tidak ikut terkirim lagi tanpa disadari.
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                this.kosongkan();
+            }
+        });
+    },
 
     /**
      * Dipanggil sekali per baris produk lewat x-init. Tiap baris mendaftarkan
@@ -106,6 +133,93 @@ Alpine.data('formPesan', () => ({
     /** Kosongkan satu baris dari ringkasan, tanpa perlu mencarinya lagi. */
     hapusPilihan(id) {
         this.jumlah[id] = 0;
+    },
+
+    /**
+     * Dipanggil setiap kali form pesan akan terkirim. Kiriman pertama ditahan
+     * dan diganti jendela konfirmasi; baru setelah "Ya, kirim pesanan" form
+     * benar-benar dikirim lewat kirimSekarang().
+     */
+    periksaDulu(event) {
+        if (this.sudahDikonfirmasi) {
+            return;
+        }
+
+        // Belum ada yang diisi: biarkan terkirim supaya server yang menjawab
+        // "pilih minimal satu produk", sama seperti kalau JavaScript mati.
+        if (this.banyakDipilih === 0) {
+            return;
+        }
+
+        event.preventDefault();
+        this.ringkasKirim = this.bacaRingkasKirim(event.target);
+        this.konfirmasiTerbuka = true;
+        this.dibukaPada = Date.now();
+        this.$nextTick(() => this.$refs.tombolKirimFinal?.focus());
+    },
+
+    /**
+     * Cara terima dan identitas tidak disimpan di komponen ini (dipegang
+     * x-order.delivery-picker dan kolom identitas non-anggota), jadi dibaca
+     * langsung dari isian form saat jendela konfirmasi dibuka.
+     */
+    bacaRingkasKirim(form) {
+        const cara = form.querySelector('input[name="delivery_method"]:checked');
+        const nilai = (nama) => (form.querySelector(`[name="${nama}"]`)?.value ?? '').trim();
+
+        return {
+            cara: cara ? cara.dataset.label : '',
+            butuhAlamat: cara ? cara.dataset.butuhAlamat === '1' : false,
+            alamat: nilai('delivery_address'),
+            nama: nilai('non_member_name'),
+            wa: nilai('whatsapp_number'),
+        };
+    },
+
+    /** Jendela konfirmasi baru muncul kurang dari setengah detik lalu. */
+    baruSajaDibuka() {
+        return Date.now() - this.dibukaPada < 500;
+    },
+
+    tutupKonfirmasi() {
+        if (this.baruSajaDibuka()) {
+            return;
+        }
+
+        this.konfirmasiTerbuka = false;
+    },
+
+    kirimSekarang() {
+        if (this.baruSajaDibuka()) {
+            return;
+        }
+
+        const form = this.$refs.formPesan;
+
+        this.sudahDikonfirmasi = true;
+        this.konfirmasiTerbuka = false;
+
+        // requestSubmit(), bukan submit(): yang pertama ikut memicu event
+        // submit, jadi penahan kirim ganda (cegah-kirim-ganda.js) tetap jalan.
+        if (typeof form.requestSubmit === 'function') {
+            form.requestSubmit();
+        } else {
+            form.submit();
+        }
+
+        // Pengirimannya bisa tertahan browser, mis. kolom wajib belum diisi.
+        // Kalau begitu, percobaan berikutnya harus lewat konfirmasi lagi.
+        this.sudahDikonfirmasi = false;
+    },
+
+    /** Kembalikan semua jumlah ke nol dan tutup jendela yang terbuka. */
+    kosongkan() {
+        Object.keys(this.jumlah).forEach((id) => {
+            this.jumlah[id] = 0;
+        });
+        this.konfirmasiTerbuka = false;
+        this.sudahDikonfirmasi = false;
+        this.rincianTerbuka = false;
     },
 
     /** Berapa jenis produk yang jumlahnya sudah diisi. */

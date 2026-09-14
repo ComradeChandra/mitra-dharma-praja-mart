@@ -7,6 +7,7 @@
         :action="route('member.orders.store')"
         :batal="route('member.dashboard')"
         :alamat-tersimpan="$alamatTersimpan"
+        :pesanan-terkirim="$pesananTerkirim"
         keterangan="Isi jumlah produk yang mau kamu pesan, lalu kirim sekaligus."
     />
 </x-layouts.member>

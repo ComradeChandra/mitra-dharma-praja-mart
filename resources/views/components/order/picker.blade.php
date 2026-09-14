@@ -22,6 +22,7 @@
     - batal             : URL tombol "Batal"
     - alamatTersimpan   : alamat bawaan pemesan (anggota punya, non-anggota tidak)
     - keterangan        : kalimat pendek di bawah judul
+    - pesananTerkirim   : pesanan yang sudah dikirim pemesan ini di periode berjalan
 
     Slot opsional:
     - identitas : kolom tambahan sebelum daftar produk (dipakai non-anggota
@@ -35,6 +36,7 @@
     'alamatTersimpan' => null,
     'keterangan' => 'Isi jumlah produk yang mau dipesan, lalu kirim sekaligus.',
     'identitas' => null,
+    'pesananTerkirim' => collect(),
 ])
 
 <div x-data="formPesan" class="max-w-3xl lg:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -61,7 +63,19 @@
             Periode "{{ $period->label }}" dibuka sampai {{ $period->end_date->format('d M Y') }}
         </div>
 
-        <form method="POST" action="{{ $action }}">
+        <x-order.sent-orders :orders="$pesananTerkirim" />
+
+        {{--
+            autocomplete="off": tanpa ini, menekan tombol "kembali" setelah
+            mengirim membuat browser mengisi ulang angka lama ke kotak jumlah,
+            padahal ringkasannya bilang 0. Sudah dibuktikan: orang menambah satu
+            barang lalu mengirim, dan barang dari pesanan sebelumnya ikut
+            terkirim lagi tanpa kelihatan di ringkasan.
+
+            @submit: pesanan tidak langsung terkirim, tapi dibukakan jendela
+            konfirmasi dulu (lihat periksaDulu() di resources/js/order-form.js).
+        --}}
+        <form method="POST" action="{{ $action }}" autocomplete="off" x-ref="formPesan" @submit="periksaDulu($event)">
             @csrf
 
             {{ $identitas }}
@@ -123,5 +137,7 @@
                 @endif
             </div>
         </form>
+
+        <x-order.confirm-dialog />
     @endif
 </div>

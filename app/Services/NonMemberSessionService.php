@@ -64,7 +64,19 @@ class NonMemberSessionService
     /** Pesanan ini dibuat di sesi berjalan atau bukan. */
     public function pesanannya(int $orderId): bool
     {
-        return in_array($orderId, Session::get(self::KUNCI_PESANAN, []), true);
+        return in_array($orderId, $this->daftarPesanan(), true);
+    }
+
+    /**
+     * Semua id pesanan yang tercatat di sesi berjalan. Dipakai form pesan
+     * buat memberi tahu pesanan mana saja yang sudah terkirim, supaya orang
+     * yang panik lalu me-refresh saat mengirim tidak mengulang pesanannya.
+     *
+     * @return array<int, int>
+     */
+    public function daftarPesanan(): array
+    {
+        return Session::get(self::KUNCI_PESANAN, []);
     }
 
     /** Cek sesi saja, tanpa menyentuh database. */
