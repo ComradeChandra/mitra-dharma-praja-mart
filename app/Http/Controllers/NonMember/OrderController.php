@@ -11,12 +11,12 @@ use App\Models\Order;
 use App\Models\OrderPeriod;
 use App\Models\Product;
 use App\Services\NonMemberSessionService;
+use App\Services\OrderLinkService;
 use App\Services\OrderService;
 use App\Services\WhatsAppInvoiceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
 
 /**
@@ -35,6 +35,7 @@ class OrderController extends Controller
         private OrderService $orderService,
         private NonMemberSessionService $sesiNonAnggota,
         private WhatsAppInvoiceService $whatsAppInvoiceService,
+        private OrderLinkService $tautanPesanan,
     ) {}
 
     /**
@@ -83,7 +84,7 @@ class OrderController extends Controller
         $this->sesiNonAnggota->catatPesanan($order->id);
 
         return redirect()
-            ->to($this->tautanPesanan($order))
+            ->to($this->tautanPesanan->untukPemesan($order))
             ->with('success', 'Pesanan berhasil dikirim! Koperasi akan belanjakan barangnya setelah periode ditutup.');
     }
 
@@ -121,7 +122,7 @@ class OrderController extends Controller
         return view('struk.show', [
             'order' => $order,
             'tautanWhatsApp' => $tautanWhatsApp,
-            'kembali' => $this->tautanPesanan($order),
+            'kembali' => $this->tautanPesanan->untukPemesan($order),
         ]);
     }
 
@@ -135,7 +136,7 @@ class OrderController extends Controller
         $this->orderService->declarePaid($order, $request->file('payment_proof'));
 
         return redirect()
-            ->to($this->tautanPesanan($order))
+            ->to($this->tautanPesanan->untukPemesan($order))
             ->with('success', 'Terima kasih. Pembayaran akan dicocokkan pengurus dengan rekening koperasi.');
     }
 
@@ -154,24 +155,6 @@ class OrderController extends Controller
         abort_unless(Storage::disk('local')->exists($order->payment_proof_path), 404);
 
         return Storage::disk('local')->response($order->payment_proof_path);
-    }
-
-    /**
-     * Tautan permanen ke halaman pesanan, dibubuhi tanda tangan.
-     *
-     * KENAPA PERLU: sesi cuma bertahan 2 jam, sedangkan pembayaran baru
-     * dilakukan setelah pengurus mengirim invoice — bisa beberapa hari
-     * kemudian. Tanpa ini, non-anggota tidak punya jalan sah untuk membuka
-     * lagi pesanannya sendiri, karena dia tidak punya akun personal dan tidak
-     * punya halaman riwayat.
-     *
-     * Tanda tangannya dihitung dari URL + APP_KEY, jadi tidak bisa dikarang
-     * sendiri oleh rekan sekantor yang cuma menaikkan angka di URL. Sengaja
-     * tanpa masa berlaku, karena pesanan lama pun masih boleh dilihat pemesan.
-     */
-    private function tautanPesanan(Order $order): string
-    {
-        return URL::signedRoute('non-member.orders.show', $order);
     }
 
     /**

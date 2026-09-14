@@ -13,16 +13,26 @@ use App\Models\Order;
  */
 class WhatsAppInvoiceService
 {
+    public function __construct(private OrderLinkService $tautanPesanan) {}
+
     /**
      * Teks invoice, siap ditempel ke WhatsApp. Isinya ditentukan di template
      * Blade admin/orders/_invoice-text.blade.php (bukan digabung manual di
      * sini) biar gampang diubah kata-katanya tanpa sentuh kode PHP.
+     *
+     * Tautan ke halaman pesanan ikut dikirim karena di halaman itulah QRIS
+     * dan tombol "Saya sudah bayar" berada. Invoice adalah pesan yang
+     * memberi tahu pemesan berapa yang harus dibayar, jadi di situ juga
+     * seharusnya dia tahu cara membayarnya.
      */
     public function generateInvoiceText(Order $order): string
     {
         $order->loadMissing('orderItems.product', 'member', 'orderPeriod');
 
-        return trim(view('admin.orders._invoice-text', ['order' => $order])->render());
+        return trim(view('admin.orders._invoice-text', [
+            'order' => $order,
+            'tautanPesanan' => $this->tautanPesanan->untukPemesan($order),
+        ])->render());
     }
 
     /**

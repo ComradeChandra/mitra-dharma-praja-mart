@@ -78,8 +78,10 @@
         </div>
 
         <p class="mt-4 text-xs text-gray-400 text-center">
-            Simpan halaman ini sebagai bukti pesanan. Invoice lengkap akan dikirim admin
-            lewat WhatsApp ke nomor yang kamu daftarkan.
+            {{-- Non-anggota tidak punya halaman riwayat pesanan, jadi mereka perlu
+                 tahu jalan kembalinya: tautan di invoice WhatsApp. --}}
+            Simpan halaman ini sebagai bukti pesanan. Invoice lengkap beserta tautan untuk
+            membayar akan dikirim pengurus lewat WhatsApp ke nomor yang kamu isi.
         </p>
     </div>
 </x-layouts.non-member>

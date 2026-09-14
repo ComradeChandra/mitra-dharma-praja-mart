@@ -2,12 +2,15 @@
 
 use App\Enums\OrderPeriodStatus;
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\UserType;
 use App\Models\Member;
+use App\Models\OpdDepartment;
 use App\Models\Order;
 use App\Models\OrderPeriod;
 use App\Models\Product;
 use App\Services\WhatsAppInvoiceService;
+use Illuminate\Support\Facades\URL;
 
 beforeEach(function () {
     $this->periode = OrderPeriod::create([
@@ -77,4 +80,65 @@ test('generateWhatsAppLink meng-encode teks invoice biar aman jadi query string 
     // Spasi & baris baru di teks invoice harus sudah ke-encode (bukan mentah)
     expect($link)->not->toContain(' Siti Nurhaliza ');
     expect(urldecode(explode('?text=', $link)[1]))->toContain('Siti Nurhaliza');
+});
+
+test('teks invoice tidak mengubah apostrof dan & jadi kode HTML', function () {
+    // Invoice ini teks polos buat WhatsApp. Kalau dicetak pakai {{ }}, nama
+    // "Nur'aini" sampai di WhatsApp sebagai "Nur&#039;aini". Nama berapostrof
+    // umum sekali, jadi ini pasti kena begitu data anggota asli masuk.
+    $this->member->update(['full_name' => "Nur'aini"]);
+    $this->order->update(['delivery_address' => 'Jl. Kenanga & Melati No. 5']);
+
+    $teks = $this->service->generateInvoiceText($this->order->fresh());
+
+    expect($teks)
+        ->toContain("Nama: Nur'aini")
+        ->toContain('Alamat: Jl. Kenanga & Melati No. 5')
+        ->not->toContain('&#039;')
+        ->not->toContain('&amp;');
+});
+
+test('invoice anggota yang belum bayar menyertakan tautan ke halaman bayar', function () {
+    // Invoice memberi tahu berapa yang harus dibayar, jadi di situ juga harus
+    // ada cara membayarnya. QRIS dan tombol "Saya sudah bayar" ada di halaman
+    // pesanan, jadi tautannya yang dikirim.
+    $teks = $this->service->generateInvoiceText($this->order);
+
+    expect($teks)
+        ->toContain('Cara bayar')
+        ->toContain(route('member.orders.show', $this->order));
+});
+
+test('invoice non-anggota menyertakan tautan bertanda tangan yang benar-benar bisa dibuka', function () {
+    // Non-anggota tidak punya akun maupun riwayat pesanan, jadi tautan di
+    // invoice inilah jalan kembalinya ke halaman bayar setelah sesinya habis.
+    $opd = OpdDepartment::create(['name' => 'Dinas Pendidikan', 'access_code' => 'opd12345']);
+    $pesanan = Order::create([
+        'order_period_id' => $this->periode->id,
+        'user_type' => UserType::NonMember,
+        'non_member_name' => 'Teh Teti',
+        'opd_id' => $opd->id,
+        'whatsapp_number' => '628199988877',
+        'status' => OrderStatus::Verified,
+        'total_amount' => 70000,
+    ]);
+    $pesanan->orderItems()->create(['product_id' => $this->beras->id, 'quantity' => 1, 'price_at_order' => 70000]);
+
+    $teks = $this->service->generateInvoiceText($pesanan);
+    $tautan = URL::signedRoute('non-member.orders.show', $pesanan);
+
+    expect($teks)->toContain($tautan);
+
+    // Dibuka dari sesi yang belum pernah mencatat pesanan ini: tetap masuk.
+    $this->withSession(['non_member_opd_id' => $opd->id])->get($tautan)->assertOk();
+});
+
+test('invoice pesanan yang sudah lunas tidak lagi menyuruh membayar', function () {
+    $this->order->update(['payment_status' => PaymentStatus::Paid]);
+
+    $teks = $this->service->generateInvoiceText($this->order->fresh());
+
+    expect($teks)
+        ->toContain('Lunas')
+        ->not->toContain('Cara bayar');
 });
