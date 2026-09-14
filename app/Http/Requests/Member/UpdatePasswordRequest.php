@@ -26,7 +26,9 @@ class UpdatePasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'current_password' => ['required', 'current_password:member'],
+            // bail + string: isian berupa larik berhenti di sini, tidak sampai
+            // ke pemeriksa password yang cuma menerima teks (error server).
+            'current_password' => ['bail', 'required', 'string', 'current_password:member'],
             'password' => ['required', 'confirmed', Password::defaults()],
         ];
     }

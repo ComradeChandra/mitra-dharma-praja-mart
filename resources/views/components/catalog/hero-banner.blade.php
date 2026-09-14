@@ -29,7 +29,7 @@
         <div class="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-sm">
             @if ($openPeriod)
                 <span class="h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
-                Periode "{{ $openPeriod->label }}" dibuka sampai {{ $openPeriod->end_date->format('d M Y') }}
+                Periode "{{ $openPeriod->label }}" dibuka sampai {{ $openPeriod->end_date->translatedFormat('d M Y') }}
             @else
                 <span class="h-2 w-2 rounded-full bg-gray-300"></span>
                 Belum ada periode pemesanan yang sedang dibuka saat ini

@@ -23,7 +23,7 @@ Route::middleware('guest')->group(function () {
 });
 
 // Middleware 'auth': hanya bisa diakses kalau sudah login.
-Route::middleware('auth')->group(function () {
+Route::middleware('auth:web')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });

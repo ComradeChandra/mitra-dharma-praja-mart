@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Concerns\NormalizesWhatsAppNumber;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -10,6 +11,8 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class StoreMemberRequest extends FormRequest
 {
+    use NormalizesWhatsAppNumber;
+
     public function authorize(): bool
     {
         return true;

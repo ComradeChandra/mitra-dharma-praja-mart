@@ -41,7 +41,11 @@ Route::get('/', function () {
 | anggota/non-anggota (yang tanpa password). Halaman ini akan bertambah
 | terus di Tahap 2 (Modul Admin): produk, anggota, OPD, periode, dst.
 */
-Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
+// auth:web, bukan auth saja: "auth" berarti guard bawaan, dan keamanan area
+// admin tidak boleh bergantung pada setelan bawaan itu. Di aplikasi yang jalan
+// hasilnya sama (guard bawaannya web), tapi di tes, actingAs($anggota, 'member')
+// mengganti guard bawaan dan membuat anggota tampak bisa masuk admin.
+Route::middleware('auth:web')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Route::resource otomatis bikin 7 route standar (index, create, store, edit,

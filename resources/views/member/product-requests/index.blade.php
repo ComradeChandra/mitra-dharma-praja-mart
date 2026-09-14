@@ -17,7 +17,7 @@
                 <div class="flex items-center justify-between gap-4 px-5 py-4 {{ ! $loop->last ? 'border-b border-gray-50' : '' }}">
                     <div class="min-w-0">
                         <p class="text-sm font-medium text-gray-800 truncate">{{ $productRequest->product_name }}</p>
-                        <p class="text-xs text-gray-400">{{ $productRequest->created_at->format('d M Y') }}</p>
+                        <p class="text-xs text-gray-400">{{ $productRequest->created_at->translatedFormat('d M Y') }}</p>
                     </div>
                     <x-admin.badge :color="$productRequest->status->badgeColor()">
                         {{ $productRequest->status->label() }}

@@ -37,7 +37,7 @@
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{{ $orderPeriod->label }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $orderPeriod->start_date->format('d M Y') }} – {{ $orderPeriod->end_date->format('d M Y') }}
+                                        {{ $orderPeriod->start_date->translatedFormat('d M Y') }} – {{ $orderPeriod->end_date->translatedFormat('d M Y') }}
                                     </td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm">
                                         <x-admin.badge :color="$isOpen ? 'green' : 'gray'">

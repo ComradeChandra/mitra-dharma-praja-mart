@@ -63,14 +63,24 @@ test('anggota TIDAK bisa mengubah nama & kode anggotanya sendiri', function () {
     expect($segar->member_code)->toBe('0001 A');
 });
 
-test('nomor WhatsApp wajib diisi & hanya boleh angka', function () {
+test('nomor WhatsApp wajib diisi & tidak boleh berisi huruf', function () {
     $this->actingAs($this->anggota, 'member')
         ->patch(route('member.profile.update'), ['whatsapp_number' => ''])
         ->assertSessionHasErrors('whatsapp_number');
 
     $this->actingAs($this->anggota, 'member')
-        ->patch(route('member.profile.update'), ['whatsapp_number' => '+62 812-3456'])
+        ->patch(route('member.profile.update'), ['whatsapp_number' => 'nomor saya 0812'])
         ->assertSessionHasErrors('whatsapp_number');
+});
+
+test('nomor WhatsApp berformat (+62, spasi, strip) diterima dan dirapikan', function () {
+    // Dulu "+62 812-3456" ditolak padahal nomornya benar; begitulah orang
+    // biasa mengetik nomor. Sekarang dirapikan dulu sebelum divalidasi.
+    $this->actingAs($this->anggota, 'member')
+        ->patch(route('member.profile.update'), ['whatsapp_number' => '+62 812-3456'])
+        ->assertSessionHasNoErrors();
+
+    expect($this->anggota->fresh()->whatsapp_number)->toBe('628123456');
 });
 
 test('anggota bisa mengunggah foto profil', function () {

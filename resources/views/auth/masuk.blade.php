@@ -13,11 +13,14 @@
 @php
     // Peran yang aktif saat halaman pertama dimuat. Dipakai buat menentukan
     // form mana yang inputnya hidup sejak awal, tidak menunggu Alpine jalan.
-    $peranAwal = old('peran', 'anggota');
+    // Nilai lama dari form yang gagal validasi dicetak ke dalam kode Alpine,
+    // jadi dibatasi ke nilai yang sah dan dicetak lewat Js::from. Isian yang
+    // dimanipulasi (teks aneh, larik) tidak boleh ikut masuk ke JavaScript.
+    $peranAwal = in_array(old('peran'), ['anggota', 'non-anggota', 'pengurus'], true) ? old('peran') : 'anggota';
 @endphp
 
 <x-guest-layout :title="'Masuk — ' . config('app.name')" subtitle="Koperasi Mitra Dharma Praja">
-    <div x-data="{ peran: '{{ $peranAwal }}' }">
+    <div x-data="{ peran: {{ \Illuminate\Support\Js::from($peranAwal) }} }">
 
         <div class="mb-5">
             <x-input-label for="peran" value="Masuk sebagai" />

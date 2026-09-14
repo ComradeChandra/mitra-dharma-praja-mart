@@ -24,7 +24,8 @@ Route::prefix('anggota')->name('member.')->group(function () {
     });
 
     // Middleware 'auth:member': cuma bisa diakses kalau sudah login sebagai anggota
-    Route::middleware('auth:member')->group(function () {
+    // member.aktif: anggota yang dinonaktifkan saat masih login ikut dikeluarkan
+    Route::middleware(['auth:member', 'member.aktif'])->group(function () {
         Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
         Route::get('beranda', [DashboardController::class, 'index'])->name('dashboard');
 

@@ -79,7 +79,7 @@
                                         {{ $order->member->full_name ?? $order->non_member_name ?? '—' }}
                                     </td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">{{ $order->orderPeriod->label }}</td>
-                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">{{ $order->created_at->format('d M Y') }}</td>
+                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">{{ $order->created_at->translatedFormat('d M Y') }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">
                                         {{ $order->total_amount !== null ? 'Rp'.number_format($order->total_amount, 0, ',', '.') : '—' }}
                                     </td>

@@ -70,7 +70,7 @@ trait ValidatesOrderQuantities
     {
         return [
             'quantity' => ['required', 'array'],
-            'quantity.*' => ['nullable', 'integer', 'min:0'],
+            'quantity.*' => ['nullable', 'integer', 'min:0', 'max:999'],
         ];
     }
 
@@ -80,6 +80,7 @@ trait ValidatesOrderQuantities
             'quantity.required' => 'Data pesanan tidak ditemukan, coba muat ulang halaman.',
             'quantity.*.integer' => 'Jumlah pesanan harus berupa angka bulat.',
             'quantity.*.min' => 'Jumlah pesanan tidak boleh negatif.',
+            'quantity.*.max' => 'Jumlah maksimal 999 per produk. Cek lagi, mungkin salah ketik.',
         ];
     }
 

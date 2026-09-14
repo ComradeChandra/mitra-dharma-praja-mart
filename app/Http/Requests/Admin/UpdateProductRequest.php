@@ -21,11 +21,11 @@ class UpdateProductRequest extends FormRequest
         return [
             'category' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
-            'buy_price' => ['required', 'numeric', 'min:0'],
-            'sell_price' => ['nullable', 'numeric', 'min:0', 'required_unless:is_fluctuating,1'],
+            'buy_price' => ['required', 'numeric', 'min:0', 'max:100000000'],
+            'sell_price' => ['nullable', 'numeric', 'min:0', 'max:100000000', 'required_unless:is_fluctuating,1'],
             'is_fluctuating' => ['nullable', 'boolean'],
             'has_stock_tracking' => ['nullable', 'boolean'],
-            'stock' => ['nullable', 'integer', 'min:0', 'required_if:has_stock_tracking,1'],
+            'stock' => ['nullable', 'integer', 'min:0', 'max:1000000', 'required_if:has_stock_tracking,1'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'is_active' => ['nullable', 'boolean'],
         ];
@@ -34,6 +34,11 @@ class UpdateProductRequest extends FormRequest
     public function messages(): array
     {
         return [
+            // Batas atas: tanpa ini, kelebihan satu-dua angka nol berakhir di
+            // error server, karena kolom harga di database maksimal Rp9,99 miliar.
+            'buy_price.max' => 'Harga beli maksimal Rp100.000.000. Cek lagi, mungkin kelebihan angka nol.',
+            'sell_price.max' => 'Harga jual maksimal Rp100.000.000. Cek lagi, mungkin kelebihan angka nol.',
+            'stock.max' => 'Stok maksimal 1.000.000. Cek lagi, mungkin kelebihan angka nol.',
             'category.required' => 'Kategori produk wajib diisi.',
             'name.required' => 'Nama produk wajib diisi.',
             'buy_price.required' => 'Harga beli wajib diisi.',

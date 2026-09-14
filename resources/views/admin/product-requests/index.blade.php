@@ -31,7 +31,7 @@
                                         <span class="text-gray-300">·</span>
                                         <span class="text-xs">{{ $productRequest->user_type->label() }}</span>
                                     </td>
-                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">{{ $productRequest->created_at->format('d M Y') }}</td>
+                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">{{ $productRequest->created_at->translatedFormat('d M Y') }}</td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm">
                                         <x-admin.badge :color="$productRequest->status->badgeColor()">
                                             {{ $productRequest->status->label() }}

@@ -18,7 +18,7 @@
                     <div class="min-w-0">
                         <p class="text-sm font-medium text-gray-800 truncate">{{ $order->orderPeriod->label }}</p>
                         <p class="text-xs text-gray-400">
-                            {{ $order->created_at->format('d M Y') }}
+                            {{ $order->created_at->translatedFormat('d M Y') }}
                             @if ($order->total_amount !== null)
                                 <span class="text-gray-300">·</span>
                                 Rp{{ number_format($order->total_amount, 0, ',', '.') }}

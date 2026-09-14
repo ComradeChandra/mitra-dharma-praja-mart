@@ -19,13 +19,18 @@
 @php
     // Pilihan yang sedang aktif: pakai yang tadi dikirim kalau formnya gagal
     // validasi, kalau belum ada default-nya "antar".
-    $metodeTerpilih = old('delivery_method', \App\Enums\DeliveryMethod::Antar->value);
+    // Nilai lama dari form yang gagal validasi dicetak ke dalam kode Alpine,
+    // jadi dibatasi ke nilai yang sah dan dicetak lewat Js::from. Isian yang
+    // dimanipulasi (teks aneh, larik) tidak boleh ikut masuk ke JavaScript.
+    $metodeLama = old('delivery_method');
+    $metodeTerpilih = (is_string($metodeLama) ? \App\Enums\DeliveryMethod::tryFrom($metodeLama) : null)?->value
+        ?? \App\Enums\DeliveryMethod::Antar->value;
     $alamatAwal = old('delivery_address', $alamatTersimpan);
 @endphp
 
 <div
     class="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-5"
-    x-data="{ cara: '{{ $metodeTerpilih }}' }"
+    x-data="{ cara: {{ \Illuminate\Support\Js::from($metodeTerpilih) }} }"
 >
     <h3 class="font-semibold text-gray-800 text-sm mb-1">Cara Terima Barang</h3>
     <p class="text-xs text-gray-400 mb-4">

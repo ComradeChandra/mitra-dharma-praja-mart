@@ -23,7 +23,7 @@
                                 "{{ $periodeAktif->label }}" sedang dibuka
                             </p>
                             <p class="text-sm text-white/80">
-                                Sampai {{ $periodeAktif->end_date->format('d M Y') }}
+                                Sampai {{ $periodeAktif->end_date->translatedFormat('d M Y') }}
                             </p>
                         @else
                             <p class="mt-1 text-xl font-bold">

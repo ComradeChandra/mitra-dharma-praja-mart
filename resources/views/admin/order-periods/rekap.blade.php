@@ -232,7 +232,7 @@
                                                 @foreach ($baris['pesanan'] as $pesanan)
                                                     <a href="{{ route('admin.orders.show', $pesanan) }}"
                                                        class="text-indigo-600 hover:text-indigo-800 font-medium">
-                                                        {{ $baris['pesanan']->count() > 1 ? $pesanan->created_at->format('d M') : 'Lihat' }} →
+                                                        {{ $baris['pesanan']->count() > 1 ? $pesanan->created_at->translatedFormat('d M') : 'Lihat' }} →
                                                     </a>
                                                 @endforeach
                                             </span>

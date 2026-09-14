@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\NonMember;
 
+use App\Http\Requests\Concerns\NormalizesWhatsAppNumber;
 use App\Http\Requests\Concerns\ValidatesOrderQuantities;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -16,7 +17,7 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class StoreOrderRequest extends FormRequest
 {
-    use ValidatesOrderQuantities;
+    use NormalizesWhatsAppNumber, ValidatesOrderQuantities;
 
     /**
      * Boleh diakses siapa saja yang lolos middleware 'non-member.session' di route.

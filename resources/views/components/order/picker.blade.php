@@ -60,7 +60,7 @@
         {{-- Info periode yang sedang berjalan --}}
         <div class="flex items-center gap-2 mb-4 px-4 py-2.5 rounded-lg bg-emerald-50 text-emerald-700 text-sm">
             <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Periode "{{ $period->label }}" dibuka sampai {{ $period->end_date->format('d M Y') }}
+            Periode "{{ $period->label }}" dibuka sampai {{ $period->end_date->translatedFormat('d M Y') }}
         </div>
 
         <x-order.sent-orders :orders="$pesananTerkirim" />

@@ -9,7 +9,7 @@
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                 <div>
                     <h1 class="font-semibold text-gray-800">{{ $order->orderPeriod->label }}</h1>
-                    <p class="text-xs text-gray-400">Dikirim {{ $order->created_at->format('d M Y, H:i') }}</p>
+                    <p class="text-xs text-gray-400">Dikirim {{ $order->created_at->translatedFormat('d M Y, H:i') }}</p>
                 </div>
                 <x-admin.badge :color="$order->status->badgeColor()">
                     {{ $order->status->label() }}

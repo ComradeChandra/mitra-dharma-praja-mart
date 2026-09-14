@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\OrderPeriodStatus;
+use App\Http\Requests\Concerns\ValidatesOrderPeriodDates;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -11,6 +12,8 @@ use Illuminate\Validation\Rule;
  */
 class StoreOrderPeriodRequest extends FormRequest
 {
+    use ValidatesOrderPeriodDates;
+
     public function authorize(): bool
     {
         return true;

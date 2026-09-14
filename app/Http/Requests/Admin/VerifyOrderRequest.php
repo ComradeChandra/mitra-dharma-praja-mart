@@ -33,7 +33,9 @@ class VerifyOrderRequest extends FormRequest
 
         foreach ($order->orderItems as $item) {
             if ($item->price_at_order === null) {
-                $rules["prices.{$item->id}"] = ['required', 'numeric', 'min:0'];
+                // Minimal Rp1: harga 0 hampir pasti salah ketik, dan membuat
+                // barangnya tercatat gratis di invoice maupun rekap.
+                $rules["prices.{$item->id}"] = ['required', 'numeric', 'min:1', 'max:100000000'];
             }
         }
 
@@ -45,7 +47,8 @@ class VerifyOrderRequest extends FormRequest
         return [
             'prices.*.required' => 'Harga produk fluktuatif wajib diisi sebelum pesanan bisa diverifikasi.',
             'prices.*.numeric' => 'Harga harus berupa angka.',
-            'prices.*.min' => 'Harga tidak boleh negatif.',
+            'prices.*.min' => 'Harga minimal Rp1. Harga 0 membuat barangnya tercatat gratis.',
+            'prices.*.max' => 'Harga maksimal Rp100.000.000. Cek lagi, mungkin kelebihan angka nol.',
         ];
     }
 

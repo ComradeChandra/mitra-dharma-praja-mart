@@ -17,7 +17,7 @@
                     <h1 class="font-semibold text-gray-800">{{ $order->orderPeriod->label }}</h1>
                     <p class="text-xs text-gray-400">
                         {{ $order->non_member_name }} · {{ $order->opdDepartment->name }} ·
-                        Dikirim {{ $order->created_at->format('d M Y, H:i') }}
+                        Dikirim {{ $order->created_at->translatedFormat('d M Y, H:i') }}
                     </p>
                 </div>
                 <x-admin.badge :color="$order->status->badgeColor()">

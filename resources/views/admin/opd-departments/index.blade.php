@@ -15,6 +15,7 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             {{-- Pesan sukses setelah create/update/delete, dikirim lewat session flash --}}
             <x-alert type="success" :message="session('success')" />
+            <x-alert type="error" :message="session('error')" />
 
             <x-card class="overflow-hidden">
                 @forelse ($opdDepartments as $opdDepartment)

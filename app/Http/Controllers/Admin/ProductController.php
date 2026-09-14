@@ -88,6 +88,16 @@ class ProductController extends Controller
      */
     public function destroy(Product $product): RedirectResponse
     {
+        // Produk yang sudah pernah dipesan tidak boleh dihapus: namanya dipakai
+        // riwayat pesanan, invoice, struk, dan rekap, dan database pun
+        // menolaknya. Dulu fotonya dihapus DULUAN, lalu penghapusan produknya
+        // gagal dengan error 500: produknya tetap ada, fotonya hilang.
+        if ($product->orderItems()->exists()) {
+            return redirect()
+                ->route('admin.products.index')
+                ->with('error', "\"{$product->name}\" sudah pernah dipesan, jadi tidak bisa dihapus supaya riwayat pesanan tetap utuh. Kalau tidak dijual lagi, nonaktifkan saja lewat Edit.");
+        }
+
         $this->imageStorage->delete($product->image_path);
         $product->delete();
 
@@ -95,5 +105,4 @@ class ProductController extends Controller
             ->route('admin.products.index')
             ->with('success', 'Produk berhasil dihapus.');
     }
-
 }

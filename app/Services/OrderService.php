@@ -134,7 +134,7 @@ class OrderService
             }
 
             $order->refresh();
-            $total = $order->orderItems->sum(fn ($item) => $item->quantity * $item->price_at_order);
+            $total = $this->totalYangMuat($order);
 
             // Statusnya dikembalikan ke Verified, termasuk kalau tadinya sudah
             // Invoiced. Ini disengaja: invoice yang terlanjur dikirim memuat
@@ -148,7 +148,6 @@ class OrderService
             return $order->fresh('orderItems');
         });
     }
-
 
     /**
      * Pemesan menyatakan sudah membayar lewat QRIS.
@@ -192,6 +191,12 @@ class OrderService
     {
         abort_if($order->total_amount === null, 422, 'Nominalnya belum final, pengurus belum mengunci harga.');
 
+        // Aman ditekan dua kali (dua tab, tombol "kembali"): kalau sudah lunas,
+        // jangan menimpa waktu konfirmasi yang pertama.
+        if ($order->payment_status === PaymentStatus::Paid) {
+            return $order;
+        }
+
         $order->update([
             'payment_status' => PaymentStatus::Paid,
             'payment_confirmed_at' => now(),
@@ -199,6 +204,7 @@ class OrderService
 
         return $order;
     }
+
     /**
      * Tandai invoice sudah dikirim. Ini konfirmasi manual dari admin setelah
      * dia menekan kirim di WhatsApp-nya sendiri; sistem tidak punya cara tahu
@@ -209,6 +215,13 @@ class OrderService
      */
     public function markAsInvoiced(Order $order): Order
     {
+        // Sudah ditandai sebelumnya (dua tab, tombol "kembali"): tidak ada yang
+        // perlu diubah. Dulu kiriman kedua berakhir di halaman error berbunyi
+        // "harus terverifikasi dulu", padahal pesanannya justru sudah terkirim.
+        if ($order->status === OrderStatus::Invoiced) {
+            return $order;
+        }
+
         abort_unless($order->status === OrderStatus::Verified, 422, 'Pesanan harus terverifikasi dulu sebelum bisa ditandai invoice terkirim.');
 
         $order->update(['status' => OrderStatus::Invoiced]);
@@ -305,11 +318,26 @@ class OrderService
             return;
         }
 
-        $total = $order->orderItems->sum(fn ($item) => $item->quantity * $item->price_at_order);
+        $total = $this->totalYangMuat($order);
 
         $order->update([
             'total_amount' => $total,
             'status' => OrderStatus::Verified,
         ]);
+    }
+
+    /**
+     * Total pesanan, dan pastikan muat di kolom total_amount (maksimal
+     * Rp9.999.999.999,99). Harga & jumlah per barang sudah dibatasi di
+     * validasi, tapi gabungan beberapa barang ekstrem masih bisa melewatinya;
+     * lebih baik ditolak dengan pesan daripada berakhir di error database.
+     */
+    private function totalYangMuat(Order $order): float
+    {
+        $total = $order->orderItems->sum(fn ($item) => $item->quantity * $item->price_at_order);
+
+        abort_if($total > 9_999_999_999.99, 422, 'Total pesanan terlalu besar untuk dicatat. Periksa lagi jumlah atau harganya.');
+
+        return $total;
     }
 }

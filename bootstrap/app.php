@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureMemberIsActive;
 use App\Http\Middleware\EnsureNonMemberSession;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
@@ -37,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // lihat catatan di EnsureNonMemberSession) — dipakai di routes/non-member.php.
         $middleware->alias([
             'non-member.session' => EnsureNonMemberSession::class,
+            'member.aktif' => EnsureMemberIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

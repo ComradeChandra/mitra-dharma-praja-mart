@@ -53,7 +53,7 @@
                     @endif
                     <div>
                         <dt class="text-xs text-gray-400">Tanggal Pesan</dt>
-                        <dd class="font-medium text-gray-800">{{ $order->created_at->format('d M Y, H:i') }}</dd>
+                        <dd class="font-medium text-gray-800">{{ $order->created_at->translatedFormat('d M Y, H:i') }}</dd>
                     </div>
                     {{-- Cara terima barang, kalau diantar, alamatnya ikut ditampilkan
                          supaya admin tidak perlu bertanya lagi lewat WhatsApp. --}}

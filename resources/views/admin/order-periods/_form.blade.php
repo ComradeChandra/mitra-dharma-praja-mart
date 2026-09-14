@@ -2,7 +2,14 @@
     Partial form periode pemesanan, dipakai bareng create.blade.php & edit.blade.php.
     $orderPeriod dikirim dari edit.blade.php buat isi value lama.
 --}}
-<div class="space-y-5" x-data="{ status: '{{ old('status', $orderPeriod->status->value ?? 'closed') }}' }">
+@php
+    // Nilai lama dari form yang gagal validasi dicetak ke dalam kode Alpine,
+    // jadi dibatasi ke nilai yang sah dan dicetak lewat Js::from. Isian yang
+    // dimanipulasi (teks aneh, larik) tidak boleh ikut masuk ke JavaScript.
+    $statusLama = old('status', $orderPeriod->status->value ?? 'closed');
+    $statusAwal = (is_string($statusLama) ? \App\Enums\OrderPeriodStatus::tryFrom($statusLama) : null)?->value ?? 'closed';
+@endphp
+<div class="space-y-5" x-data="{ status: {{ \Illuminate\Support\Js::from($statusAwal) }} }">
     <div>
         <x-input-label for="label" value="Label Periode" />
         <x-text-input
