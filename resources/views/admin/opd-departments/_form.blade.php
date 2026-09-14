@@ -17,6 +17,14 @@
     <x-input-error :messages="$errors->get('name')" class="mt-2" />
 </div>
 
+{{--
+    PENTING: jangan menaruh direktif Blade (@if, @isset, dst) di dalam atribut
+    tag komponen <x-...>. Blade tidak memproses tag seperti itu, tagnya
+    dibiarkan mentah di HTML, dan browser tidak menganggapnya kotak isian.
+    Kolom ini sempat begitu ("@if (...) required @endif"): sejak awal admin
+    tidak bisa menambah OPD atau mengganti kode aksesnya dari aplikasi.
+    Pakai atribut boolean seperti :required="..." di bawah.
+--}}
 <div class="mt-4">
     <x-input-label for="access_code" value="Kode Akses Non-Anggota" />
     <x-text-input
@@ -27,7 +35,7 @@
         placeholder="{{ isset($opdDepartment) ? 'Kosongkan kalau tidak mau ganti' : 'Minimal 6 karakter' }}"
         :value="old('access_code')"
         minlength="6"
-        @if (! isset($opdDepartment)) required @endif
+        :required="! isset($opdDepartment)"
     />
     <p class="mt-1 text-xs text-gray-400">
         Kode ini yang dipakai non-anggota dari OPD ini buat login (dibagikan admin ke

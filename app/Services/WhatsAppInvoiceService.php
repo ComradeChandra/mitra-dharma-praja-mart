@@ -45,7 +45,7 @@ class WhatsAppInvoiceService
         $nomorWa = $this->normalizePhoneNumber($order->whatsapp_number);
         $teks = $this->generateInvoiceText($order);
 
-        return "https://wa.me/{$nomorWa}?text=".urlencode($teks);
+        return "https://wa.me/{$nomorWa}?text=".$this->encodeTeks($teks);
     }
 
     /**
@@ -60,7 +60,18 @@ class WhatsAppInvoiceService
      */
     public function generateShareLink(Order $order): string
     {
-        return 'https://wa.me/?text='.urlencode($this->generateInvoiceText($order));
+        return 'https://wa.me/?text='.$this->encodeTeks($this->generateInvoiceText($order));
+    }
+
+    /**
+     * rawurlencode, BUKAN urlencode. urlencode mengubah spasi jadi "+", dan
+     * tidak semua aplikasi WhatsApp mengembalikannya jadi spasi: di sebagian
+     * HP invoice terbaca "Total:+Rp105.000". Contoh resmi WhatsApp untuk
+     * tautan wa.me memakai %20, yang dihasilkan rawurlencode.
+     */
+    private function encodeTeks(string $teks): string
+    {
+        return rawurlencode($teks);
     }
 
     /**

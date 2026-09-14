@@ -79,7 +79,11 @@ test('generateWhatsAppLink meng-encode teks invoice biar aman jadi query string 
 
     // Spasi & baris baru di teks invoice harus sudah ke-encode (bukan mentah)
     expect($link)->not->toContain(' Siti Nurhaliza ');
-    expect(urldecode(explode('?text=', $link)[1]))->toContain('Siti Nurhaliza');
+    expect(rawurldecode(explode('?text=', $link)[1]))->toContain('Siti Nurhaliza');
+
+    // Spasi jadi %20, bukan "+": tidak semua aplikasi WhatsApp mengembalikan
+    // "+" jadi spasi, jadi invoice bisa terbaca "Total:+Rp140.000".
+    expect($link)->toContain('Siti%20Nurhaliza')->not->toContain('Siti+Nurhaliza');
 });
 
 test('teks invoice tidak mengubah apostrof dan & jadi kode HTML', function () {
