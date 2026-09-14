@@ -182,3 +182,37 @@ test('halaman rekap admin menampilkan ketiga jenis rekap', function () {
     $response->assertSee('Dinas Pendidikan');
     $response->assertSee('Belum Pesan');
 });
+
+test('rekap status anggota memuat SEMUA pesanan anggota di periode itu, bukan cuma satu', function () {
+    // Dulu dipakai keyBy('member_id'), peninggalan aturan lama "1 pesanan per
+    // periode". Begitu anggota boleh memesan lebih dari sekali, pesanan kedua
+    // diam-diam hilang dari rekap.
+    $kedua = Order::create([
+        'order_period_id' => $this->periode->id,
+        'user_type' => UserType::Member,
+        'member_id' => $this->sudahPesan->id,
+        'whatsapp_number' => $this->sudahPesan->whatsapp_number,
+        'status' => OrderStatus::Verified,
+        'total_amount' => 35000,
+    ]);
+    $ketiga = Order::create([
+        'order_period_id' => $this->periode->id,
+        'user_type' => UserType::Member,
+        'member_id' => $this->sudahPesan->id,
+        'whatsapp_number' => $this->sudahPesan->whatsapp_number,
+        'status' => OrderStatus::Pending, // harga belum dikunci
+    ]);
+
+    $baris = $this->recap->memberOrderStatusForPeriod($this->periode)->firstWhere('nama', 'Sudah Pesan');
+
+    expect($baris['pesanan'])->toHaveCount(3);
+    expect($baris['totalBelanja'])->toBe(175000.0); // 140.000 + 35.000, yang pending belum ada angkanya
+    expect($baris['adaHargaMenyusul'])->toBeTrue();
+
+    $this->actingAs($this->admin)
+        ->get(route('admin.order-periods.rekap', $this->periode))
+        ->assertOk()
+        ->assertSee(route('admin.orders.show', $kedua), false)
+        ->assertSee(route('admin.orders.show', $ketiga), false)
+        ->assertSee('3 pesanan');
+});

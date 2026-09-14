@@ -202,15 +202,41 @@
                         @if ($anggotaSudah->isNotEmpty())
                             <ul class="divide-y divide-gray-50">
                                 @foreach ($anggotaSudah as $baris)
-                                    <li class="px-5 py-2.5 text-sm flex items-center justify-between gap-3">
+                                    {{-- Anggota boleh memesan lebih dari sekali per periode,
+                                         jadi SEMUA pesanannya ditautkan, bukan cuma satu. Dulu
+                                         pesanan kedua dan seterusnya tidak kelihatan di sini. --}}
+                                    <li class="px-5 py-2.5 text-sm flex items-start justify-between gap-3">
                                         <span class="min-w-0">
                                             <span class="text-gray-800">{{ $baris['nama'] }}</span>
-                                            <span class="text-xs text-gray-400 block">{{ $baris['kode'] }}</span>
+                                            <span class="text-xs text-gray-400 block">
+                                                {{ $baris['kode'] }}
+                                                @if ($baris['pesanan']->count() > 1)
+                                                    · {{ $baris['pesanan']->count() }} pesanan
+                                                @endif
+                                            </span>
                                         </span>
-                                        <a href="{{ route('admin.orders.show', $baris['order']) }}"
-                                           class="text-indigo-600 hover:text-indigo-800 text-xs font-medium shrink-0">
-                                            Lihat →
-                                        </a>
+                                        <span class="shrink-0 text-right">
+                                            {{-- Kalau semua pesanannya masih menunggu harga, "Rp0"
+                                                 terbaca seperti belanjanya nol, jadi ditulis apa adanya. --}}
+                                            @if ($baris['totalBelanja'] > 0)
+                                                <span class="block text-gray-800 tabular-nums">
+                                                    Rp{{ number_format($baris['totalBelanja'], 0, ',', '.') }}
+                                                </span>
+                                                @if ($baris['adaHargaMenyusul'])
+                                                    <span class="block text-[11px] text-amber-600">+ harga menyusul</span>
+                                                @endif
+                                            @else
+                                                <span class="block text-xs text-amber-600">Menunggu harga</span>
+                                            @endif
+                                            <span class="mt-0.5 flex justify-end gap-2 text-xs">
+                                                @foreach ($baris['pesanan'] as $pesanan)
+                                                    <a href="{{ route('admin.orders.show', $pesanan) }}"
+                                                       class="text-indigo-600 hover:text-indigo-800 font-medium">
+                                                        {{ $baris['pesanan']->count() > 1 ? $pesanan->created_at->format('d M') : 'Lihat' }} →
+                                                    </a>
+                                                @endforeach
+                                            </span>
+                                        </span>
                                     </li>
                                 @endforeach
                             </ul>

@@ -280,24 +280,40 @@ class RecapService
      *
      * Anggota nonaktif tidak ikut didaftar.
      *
-     * @return Collection<int, array{kode: string, nama: string, sudahPesan: bool, order: Order|null}>
+     * SEMUA pesanan tiap anggota di periode ini ikut dibawa, bukan cuma satu.
+     * Dulu dipakai keyBy('member_id'), yang diam-diam membuang pesanan kedua
+     * dan seterusnya. Itu peninggalan aturan lama "1 pesanan per periode" yang
+     * sudah dicabut: anggota boleh memesan lebih dari sekali, jadi pesanan yang
+     * terbuang itu tidak kelihatan di rekap sama sekali.
+     *
+     * totalBelanja cuma menjumlah pesanan yang harganya sudah pasti; kalau ada
+     * yang masih menunggu harga, adaHargaMenyusul bernilai true.
+     *
+     * @return Collection<int, array{kode: string, nama: string, sudahPesan: bool, pesanan: Collection<int, Order>, totalBelanja: float, adaHargaMenyusul: bool}>
      */
     public function memberOrderStatusForPeriod(OrderPeriod $period): Collection
     {
         $pesananPerAnggota = Order::where('order_period_id', $period->id)
             ->whereNotNull('member_id')
+            ->orderBy('created_at')
             ->get()
-            ->keyBy('member_id');
+            ->groupBy('member_id');
 
         return Member::aktif()
             ->orderBy('full_name')
             ->get()
-            ->map(fn (Member $member) => [
-                'kode' => $member->member_code,
-                'nama' => $member->full_name,
-                'sudahPesan' => $pesananPerAnggota->has($member->id),
-                'order' => $pesananPerAnggota->get($member->id),
-            ]);
+            ->map(function (Member $member) use ($pesananPerAnggota) {
+                $pesanan = $pesananPerAnggota->get($member->id, collect());
+
+                return [
+                    'kode' => $member->member_code,
+                    'nama' => $member->full_name,
+                    'sudahPesan' => $pesanan->isNotEmpty(),
+                    'pesanan' => $pesanan,
+                    'totalBelanja' => (float) $pesanan->sum('total_amount'),
+                    'adaHargaMenyusul' => $pesanan->contains(fn (Order $order) => $order->total_amount === null),
+                ];
+            });
     }
 
     /**
