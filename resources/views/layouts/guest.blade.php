@@ -54,6 +54,17 @@
                 </div>
             </div>
 
+            {{-- Bantuan masuk lewat WhatsApp pengurus. Yang paling sering
+                 terjadi: anggota lupa password yang dibuatkan pengurus, atau
+                 non-anggota belum tahu kode akses kantornya. Tidak tampil
+                 kalau nomor koperasi belum diisi. --}}
+            <x-kontak-pengurus
+                varian="tautan"
+                class="mt-5 px-4 py-2 rounded-lg hover:bg-white/70"
+                label="Lupa password atau kode akses? Hubungi pengurus"
+                pesan="Saya butuh bantuan untuk masuk ke aplikasi Mitra Dharma Praja Mart."
+            />
+
             {{--
                 Tombol kembali — kalau orang salah pilih pintu masuk (mis. anggota
                 kepencet "Login Admin"), dia bisa balik tanpa harus tau tombol back

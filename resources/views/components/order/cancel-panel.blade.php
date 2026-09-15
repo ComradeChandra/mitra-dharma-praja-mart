@@ -5,7 +5,8 @@
     Boleh-tidaknya dihitung OrderCancellationService, komponen ini cuma
     menampilkan hasilnya:
     - boleh      : tombol batal, dengan konfirmasi browser dulu
-    - tidak      : kalimat kenapa tidak bisa, dan bahwa harus lewat pengurus
+    - tidak      : kalimat kenapa tidak bisa, dan bahwa harus lewat pengurus,
+                   plus tautan WhatsApp ke pengurus (kalau nomornya diisi)
     - lunas      : tidak menampilkan apa-apa; pesanan yang sudah selesai tidak
                    perlu diingatkan soal pembatalan setiap kali dibuka
     - dibatalkan : tidak menampilkan apa-apa (sudah ada x-order.cancelled-notice)
@@ -46,6 +47,18 @@
             </p>
         @else
             <p class="text-xs text-gray-400 text-center leading-relaxed">{{ $alasan }}</p>
+
+            {{-- Alasannya selalu "hubungi pengurus", jadi langsung diberi
+                 jalannya. Pesannya menyebut periode & waktu kirim, karena
+                 itulah yang juga dilihat pengurus di daftar pesanannya. --}}
+            @php
+                $pesanBatal = 'Saya ingin membatalkan pesanan periode "'.$order->orderPeriod->label.'"'
+                    .' yang dikirim '.$order->created_at->translatedFormat('d M Y, H:i')
+                    .($order->non_member_name ? ' atas nama '.$order->non_member_name : '').'.';
+            @endphp
+            <div class="mt-3 text-center">
+                <x-kontak-pengurus varian="tautan" :pesan="$pesanBatal" />
+            </div>
         @endif
     </div>
 @endunless

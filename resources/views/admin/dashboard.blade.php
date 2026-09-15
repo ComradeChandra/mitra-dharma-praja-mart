@@ -6,6 +6,24 @@
     <div class="py-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
+            {{-- Pengingat: selama nomor WhatsApp koperasi kosong, anggota &
+                 non-anggota tidak punya tombol untuk menghubungi pengurus --}}
+            @if ($nomorWaBelumDiisi)
+                <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+                    <div class="flex items-start gap-3 min-w-0">
+                        <x-ikon-whatsapp class="h-5 w-5 mt-0.5 shrink-0 text-amber-700" />
+                        <p class="text-sm text-amber-800">
+                            Nomor WhatsApp koperasi belum diisi, jadi anggota dan non-anggota belum
+                            bisa menekan tombol <span class="font-medium">Hubungi Pengurus</span>.
+                        </p>
+                    </div>
+                    <a href="{{ route('admin.settings.edit') }}"
+                       class="shrink-0 text-sm font-medium text-amber-800 underline underline-offset-2 hover:text-amber-900">
+                        Isi nomornya
+                    </a>
+                </div>
+            @endif
+
             {{-- Kartu status periode pemesanan, paling atas karena ini info
                  yang paling sering dicek admin tiap hari. Pakai gradient biar
                  beda bobot visualnya dari kartu statistik di bawahnya. --}}

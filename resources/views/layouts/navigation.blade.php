@@ -103,6 +103,12 @@
                             {{ __('Profil Saya') }}
                         </x-dropdown-link>
 
+                        {{-- Di menu akun, bukan di deretan menu atas: jarang
+                             dibuka, dan deretan atas sudah penuh di layar 1280px --}}
+                        <x-dropdown-link :href="route('admin.settings.edit')">
+                            Pengaturan
+                        </x-dropdown-link>
+
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -165,6 +171,10 @@
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('admin.profile.edit')" :active="request()->routeIs('admin.profile.*')">
                     {{ __('Profil Saya') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('admin.settings.edit')" :active="request()->routeIs('admin.settings.*')">
+                    Pengaturan
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->

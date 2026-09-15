@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\OrderPeriodController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductRequestController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Auth\LoginPortalController;
 use App\Http\Controllers\CatalogController;
 use Illuminate\Support\Facades\Auth;
@@ -88,6 +89,11 @@ Route::middleware('auth:web')->prefix('admin')->name('admin.')->group(function (
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    // Pengaturan koperasi yang diubah pengurus sendiri, sekarang isinya
+    // nomor WhatsApp untuk tombol "Hubungi Pengurus".
+    Route::get('pengaturan', [SettingController::class, 'edit'])->name('settings.edit');
+    Route::put('pengaturan', [SettingController::class, 'update'])->name('settings.update');
 });
 
 // Route login/logout admin (lihat routes/auth.php)

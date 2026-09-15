@@ -19,6 +19,9 @@ WhatsApp dan menerima pembayaran lewat QRIS.
   Pengurus juga bisa menghapus satu barang yang tidak bisa dipenuhi, dengan
   catatan yang terlihat oleh pemesan.
 - **Invoice WhatsApp** berupa teks + tautan pembayaran, dikirim lewat wa.me.
+- **Tombol "Hubungi Pengurus"** lewat WhatsApp untuk anggota, non-anggota, dan
+  tamu, dengan salam pembuka yang sudah menyebut pengirimnya. Nomornya diatur
+  pengurus sendiri di Admin → Pengaturan.
 - **Pembayaran QRIS** statis, pemesan melampirkan bukti, pengurus mencocokkan.
 - **Struk resmi** yang bisa dicetak atau disimpan sebagai PDF.
 - **Rekap** per produk (belanja grosir), per OPD, dan per anggota.

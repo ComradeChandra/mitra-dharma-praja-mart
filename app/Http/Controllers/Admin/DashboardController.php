@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\DashboardStatsService;
+use App\Services\KontakPengurusService;
 use App\Services\RecapService;
 use Illuminate\View\View;
 
@@ -20,6 +21,7 @@ class DashboardController extends Controller
     public function __construct(
         private DashboardStatsService $dashboardStatsService,
         private RecapService $recapService,
+        private KontakPengurusService $kontakPengurus,
     ) {}
 
     public function index(): View
@@ -42,6 +44,10 @@ class DashboardController extends Controller
             'progresBelanja' => $this->recapService->memberOrderProgressForPeriod($summary['periodeAktif']),
         ];
 
-        return view('admin.dashboard', [...$summary, ...$recap]);
+        // Pengingat di dasbor kalau nomor WhatsApp koperasi belum diisi:
+        // selama kosong, pemesan tidak punya tombol untuk menghubungi pengurus.
+        $nomorWaBelumDiisi = $this->kontakPengurus->nomorWhatsApp() === null;
+
+        return view('admin.dashboard', [...$summary, ...$recap, 'nomorWaBelumDiisi' => $nomorWaBelumDiisi]);
     }
 }

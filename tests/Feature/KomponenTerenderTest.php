@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderPeriod;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\KontakPengurusService;
 use Database\Seeders\DatabaseSeeder;
 
 /*
@@ -22,6 +23,10 @@ use Database\Seeders\DatabaseSeeder;
 
 beforeEach(function () {
     $this->seed(DatabaseSeeder::class);
+
+    // Nomor WhatsApp koperasi diisi, supaya tombol "Hubungi Pengurus" ikut
+    // dirender dan ikut diperiksa di semua halaman.
+    app(KontakPengurusService::class)->simpanNomorWhatsApp('081234567890');
 });
 
 function pastikanTerender($respons, string $url): void
@@ -44,7 +49,7 @@ test('semua halaman admin terender tanpa tag komponen mentah', function () {
         route('admin.opd-departments.index'), route('admin.opd-departments.create'), route('admin.opd-departments.edit', OpdDepartment::first()),
         route('admin.order-periods.index'), route('admin.order-periods.create'), route('admin.order-periods.edit', $periode), route('admin.order-periods.rekap', $periode),
         route('admin.orders.index'), route('admin.orders.show', $pesanan), route('admin.orders.struk', $pesanan),
-        route('admin.product-requests.index'), route('admin.profile.edit'),
+        route('admin.product-requests.index'), route('admin.profile.edit'), route('admin.settings.edit'),
     ] as $url) {
         pastikanTerender($this->get($url), $url);
     }

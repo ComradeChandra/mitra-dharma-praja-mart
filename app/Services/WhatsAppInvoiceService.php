@@ -10,10 +10,16 @@ use App\Models\Order;
  * Ini bukan integrasi WhatsApp API berbayar. Yang disiapkan cuma teks dan
  * tautannya; admin sendiri yang menekan kirim di WhatsApp-nya. Tidak ada
  * pesan yang terkirim otomatis dari sistem.
+ *
+ * Cara merakit tautan wa.me-nya (merapikan nomor, meng-encode teks) ada di
+ * WhatsAppLinkService, dipakai bersama tombol "Hubungi Pengurus".
  */
 class WhatsAppInvoiceService
 {
-    public function __construct(private OrderLinkService $tautanPesanan) {}
+    public function __construct(
+        private OrderLinkService $tautanPesanan,
+        private WhatsAppLinkService $tautanWhatsApp,
+    ) {}
 
     /**
      * Teks invoice, siap ditempel ke WhatsApp. Isinya ditentukan di template
@@ -42,10 +48,7 @@ class WhatsAppInvoiceService
      */
     public function generateWhatsAppLink(Order $order): string
     {
-        $nomorWa = $this->normalizePhoneNumber($order->whatsapp_number);
-        $teks = $this->generateInvoiceText($order);
-
-        return "https://wa.me/{$nomorWa}?text=".$this->encodeTeks($teks);
+        return $this->tautanWhatsApp->keNomor($order->whatsapp_number, $this->generateInvoiceText($order));
     }
 
     /**
@@ -60,38 +63,6 @@ class WhatsAppInvoiceService
      */
     public function generateShareLink(Order $order): string
     {
-        return 'https://wa.me/?text='.$this->encodeTeks($this->generateInvoiceText($order));
-    }
-
-    /**
-     * rawurlencode, BUKAN urlencode. urlencode mengubah spasi jadi "+", dan
-     * tidak semua aplikasi WhatsApp mengembalikannya jadi spasi: di sebagian
-     * HP invoice terbaca "Total:+Rp105.000". Contoh resmi WhatsApp untuk
-     * tautan wa.me memakai %20, yang dihasilkan rawurlencode.
-     */
-    private function encodeTeks(string $teks): string
-    {
-        return rawurlencode($teks);
-    }
-
-    /**
-     * wa.me butuh format nomor internasional tanpa "+", "0" di depan, atau
-     * spasi/strip (mis. "628123456789", bukan "08123456789" atau
-     * "+62 812-3456-789"). Admin yang input nomor whatsapp_number bisa saja
-     * ngetik dalam format apa pun, jadi dirapikan dulu di sini biar link-nya
-     * selalu valid apa pun format aslinya.
-     */
-    private function normalizePhoneNumber(string $nomor): string
-    {
-        // Buang semua karakter selain angka (spasi, strip, tanda +, dst).
-        $angkaSaja = preg_replace('/\D/', '', $nomor);
-
-        // Nomor lokal biasanya diawali "0" (mis. 08123456789), diganti jadi
-        // kode negara "62" biar formatnya internasional.
-        if (str_starts_with($angkaSaja, '0')) {
-            return '62'.substr($angkaSaja, 1);
-        }
-
-        return $angkaSaja;
+        return $this->tautanWhatsApp->tanpaNomor($this->generateInvoiceText($order));
     }
 }

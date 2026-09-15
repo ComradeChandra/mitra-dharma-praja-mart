@@ -63,6 +63,19 @@
             Periode "{{ $period->label }}" dibuka sampai {{ $period->end_date->translatedFormat('d M Y') }}
         </div>
 
+        {{-- Pengganti tombol WhatsApp melayang, yang di halaman ini sengaja
+             disembunyikan (lihat data-tanpa-kontak-melayang di form bawah).
+             Tidak tampil kalau nomor koperasi belum diisi. --}}
+        @php
+            $pesanTanyaProduk = 'Saya mau bertanya soal produk di periode "'.$period->label.'".';
+        @endphp
+        <x-kontak-pengurus
+            varian="tautan"
+            class="mb-4"
+            label="Ada pertanyaan soal produk? Hubungi pengurus"
+            :pesan="$pesanTanyaProduk"
+        />
+
         <x-order.sent-orders :orders="$pesananTerkirim" />
 
         {{--
@@ -74,8 +87,13 @@
 
             @submit: pesanan tidak langsung terkirim, tapi dibukakan jendela
             konfirmasi dulu (lihat periksaDulu() di resources/js/order-form.js).
+
+            data-tanpa-kontak-melayang: tombol WhatsApp melayang
+            (x-kontak-pengurus) disembunyikan di halaman ini. Kotak jumlah
+            produk ada di tepi kanan sepanjang daftar, dan tombol kirim ada di
+            ujung bawah; tombol melayang pasti menutupi salah satunya.
         --}}
-        <form method="POST" action="{{ $action }}" autocomplete="off" x-ref="formPesan" @submit="periksaDulu($event)">
+        <form method="POST" action="{{ $action }}" autocomplete="off" x-ref="formPesan" @submit="periksaDulu($event)" data-tanpa-kontak-melayang>
             @csrf
 
             {{ $identitas }}

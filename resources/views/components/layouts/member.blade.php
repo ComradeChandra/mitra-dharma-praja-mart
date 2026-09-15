@@ -174,5 +174,8 @@
         <main>
             {{ $slot }}
         </main>
+
+        {{-- Tombol WhatsApp ke pengurus, tampil kalau nomornya sudah diisi --}}
+        <x-kontak-pengurus />
     </body>
 </html>

@@ -66,5 +66,9 @@
             <p class="text-gray-500 font-medium tracking-wide">Kebersamaan untuk Kesejahteraan</p>
             <p class="mt-1">&copy; {{ date("Y") }} Koperasi Mitra Dharma Praja</p>
         </footer>
+
+        {{-- Tombol WhatsApp ke pengurus, tampil kalau nomornya sudah diisi.
+             Katalog juga dibuka anggota yang sudah masuk, jadi di sini pun ada. --}}
+        <x-kontak-pengurus />
     </body>
 </html>
