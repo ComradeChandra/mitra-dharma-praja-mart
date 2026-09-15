@@ -45,6 +45,9 @@ Route::prefix('anggota')->name('member.')->group(function () {
         Route::get('pesanan-saya/{order}/struk', [OrderController::class, 'struk'])->name('orders.struk');
         // Pemesan menyatakan sudah bayar lewat QRIS. Lunasnya tetap ditentukan pengurus.
         Route::post('pesanan-saya/{order}/bayar', [OrderController::class, 'declarePaid'])->name('orders.declare-paid');
+        // Anggota membatalkan pesanannya sendiri, selama periode masih dibuka
+        // dan belum dibayar (aturannya di OrderCancellationService).
+        Route::post('pesanan-saya/{order}/batal', [OrderController::class, 'cancel'])->name('orders.cancel');
         // Bukti transfer disimpan di disk privat, jadi disajikan lewat rute ini
         // yang memeriksa pesanannya memang milik anggota yang sedang masuk.
         Route::get('pesanan-saya/{order}/bukti-bayar', [OrderController::class, 'paymentProof'])->name('orders.payment-proof');

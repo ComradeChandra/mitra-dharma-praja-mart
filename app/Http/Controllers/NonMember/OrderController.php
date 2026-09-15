@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\NonMember;
 
-use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DeclarePaymentRequest;
 use App\Http\Requests\NonMember\StoreOrderRequest;
@@ -11,6 +10,7 @@ use App\Models\Order;
 use App\Models\OrderPeriod;
 use App\Models\Product;
 use App\Services\NonMemberSessionService;
+use App\Services\OrderCancellationService;
 use App\Services\OrderLinkService;
 use App\Services\OrderService;
 use App\Services\WhatsAppInvoiceService;
@@ -36,6 +36,7 @@ class OrderController extends Controller
         private NonMemberSessionService $sesiNonAnggota,
         private WhatsAppInvoiceService $whatsAppInvoiceService,
         private OrderLinkService $tautanPesanan,
+        private OrderCancellationService $pembatalan,
     ) {}
 
     /**
@@ -57,6 +58,7 @@ class OrderController extends Controller
             ? Order::whereIn('id', $this->sesiNonAnggota->daftarPesanan())
                 ->where('opd_id', $opd->id)
                 ->where('order_period_id', $period->id)
+                ->belumDibatalkan()
                 ->latest()
                 ->get()
             : collect();
@@ -111,7 +113,26 @@ class OrderController extends Controller
 
         $order->load('orderItems.product', 'orderPeriod');
 
-        return view('non-member.orders.show', compact('order'));
+        // null berarti tombol "Batalkan pesanan" boleh tampil
+        $alasanTidakBisaBatal = $this->pembatalan->alasanPemesanTidakBisaBatal($order);
+
+        return view('non-member.orders.show', compact('order', 'alasanTidakBisaBatal'));
+    }
+
+    /**
+     * Non-anggota membatalkan pesanannya sendiri. Yang boleh cuma orang yang
+     * mengirimnya (bukan rekan sekantor), selama periodenya masih dibuka dan
+     * belum dibayar.
+     */
+    public function cancel(Order $order): RedirectResponse
+    {
+        $this->pastikanPesanannya($order);
+
+        $this->pembatalan->batalkanOlehPemesan($order);
+
+        return redirect()
+            ->to($this->tautanPesanan->untukPemesan($order))
+            ->with('success', 'Pesananmu sudah dibatalkan.');
     }
 
     /**
@@ -125,9 +146,9 @@ class OrderController extends Controller
 
         $order->load('orderItems.product', 'opdDepartment', 'orderPeriod');
 
-        $tautanWhatsApp = $order->status === OrderStatus::Pending
-            ? null
-            : $this->whatsAppInvoiceService->generateShareLink($order);
+        $tautanWhatsApp = $order->status->hargaSudahFinal()
+            ? $this->whatsAppInvoiceService->generateShareLink($order)
+            : null;
 
         return view('struk.show', [
             'order' => $order,

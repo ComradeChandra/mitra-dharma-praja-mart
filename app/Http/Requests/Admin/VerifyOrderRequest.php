@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use App\Models\Order;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * Validasi form verifikasi pesanan, admin mengisi harga final buat tiap
@@ -29,7 +30,12 @@ class VerifyOrderRequest extends FormRequest
         /** @var Order $order */
         $order = $this->route('order');
 
-        $rules = [];
+        // Harga yang diisi berlaku untuk pesanan ini saja, atau sekaligus untuk
+        // pesanan lain di periode yang sama yang harganya masih kosong.
+        // Kosong dianggap "pesanan ini saja", pilihan yang paling aman.
+        $rules = [
+            'terapkan' => ['nullable', 'string', Rule::in(['pesanan-ini', 'semua'])],
+        ];
 
         foreach ($order->orderItems as $item) {
             if ($item->price_at_order === null) {
@@ -49,7 +55,18 @@ class VerifyOrderRequest extends FormRequest
             'prices.*.numeric' => 'Harga harus berupa angka.',
             'prices.*.min' => 'Harga minimal Rp1. Harga 0 membuat barangnya tercatat gratis.',
             'prices.*.max' => 'Harga maksimal Rp100.000.000. Cek lagi, mungkin kelebihan angka nol.',
+            'terapkan.in' => 'Pilih harga ini berlaku untuk pesanan ini saja atau untuk semua pesanan.',
+            'terapkan.string' => 'Pilih harga ini berlaku untuk pesanan ini saja atau untuk semua pesanan.',
         ];
+    }
+
+    /**
+     * Pengurus memilih harga ini ikut diisikan ke pesanan lain di periode
+     * yang sama (lihat OrderService::verifyOrder()).
+     */
+    public function terapkanKeSemua(): bool
+    {
+        return $this->validated('terapkan') === 'semua';
     }
 
     /**

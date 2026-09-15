@@ -64,7 +64,7 @@ Route::middleware('auth:web')->prefix('admin')->name('admin.')->group(function (
     // Pemesanan (Modul 3, 5 & 7), admin lihat semua pesanan masuk, mengunci
     // harga produk fluktuatif ("verifikasi"), lalu kirim invoice WhatsApp.
     // Bukan CRUD biasa (tidak ada create/edit/delete, pesanan hanya dibuat
-    // anggota, bukan admin).
+    // anggota, bukan admin). Pesanan bisa dibatalkan, tapi tidak dihapus.
     Route::get('pesanan', [OrderController::class, 'index'])->name('orders.index');
     Route::get('pesanan/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('pesanan/{order}/struk', [OrderController::class, 'struk'])->name('orders.struk');
@@ -72,6 +72,7 @@ Route::middleware('auth:web')->prefix('admin')->name('admin.')->group(function (
     Route::get('pesanan/{order}/bukti-bayar', [OrderController::class, 'paymentProof'])->name('orders.payment-proof');
     Route::patch('pesanan/{order}/verifikasi', [OrderController::class, 'verify'])->name('orders.verify');
     Route::patch('pesanan/{order}/tandai-terkirim', [OrderController::class, 'markInvoiced'])->name('orders.mark-invoiced');
+    Route::patch('pesanan/{order}/batalkan', [OrderController::class, 'cancel'])->name('orders.cancel');
 
     // Peninjauan permintaan produk (Modul 8), admin cuma approve/reject,
     // bukan CRUD penuh (tidak ada create/edit/delete dari sisi admin).

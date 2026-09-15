@@ -12,7 +12,10 @@ WhatsApp dan menerima pembayaran lewat QRIS.
 - **Tiga jenis pengguna** — pengurus (email + password), anggota (kode anggota +
   password dari pengurus), dan non-anggota (pilih OPD + kode akses OPD).
 - **Katalog & pemesanan** per periode, dengan konfirmasi sebelum kirim.
-- **Harga fluktuatif** (telur, sayur) dikunci pengurus saat verifikasi.
+- **Harga fluktuatif** (telur, sayur) dikunci pengurus saat verifikasi, untuk
+  satu pesanan atau sekaligus semua pesanan di periode yang sama.
+- **Pembatalan pesanan** oleh pemesan (selama periode dibuka dan belum bayar)
+  atau oleh pengurus; pesanan batal tetap tercatat tapi tidak dihitung di rekap.
 - **Invoice WhatsApp** berupa teks + tautan pembayaran, dikirim lewat wa.me.
 - **Pembayaran QRIS** statis, pemesan melampirkan bukti, pengurus mencocokkan.
 - **Struk resmi** yang bisa dicetak atau disimpan sebagai PDF.

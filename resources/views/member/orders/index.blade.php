@@ -31,9 +31,12 @@
                         <x-admin.badge :color="$order->status->badgeColor()">
                             {{ $order->status->label() }}
                         </x-admin.badge>
-                        <x-admin.badge :color="$order->payment_status->color()">
-                            {{ $order->payment_status->label() }}
-                        </x-admin.badge>
+                        {{-- Pesanan batal tidak ditagih, jadi status bayarnya disembunyikan --}}
+                        @unless ($order->dibatalkan())
+                            <x-admin.badge :color="$order->payment_status->color()">
+                                {{ $order->payment_status->label() }}
+                            </x-admin.badge>
+                        @endunless
                     </div>
                 </a>
             @empty

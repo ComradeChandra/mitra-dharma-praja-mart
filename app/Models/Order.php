@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CancelledBy;
 use App\Enums\DeliveryMethod;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
@@ -16,8 +17,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Model untuk tabel orders.
  *
  * Satu baris = satu pesanan dari anggota ATAU non-anggota (dibedakan lewat
- * kolom user_type). Alur status: pending → verified → invoiced. tidak ada
- * status "dibayar/lunas" karena aplikasi ini bukan e-commerce.
+ * kolom user_type). Alur status: pending → verified → invoiced, dan bisa
+ * berhenti di cancelled dari mana saja. Pembayaran QRIS dicatat terpisah di
+ * kolom payment_status.
  */
 #[Fillable([
     'order_period_id',
@@ -34,6 +36,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'payment_proof_path',
     'paid_declared_at',
     'payment_confirmed_at',
+    'cancelled_at',
+    'cancelled_by',
+    'cancellation_reason',
 ])]
 class Order extends Model
 {
@@ -65,6 +70,8 @@ class Order extends Model
             'payment_status' => PaymentStatus::class,
             'paid_declared_at' => 'datetime',
             'payment_confirmed_at' => 'datetime',
+            'cancelled_at' => 'datetime',
+            'cancelled_by' => CancelledBy::class,
             'delivery_method' => DeliveryMethod::class,
             'total_amount' => 'decimal:2',
         ];
@@ -91,6 +98,27 @@ class Order extends Model
         return $status && OrderStatus::tryFrom($status)
             ? $query->where('status', $status)
             : $query;
+    }
+
+    /**
+     * Pesanan yang masih berlaku, alias belum dibatalkan.
+     *
+     * Dipakai di tempat yang menghitung SEMUA status termasuk pending (rekap
+     * sudah/belum belanja, pemberitahuan "kamu sudah mengirim pesanan",
+     * pembayaran yang menunggu dicocokkan). Rekap uang tidak butuh ini karena
+     * sudah cuma mengambil pesanan berstatus verified/invoiced.
+     */
+    public function scopeBelumDibatalkan(Builder $query): Builder
+    {
+        return $query->where('status', '!=', OrderStatus::Cancelled);
+    }
+
+    /**
+     * Pesanan ini sudah dibatalkan pemesan atau pengurus.
+     */
+    public function dibatalkan(): bool
+    {
+        return $this->status === OrderStatus::Cancelled;
     }
 
     /**

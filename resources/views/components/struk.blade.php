@@ -35,6 +35,15 @@
         </div>
     </header>
 
+    {{-- Struk pesanan yang dibatalkan tetap bisa dibuka pengurus, jadi
+         ditandai tegas di atas. Garis tebal, bukan warna, supaya tetap
+         terbaca waktu dicetak hitam-putih. --}}
+    @if ($order->dibatalkan())
+        <p class="mt-4 border-2 border-gray-800 px-3 py-2 text-center text-sm font-bold uppercase tracking-widest">
+            Pesanan ini dibatalkan{{ $order->cancelled_at ? ' · '.$order->cancelled_at->translatedFormat('d M Y') : '' }}
+        </p>
+    @endif
+
     {{-- Keterangan pemesan --}}
     <section class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 py-4 text-sm border-b border-gray-300">
         @foreach ([
@@ -125,17 +134,27 @@
              dibelanjakan setelah pesanan terkumpul, tagihan menyusul. --}}
         <p class="leading-relaxed">
             <span class="font-semibold">Catatan:</span>
-            @if ($order->payment_status === App\Enums\PaymentStatus::Paid)
-                Pembayaran pesanan ini sudah dicocokkan pengurus dengan rekening koperasi.
+            {{-- Pesanan batal punya catatannya sendiri; catatan pre-order di
+                 cabang @else tidak berlaku lagi untuknya. --}}
+            @if ($order->dibatalkan())
+                Pesanan ini sudah dibatalkan dan tidak ditagih.
+                @if ($order->payment_status !== App\Enums\PaymentStatus::Unpaid)
+                    Pembayaran yang sudah masuk dikembalikan oleh pengurus koperasi.
+                @endif
+                Kalau ada pertanyaan, silakan hubungi pengurus koperasi.
             @else
-                Struk ini adalah bukti <span class="font-semibold">pemesanan</span>, bukan bukti pembayaran.
+                @if ($order->payment_status === App\Enums\PaymentStatus::Paid)
+                    Pembayaran pesanan ini sudah dicocokkan pengurus dengan rekening koperasi.
+                @else
+                    Struk ini adalah bukti <span class="font-semibold">pemesanan</span>, bukan bukti pembayaran.
+                @endif
+                Barang dibelanjakan koperasi setelah pesanan seluruh anggota terkumpul dalam satu periode.
+                @if ($order->orderItems->contains(fn ($i) => $i->price_at_order === null))
+                    Ada barang yang harganya masih menyusul dan akan dipastikan pengurus saat verifikasi,
+                    jadi total di atas belum final.
+                @endif
+                Kalau ada yang kurang sesuai, silakan hubungi pengurus koperasi.
             @endif
-            Barang dibelanjakan koperasi setelah pesanan seluruh anggota terkumpul dalam satu periode.
-            @if ($order->orderItems->contains(fn ($i) => $i->price_at_order === null))
-                Ada barang yang harganya masih menyusul dan akan dipastikan pengurus saat verifikasi,
-                jadi total di atas belum final.
-            @endif
-            Kalau ada yang kurang sesuai, silakan hubungi pengurus koperasi.
         </p>
 
         <p class="text-[11px] text-gray-400 pt-1">

@@ -47,12 +47,17 @@
             Melampirkan PDF otomatis butuh WhatsApp Business API yang berbayar.
             Daripada menjanjikan yang tidak bisa dilakukan, caranya dijelaskan
             saja di sini.
+
+            Cuma tampil kalau tombol WhatsApp-nya memang ada. Pesanan yang
+            belum final harganya atau sudah dibatalkan tidak diberi tombol itu.
         --}}
-        <p class="no-print mt-4 text-xs text-gray-500 leading-relaxed">
-            Tombol WhatsApp mengirim struk dalam bentuk <strong>teks</strong>, langsung terisi di kotak
-            ketikan. Kalau mau mengirim versi PDF-nya, simpan dulu lewat tombol
-            &ldquo;Cetak / Simpan PDF&rdquo; (pilih <em>Save as PDF</em> di dialog cetak), lalu lampirkan
-            berkasnya seperti biasa di WhatsApp.
-        </p>
+        @if ($tautanWhatsApp)
+            <p class="no-print mt-4 text-xs text-gray-500 leading-relaxed">
+                Tombol WhatsApp mengirim struk dalam bentuk <strong>teks</strong>, langsung terisi di kotak
+                ketikan. Kalau mau mengirim versi PDF-nya, simpan dulu lewat tombol
+                &ldquo;Cetak / Simpan PDF&rdquo; (pilih <em>Save as PDF</em> di dialog cetak), lalu lampirkan
+                berkasnya seperti biasa di WhatsApp.
+            </p>
+        @endif
     </div>
 </x-layouts.public>

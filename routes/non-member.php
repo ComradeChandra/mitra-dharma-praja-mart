@@ -29,6 +29,7 @@ Route::prefix('non-anggota')->name('non-member.')->group(function () {
         Route::get('pesanan/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::get('pesanan/{order}/struk', [OrderController::class, 'struk'])->name('orders.struk');
         Route::post('pesanan/{order}/bayar', [OrderController::class, 'declarePaid'])->name('orders.declare-paid');
+        Route::post('pesanan/{order}/batal', [OrderController::class, 'cancel'])->name('orders.cancel');
         Route::get('pesanan/{order}/bukti-bayar', [OrderController::class, 'paymentProof'])->name('orders.payment-proof');
 
         // Usulan produk baru (Modul 8), sisi non-anggota. Cuma create/store:

@@ -9,9 +9,12 @@ use App\Enums\UserType;
 use App\Models\Member;
 use App\Models\OpdDepartment;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\OrderPeriod;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -19,9 +22,10 @@ use Illuminate\Validation\ValidationException;
  * Logika pemesanan (Modul 3). Dipisah dari controller sesuai aturan service
  * layer di CLAUDE.md.
  *
- * Isinya empat hal: membuat pesanan anggota, membuat pesanan non-anggota,
- * mengunci harga produk fluktuatif saat admin verifikasi, dan menandai
- * invoice sudah dikirim.
+ * Isinya: membuat pesanan anggota & non-anggota, mengunci harga produk
+ * fluktuatif saat admin verifikasi (untuk satu pesanan atau sekaligus semua
+ * pesanan di periodenya), mencatat pembayaran, dan menandai invoice sudah
+ * dikirim. Pembatalan punya service sendiri, OrderCancellationService.
  */
 class OrderService
 {
@@ -107,10 +111,23 @@ class OrderService
      * Isi harga produk fluktuatif yang masih kosong, hitung ulang total, lalu
      * tandai pesanan sebagai terverifikasi.
      *
+     * Kalau $terapkanKeSemua true, harga yang sama juga diisikan ke pesanan
+     * lain di PERIODE YANG SAMA yang memuat barang itu dan harganya masih
+     * kosong (15 Sep 2026). Tanpa ini, 30 pesanan telur berarti mengetik harga
+     * telur 30 kali. Yang tidak ikut diubah: pesanan yang harganya sudah diisi
+     * satu per satu (tidak ditimpa, sesuai keputusan Chandra), pesanan yang
+     * sudah dibatalkan, dan pesanan di periode lain (harga pasarnya lain).
+     *
+     * Semuanya di satu transaksi: kalau satu pesanan gagal, tidak ada yang
+     * berubah sama sekali.
+     *
      * @param  array<int, numeric-string|float>  $prices  [order_item_id => harga]
+     * @return array{lain: int, masihMenunggu: int} jumlah pesanan lain yang ikut diisi, dan berapa di antaranya yang masih menunggu harga barang lain
      */
-    public function verifyOrder(Order $order, array $prices): Order
+    public function verifyOrder(Order $order, array $prices, bool $terapkanKeSemua = false): array
     {
+        abort_if($order->dibatalkan(), 422, 'Pesanan ini sudah dibatalkan, harganya tidak perlu dikunci lagi.');
+
         // Harga tidak boleh diubah lagi begitu pembayarannya sudah berjalan.
         // Tanpa penjagaan ini, pengurus bisa mengubah harga pesanan yang sudah
         // lunas, dan catatannya jadi bohong: tertulis "Lunas Rp150.000"
@@ -126,7 +143,13 @@ class OrderService
             'Pesanan ini pembayarannya sudah berjalan, harganya tidak bisa diubah lagi. Koordinasikan dulu dengan pemesannya.',
         );
 
-        return DB::transaction(function () use ($order, $prices) {
+        return DB::transaction(function () use ($order, $prices, $terapkanKeSemua) {
+            // Baris pesanannya dikunci dan dibaca ulang. Kalau pemesan
+            // membatalkan tepat bersamaan, salah satu menunggu yang lain, dan
+            // pesanan yang sudah batal tidak "hidup lagi" jadi terverifikasi.
+            $terkini = Order::whereKey($order->id)->lockForUpdate()->first();
+            abort_if($terkini->dibatalkan(), 422, 'Pesanan ini baru saja dibatalkan, harganya tidak dikunci.');
+
             foreach ($prices as $orderItemId => $price) {
                 $order->orderItems()
                     ->whereKey($orderItemId)
@@ -145,8 +168,95 @@ class OrderService
                 'status' => OrderStatus::Verified,
             ]);
 
-            return $order->fresh('orderItems');
+            if (! $terapkanKeSemua) {
+                return ['lain' => 0, 'masihMenunggu' => 0];
+            }
+
+            // Harga per produk, diambil dari item yang BARUSAN diisi saja.
+            $hargaPerProduk = $order->orderItems
+                ->whereIn('id', array_keys($prices))
+                ->mapWithKeys(fn ($item) => [$item->product_id => $item->price_at_order]);
+
+            return $this->terapkanKePesananLain($order, $hargaPerProduk);
         });
+    }
+
+    /**
+     * Berapa pesanan LAIN di periode yang sama yang juga masih menunggu harga
+     * tiap barang fluktuatif di pesanan ini. Ditampilkan di samping pilihan
+     * "terapkan ke semua", supaya pengurus tahu dampaknya sebelum menekan.
+     *
+     * Cakupannya harus sama persis dengan terapkanKePesananLain(), karena
+     * angka ini janji tentang apa yang akan diubah.
+     *
+     * @return array<int, int> [product_id => jumlah pesanan lain]
+     */
+    public function pesananLainMenungguHarga(Order $order): array
+    {
+        $produkMenunggu = $order->orderItems->whereNull('price_at_order')->pluck('product_id')->unique();
+
+        if ($produkMenunggu->isEmpty() || $order->dibatalkan()) {
+            return [];
+        }
+
+        return OrderItem::query()
+            ->whereIn('product_id', $produkMenunggu)
+            ->whereNull('price_at_order')
+            ->whereHas('order', fn ($query) => $this->cakupanPesananLain($query, $order))
+            ->selectRaw('product_id, COUNT(DISTINCT order_id) AS jumlah')
+            ->groupBy('product_id')
+            ->pluck('jumlah', 'product_id')
+            ->map(fn ($jumlah) => (int) $jumlah)
+            ->all();
+    }
+
+    /**
+     * Isi harga ke pesanan lain yang masih kosong harganya, lalu pesanan yang
+     * jadi lengkap langsung dihitung totalnya dan ditandai terverifikasi.
+     * Pesanan yang masih memuat barang fluktuatif lain tetap menunggu.
+     *
+     * @param  Collection<int, mixed>  $hargaPerProduk  [product_id => harga]
+     * @return array{lain: int, masihMenunggu: int}
+     */
+    private function terapkanKePesananLain(Order $order, Collection $hargaPerProduk): array
+    {
+        $pesananLain = $this->cakupanPesananLain(Order::query(), $order)
+            ->whereHas('orderItems', fn ($query) => $query
+                ->whereIn('product_id', $hargaPerProduk->keys())
+                ->whereNull('price_at_order'))
+            ->get();
+
+        $masihMenunggu = 0;
+
+        foreach ($pesananLain as $lain) {
+            foreach ($hargaPerProduk as $productId => $harga) {
+                // whereNull: harga yang sudah diisi satu per satu tidak ditimpa
+                $lain->orderItems()
+                    ->where('product_id', $productId)
+                    ->whereNull('price_at_order')
+                    ->update(['price_at_order' => $harga]);
+            }
+
+            if (! $this->recalculateIfComplete($lain)) {
+                $masihMenunggu++;
+            }
+        }
+
+        return ['lain' => $pesananLain->count(), 'masihMenunggu' => $masihMenunggu];
+    }
+
+    /**
+     * Pesanan mana yang boleh ikut diisi harganya lewat "terapkan ke semua":
+     * periode yang sama, bukan pesanan yang sedang dibuka, belum dibatalkan,
+     * dan belum dibayar. Dipakai bareng oleh penghitung dan pengisinya.
+     */
+    private function cakupanPesananLain(Builder $query, Order $order): Builder
+    {
+        return $query
+            ->where('order_period_id', $order->order_period_id)
+            ->whereKeyNot($order->id)
+            ->belumDibatalkan()
+            ->where('payment_status', PaymentStatus::Unpaid->value);
     }
 
     /**
@@ -162,6 +272,7 @@ class OrderService
      */
     public function declarePaid(Order $order, ?UploadedFile $bukti = null): Order
     {
+        abort_if($order->dibatalkan(), 422, 'Pesanan ini sudah dibatalkan, tidak perlu dibayar.');
         abort_if($order->total_amount === null, 422, 'Nominalnya belum final, pengurus belum mengunci harga.');
         abort_if($order->payment_status !== PaymentStatus::Unpaid, 422, 'Pembayaran pesanan ini sudah pernah dinyatakan.');
 
@@ -189,6 +300,7 @@ class OrderService
      */
     public function confirmPayment(Order $order): Order
     {
+        abort_if($order->dibatalkan(), 422, 'Pesanan ini sudah dibatalkan, pembayarannya tidak bisa dikonfirmasi.');
         abort_if($order->total_amount === null, 422, 'Nominalnya belum final, pengurus belum mengunci harga.');
 
         // Aman ditekan dua kali (dua tab, tombol "kembali"): kalau sudah lunas,
@@ -215,6 +327,8 @@ class OrderService
      */
     public function markAsInvoiced(Order $order): Order
     {
+        abort_if($order->dibatalkan(), 422, 'Pesanan ini sudah dibatalkan, invoice-nya tidak perlu dikirim.');
+
         // Sudah ditandai sebelumnya (dua tab, tombol "kembali"): tidak ada yang
         // perlu diubah. Dulu kiriman kedua berakhir di halaman error berbunyi
         // "harus terverifikasi dulu", padahal pesanannya justru sudah terkirim.
@@ -305,8 +419,10 @@ class OrderService
     /**
      * Kalau semua item sudah punya harga, total langsung dihitung dan pesanan
      * ditandai terverifikasi tanpa perlu admin membukanya dulu.
+     *
+     * @return bool true kalau pesanannya sudah lengkap berharga
      */
-    private function recalculateIfComplete(Order $order): void
+    private function recalculateIfComplete(Order $order): bool
     {
         $order->load('orderItems');
 
@@ -315,7 +431,7 @@ class OrderService
         );
 
         if ($adaYangBelumBerharga) {
-            return;
+            return false;
         }
 
         $total = $this->totalYangMuat($order);
@@ -324,6 +440,8 @@ class OrderService
             'total_amount' => $total,
             'status' => OrderStatus::Verified,
         ]);
+
+        return true;
     }
 
     /**

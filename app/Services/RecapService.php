@@ -14,7 +14,8 @@ use Illuminate\Support\Collection;
  * anggota (Modul 6 & 9 di CLAUDE.md).
  *
  * Semua perhitungan di sini cuma memakai pesanan berstatus verified atau
- * invoiced. Pesanan pending belum dihitung karena harganya belum dikunci.
+ * invoiced. Pesanan pending belum dihitung karena harganya belum dikunci,
+ * dan pesanan yang dibatalkan tidak dihitung sama sekali.
  *
  * Cakupan pemesannya beda-beda per jenis rekap:
  * - Rekap uang & kebutuhan produk ikut menghitung anggota dan non-anggota.
@@ -293,8 +294,11 @@ class RecapService
      */
     public function memberOrderStatusForPeriod(OrderPeriod $period): Collection
     {
+        // Pesanan yang dibatalkan tidak dihitung: anggota yang membatalkan
+        // satu-satunya pesanannya berarti belum belanja.
         $pesananPerAnggota = Order::where('order_period_id', $period->id)
             ->whereNotNull('member_id')
+            ->belumDibatalkan()
             ->orderBy('created_at')
             ->get()
             ->groupBy('member_id');
@@ -333,6 +337,7 @@ class RecapService
 
         $sudah = Order::where('order_period_id', $period->id)
             ->whereNotNull('member_id')
+            ->belumDibatalkan()
             ->distinct()
             ->count('member_id');
 

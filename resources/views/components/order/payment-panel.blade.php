@@ -22,10 +22,28 @@
 <x-card class="overflow-hidden">
     <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
         <h2 class="font-semibold text-gray-800 text-sm">Pembayaran</h2>
-        <x-admin.badge :color="$status->color()">{{ $status->label() }}</x-admin.badge>
+        @if ($order->dibatalkan())
+            <x-admin.badge color="gray">Tidak ditagih</x-admin.badge>
+        @else
+            <x-admin.badge :color="$status->color()">{{ $status->label() }}</x-admin.badge>
+        @endif
     </div>
 
-    @if (! $totalFinal)
+    @if ($order->dibatalkan())
+        {{-- Pesanan batal tidak ditagih, jadi QRIS tidak ditampilkan lagi.
+             Kalau uangnya terlanjur masuk, pengurus yang mengembalikan. --}}
+        <div class="px-5 py-6 text-center">
+            <p class="text-sm text-gray-600">Pesanan ini dibatalkan</p>
+            <p class="mt-1 text-xs text-gray-400 leading-relaxed">
+                @if ($status === App\Enums\PaymentStatus::Unpaid)
+                    Tidak ada yang perlu dibayar.
+                @else
+                    Pembayaran yang sudah masuk dikembalikan oleh pengurus koperasi.
+                @endif
+            </p>
+        </div>
+
+    @elseif (! $totalFinal)
         {{-- Belum ada angka yang bisa dibayar. Pesanan yang memuat produk
              fluktuatif baru punya total setelah pengurus mengunci harganya. --}}
         <div class="px-5 py-6 text-center">

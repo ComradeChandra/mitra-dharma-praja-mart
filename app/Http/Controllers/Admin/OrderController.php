@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\OrderStatus;
-use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\CancelOrderRequest;
 use App\Http\Requests\Admin\VerifyOrderRequest;
 use App\Models\Order;
+use App\Services\OrderCancellationService;
 use App\Services\OrderService;
 use App\Services\WhatsAppInvoiceService;
 use Illuminate\Http\RedirectResponse;
@@ -14,7 +14,6 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-
 
 /**
  * Sisi admin dari pemesanan (Modul 3, 5 & 7 di CLAUDE.md), admin melihat
@@ -28,6 +27,7 @@ class OrderController extends Controller
     public function __construct(
         private OrderService $orderService,
         private WhatsAppInvoiceService $whatsAppInvoiceService,
+        private OrderCancellationService $pembatalan,
     ) {}
 
     /**
@@ -64,15 +64,20 @@ class OrderController extends Controller
         $order->load('orderItems.product', 'member', 'orderPeriod', 'opdDepartment');
 
         // Invoice cuma bisa disiapkan kalau totalnya sudah final (verified/invoiced) —
-        // pesanan "pending" belum punya harga lengkap, belum ada yang bisa di-invoice-kan.
+        // pesanan "pending" belum punya harga lengkap, dan pesanan yang
+        // dibatalkan tidak perlu ditagih.
         $invoiceText = null;
         $whatsAppLink = null;
-        if ($order->status !== OrderStatus::Pending) {
+        if ($order->status->hargaSudahFinal()) {
             $invoiceText = $this->whatsAppInvoiceService->generateInvoiceText($order);
             $whatsAppLink = $this->whatsAppInvoiceService->generateWhatsAppLink($order);
         }
 
-        return view('admin.orders.show', compact('order', 'invoiceText', 'whatsAppLink'));
+        // Berapa pesanan lain di periode ini yang juga menunggu harga barang
+        // yang sama, buat pilihan "terapkan ke semua" di form kunci harga.
+        $pesananLainMenunggu = $this->orderService->pesananLainMenungguHarga($order);
+
+        return view('admin.orders.show', compact('order', 'invoiceText', 'whatsAppLink', 'pesananLainMenunggu'));
     }
 
     /**
@@ -85,9 +90,9 @@ class OrderController extends Controller
     {
         $order->load('orderItems.product', 'member', 'orderPeriod', 'opdDepartment');
 
-        $tautanWhatsApp = $order->status === OrderStatus::Pending
-            ? null
-            : $this->whatsAppInvoiceService->generateWhatsAppLink($order);
+        $tautanWhatsApp = $order->status->hargaSudahFinal()
+            ? $this->whatsAppInvoiceService->generateWhatsAppLink($order)
+            : null;
 
         return view('struk.show', [
             'order' => $order,
@@ -131,11 +136,33 @@ class OrderController extends Controller
      */
     public function verify(VerifyOrderRequest $request, Order $order): RedirectResponse
     {
-        $this->orderService->verifyOrder($order, $request->itemPrices());
+        $hasil = $this->orderService->verifyOrder($order, $request->itemPrices(), $request->terapkanKeSemua());
+
+        $pesan = 'Pesanan berhasil diverifikasi, harga & total sudah dikunci.';
+        if ($hasil['lain'] > 0) {
+            $pesan .= " Harganya juga diterapkan ke {$hasil['lain']} pesanan lain di periode ini";
+            $pesan .= $hasil['masihMenunggu'] > 0
+                ? "; {$hasil['masihMenunggu']} di antaranya masih menunggu harga barang lain."
+                : '.';
+        }
 
         return redirect()
             ->route('admin.orders.show', $order)
-            ->with('success', 'Pesanan berhasil diverifikasi, harga & total sudah dikunci.');
+            ->with('success', $pesan);
+    }
+
+    /**
+     * Pengurus membatalkan pesanan, misalnya karena barangnya habis di grosir
+     * atau pemesan keberatan dengan harga akhirnya. Aturannya ada di
+     * OrderCancellationService.
+     */
+    public function cancel(CancelOrderRequest $request, Order $order): RedirectResponse
+    {
+        $this->pembatalan->batalkanOlehPengurus($order, $request->alasan(), $request->uangDikembalikan());
+
+        return redirect()
+            ->route('admin.orders.show', $order)
+            ->with('success', 'Pesanan dibatalkan dan tidak lagi dihitung di rekap. Jangan lupa kabari pemesannya lewat WhatsApp.');
     }
 
     /**

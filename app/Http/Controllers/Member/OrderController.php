@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Member;
 
-use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DeclarePaymentRequest;
 use App\Http\Requests\Member\StoreOrderRequest;
 use App\Models\Order;
 use App\Models\OrderPeriod;
 use App\Models\Product;
+use App\Services\OrderCancellationService;
 use App\Services\OrderService;
 use App\Services\WhatsAppInvoiceService;
 use Illuminate\Http\RedirectResponse;
@@ -29,6 +29,7 @@ class OrderController extends Controller
     public function __construct(
         private OrderService $orderService,
         private WhatsAppInvoiceService $whatsAppInvoiceService,
+        private OrderCancellationService $pembatalan,
     ) {}
 
     /**
@@ -51,8 +52,9 @@ class OrderController extends Controller
             'alamatTersimpan' => $member->address,
             // Pesanan yang sudah terkirim di periode ini, ditampilkan di atas
             // form supaya orang tidak mengirim ulang karena mengira gagal.
+            // Yang sudah dibatalkan tidak ikut disebut.
             'pesananTerkirim' => $period
-                ? $member->orders()->where('order_period_id', $period->id)->latest()->get()
+                ? $member->orders()->where('order_period_id', $period->id)->belumDibatalkan()->latest()->get()
                 : collect(),
         ]);
     }
@@ -112,12 +114,33 @@ class OrderController extends Controller
         $order->load('orderItems.product', 'orderPeriod');
 
         // Struk baru bisa dibagikan setelah totalnya final. Pesanan yang masih
-        // menunggu verifikasi harga belum punya angka pasti.
-        $tautanBagikan = $order->status === OrderStatus::Pending
-            ? null
-            : $this->whatsAppInvoiceService->generateShareLink($order);
+        // menunggu verifikasi harga belum punya angka pasti, dan pesanan yang
+        // dibatalkan tidak perlu dibagikan.
+        $tautanBagikan = $order->status->hargaSudahFinal()
+            ? $this->whatsAppInvoiceService->generateShareLink($order)
+            : null;
 
-        return view('member.orders.show', compact('order', 'tautanBagikan'));
+        // null berarti tombol "Batalkan pesanan" boleh tampil
+        $alasanTidakBisaBatal = $this->pembatalan->alasanPemesanTidakBisaBatal($order);
+
+        return view('member.orders.show', compact('order', 'tautanBagikan', 'alasanTidakBisaBatal'));
+    }
+
+    /**
+     * Anggota membatalkan pesanannya sendiri. Boleh selama periodenya masih
+     * dibuka dan belum dibayar (lihat OrderCancellationService).
+     */
+    public function cancel(Order $order): RedirectResponse
+    {
+        $member = Auth::guard('member')->user();
+
+        abort_unless($order->member_id === $member->id, 403);
+
+        $this->pembatalan->batalkanOlehPemesan($order);
+
+        return redirect()
+            ->route('member.orders.show', $order)
+            ->with('success', 'Pesananmu sudah dibatalkan.');
     }
 
     /**
@@ -137,9 +160,9 @@ class OrderController extends Controller
         // Tautan bagikan tanpa nomor tujuan, jadi anggota bebas memilih mau
         // dikirim ke siapa. Pesanan yang totalnya belum final tidak dikasih
         // tautan, karena angkanya masih bisa berubah.
-        $tautanWhatsApp = $order->status === OrderStatus::Pending
-            ? null
-            : $this->whatsAppInvoiceService->generateShareLink($order);
+        $tautanWhatsApp = $order->status->hargaSudahFinal()
+            ? $this->whatsAppInvoiceService->generateShareLink($order)
+            : null;
 
         return view('struk.show', [
             'order' => $order,

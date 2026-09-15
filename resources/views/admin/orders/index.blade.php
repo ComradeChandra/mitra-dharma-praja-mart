@@ -24,6 +24,7 @@
                     \App\Enums\OrderStatus::Pending->value => 'Menunggu Verifikasi',
                     \App\Enums\OrderStatus::Verified->value => 'Terverifikasi',
                     \App\Enums\OrderStatus::Invoiced->value => 'Invoice Terkirim',
+                    \App\Enums\OrderStatus::Cancelled->value => 'Dibatalkan',
                 ] as $value => $label)
                     {{-- animate-[pop-in_...] = tombol tab muncul gantian berurutan
                          pas halaman kebuka, lihat @keyframes di resources/css/app.css --}}
@@ -89,9 +90,14 @@
                                         </x-admin.badge>
                                     </td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm">
-                                        <x-admin.badge :color="$order->payment_status->color()">
-                                            {{ $order->payment_status->label() }}
-                                        </x-admin.badge>
+                                        {{-- Pesanan batal tidak ditagih, status bayarnya tidak relevan lagi --}}
+                                        @if ($order->dibatalkan())
+                                            <span class="text-gray-400">—</span>
+                                        @else
+                                            <x-admin.badge :color="$order->payment_status->color()">
+                                                {{ $order->payment_status->label() }}
+                                            </x-admin.badge>
+                                        @endif
                                         {{-- Penanda kecil kalau pemesan melampirkan bukti transfer,
                                              biar pengurus tahu mana yang lebih cepat dicocokkan --}}
                                         @if ($order->payment_proof_path)

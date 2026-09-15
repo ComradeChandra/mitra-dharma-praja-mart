@@ -65,7 +65,10 @@ class DashboardStatsService
             // "Pendapatan" di grafik dihitung dari pesanan terverifikasi tanpa
             // peduli sudah dibayar atau belum, jadi tanpa penanda ini gampang
             // mengira uangnya sudah masuk semua.
-            'pembayaranMenunggu' => Order::where('payment_status', PaymentStatus::AwaitingConfirmation)->count(),
+            // Pesanan yang sudah dibatalkan tidak perlu dicocokkan lagi.
+            'pembayaranMenunggu' => Order::where('payment_status', PaymentStatus::AwaitingConfirmation)
+                ->belumDibatalkan()
+                ->count(),
         ];
     }
 }

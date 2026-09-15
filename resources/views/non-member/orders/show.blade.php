@@ -10,6 +10,9 @@
 
         <x-alert type="success" :message="session('success')" />
 
+        {{-- Muncul cuma kalau pesanannya sudah dibatalkan --}}
+        <x-order.cancelled-notice :order="$order" class="mb-6" />
+
         <x-card class="overflow-hidden">
             {{-- Header: periode + status --}}
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
@@ -54,28 +57,40 @@
             <div class="flex items-center justify-between px-5 py-4 bg-gray-50 border-t border-gray-100">
                 <span class="text-sm font-medium text-gray-600">Total</span>
                 <span class="text-lg font-bold text-gray-900">
-                    {{ $order->total_amount !== null ? 'Rp'.number_format($order->total_amount, 0, ',', '.') : 'Menunggu verifikasi' }}
+                    {{ $order->total_amount !== null ? 'Rp'.number_format($order->total_amount, 0, ',', '.') : ($order->dibatalkan() ? '—' : 'Menunggu verifikasi') }}
                 </span>
             </div>
         </x-card>
 
-        <div class="mt-4">
-            {{-- Struk resmi: halaman tersendiri yang siap dicetak atau
-                 disimpan jadi PDF lewat dialog cetak browser. --}}
-            <a
-                href="{{ route('non-member.orders.struk', $order) }}"
-                class="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V4h12v5M6 18H4v-6h16v6h-2M8 14h8v6H8z" />
-                </svg>
-                Lihat Struk Resmi
-            </a>
-        </div>
+        {{-- Pesanan yang dibatalkan tidak butuh struk --}}
+        @unless ($order->dibatalkan())
+            <div class="mt-4">
+                {{-- Struk resmi: halaman tersendiri yang siap dicetak atau
+                     disimpan jadi PDF lewat dialog cetak browser. --}}
+                <a
+                    href="{{ route('non-member.orders.struk', $order) }}"
+                    class="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V4h12v5M6 18H4v-6h16v6h-2M8 14h8v6H8z" />
+                    </svg>
+                    Lihat Struk Resmi
+                </a>
+            </div>
+        @endunless
 
         <div class="mt-6">
             <x-order.payment-panel :order="$order" :action="route('non-member.orders.declare-paid', $order)" :bukti-url="route('non-member.orders.payment-proof', $order)" />
         </div>
+
+        {{-- Batalkan pesanan: boleh sendiri selama periode masih dibuka dan
+             belum dibayar, selebihnya lewat pengurus. --}}
+        <x-order.cancel-panel
+            class="mt-6"
+            :order="$order"
+            :action="route('non-member.orders.cancel', $order)"
+            :alasan="$alasanTidakBisaBatal"
+        />
 
         <p class="mt-4 text-xs text-gray-400 text-center">
             {{-- Non-anggota tidak punya halaman riwayat pesanan, jadi mereka perlu

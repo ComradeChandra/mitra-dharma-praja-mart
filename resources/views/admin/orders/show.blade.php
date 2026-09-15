@@ -1,7 +1,17 @@
 @php
     // Item yang masih butuh diisi harga admin (produk fluktuatif yang belum
     // dikunci), dipakai buat nentuin apakah form verifikasi perlu ditampilkan.
+    // Pesanan yang sudah dibatalkan tidak perlu dikunci harganya.
     $itemBelumBerharga = $order->orderItems->whereNull('price_at_order');
+    $bisaDikunci = $itemBelumBerharga->isNotEmpty() && ! $order->dibatalkan();
+
+    // Ringkasan pesanan LAIN yang ikut terisi kalau pengurus memilih
+    // "terapkan ke semua", mis. "Telur Ayam 1kg: 12 pesanan lain". Angkanya
+    // dihitung OrderService::pesananLainMenungguHarga().
+    $ringkasanPesananLain = $itemBelumBerharga->unique('product_id')
+        ->filter(fn ($item) => ($pesananLainMenunggu[$item->product_id] ?? 0) > 0)
+        ->map(fn ($item) => $item->product->name.': '.$pesananLainMenunggu[$item->product_id].' pesanan lain')
+        ->implode(' · ');
 @endphp
 
 <x-app-layout :title="'Detail Pesanan — ' . config('app.name')">
@@ -18,6 +28,28 @@
     <div class="py-10">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <x-alert type="success" :message="session('success')" />
+
+            {{-- Muncul cuma kalau pesanannya sudah dibatalkan --}}
+            <x-order.cancelled-notice :order="$order" />
+
+            {{-- Pesanan batal yang pembayarannya sempat berjalan. Kartu invoice
+                 (tempat info bayar biasanya) tidak tampil untuk pesanan batal,
+                 padahal pengurus masih butuh status & bukti transfernya untuk
+                 mengembalikan uang. --}}
+            @if ($order->dibatalkan() && $order->payment_status !== \App\Enums\PaymentStatus::Unpaid)
+                <x-card class="px-5 py-4">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-sm font-medium text-gray-700">Pembayaran sebelum dibatalkan</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Uang yang sudah masuk perlu dikembalikan ke pemesan.</p>
+                        </div>
+                        <x-admin.badge :color="$order->payment_status->color()">
+                            {{ $order->payment_status->label() }}
+                        </x-admin.badge>
+                    </div>
+                    <x-admin.payment-proof-link :order="$order" class="mt-3" />
+                </x-card>
+            @endif
 
             {{-- Info pemesan --}}
             <x-card class="p-6">
@@ -93,6 +125,9 @@
                                     <span class="text-sm font-medium text-gray-700 shrink-0">
                                         Rp{{ number_format($item->price_at_order, 0, ',', '.') }} / pcs
                                     </span>
+                                @elseif (! $bisaDikunci)
+                                    {{-- Pesanan batal: harganya tidak perlu diisi lagi --}}
+                                    <span class="text-sm text-gray-400 shrink-0">—</span>
                                 @else
                                     {{-- Input harga buat produk fluktuatif yang belum dikunci --}}
                                     <div class="shrink-0 w-40">
@@ -118,12 +153,46 @@
                     <div class="flex items-center justify-between px-5 py-4 bg-gray-50 border-t border-gray-100">
                         <span class="text-sm font-medium text-gray-600">Total</span>
                         <span class="text-lg font-bold text-gray-900">
-                            {{ $order->total_amount !== null ? 'Rp'.number_format($order->total_amount, 0, ',', '.') : 'Menunggu harga fluktuatif' }}
+                            {{ $order->total_amount !== null ? 'Rp'.number_format($order->total_amount, 0, ',', '.') : ($order->dibatalkan() ? '—' : 'Menunggu harga fluktuatif') }}
                         </span>
                     </div>
                 </x-card>
 
-                @if ($itemBelumBerharga->isNotEmpty())
+                {{--
+                    Harga ini berlaku ke mana. "Semua" mengisi harga yang sama ke
+                    pesanan lain di periode ini yang masih kosong harganya, supaya
+                    30 pesanan telur tidak berarti mengetik harga 30 kali.
+                    Cuma muncul kalau memang ada pesanan lain yang menunggu.
+                    Bawaannya "pesanan ini saja", pilihan yang paling aman.
+                --}}
+                @if ($bisaDikunci && $ringkasanPesananLain !== '')
+                    <x-card class="mt-4 p-4">
+                        <fieldset>
+                            <legend class="text-sm font-medium text-gray-800">Terapkan harga ini ke</legend>
+                            <div class="mt-3 space-y-3">
+                                <label class="flex items-start gap-2.5 text-sm text-gray-700 cursor-pointer">
+                                    <input type="radio" name="terapkan" value="pesanan-ini"
+                                           class="mt-0.5 border-gray-300 text-emerald-700 focus:ring-emerald-600"
+                                           @checked(old('terapkan', 'pesanan-ini') !== 'semua')>
+                                    <span>Pesanan ini saja</span>
+                                </label>
+                                <label class="flex items-start gap-2.5 text-sm text-gray-700 cursor-pointer">
+                                    <input type="radio" name="terapkan" value="semua"
+                                           class="mt-0.5 border-gray-300 text-emerald-700 focus:ring-emerald-600"
+                                           @checked(old('terapkan') === 'semua')>
+                                    <span>
+                                        Semua pesanan di periode ini yang harganya masih kosong
+                                        <span class="block mt-0.5 text-xs text-gray-500">{{ $ringkasanPesananLain }}</span>
+                                        <span class="block mt-0.5 text-xs text-gray-400">Pesanan yang harganya sudah diisi tidak ditimpa.</span>
+                                    </span>
+                                </label>
+                            </div>
+                            <x-input-error :messages="$errors->get('terapkan')" class="mt-2" />
+                        </fieldset>
+                    </x-card>
+                @endif
+
+                @if ($bisaDikunci)
                     <div class="mt-4">
                         <x-primary-button>Verifikasi & Kunci Harga</x-primary-button>
                     </div>
@@ -179,17 +248,7 @@
                         </div>
 
                         {{-- Bukti transfer, kalau pemesan melampirkannya --}}
-                        @if ($order->payment_proof_path)
-                            <a href="{{ route('admin.orders.payment-proof', $order) }}"
-                               target="_blank" rel="noopener"
-                               class="mt-3 inline-flex items-center gap-2 text-sm text-emerald-700 hover:text-emerald-900">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V7.5A1.5 1.5 0 0 1 4.5 6h15A1.5 1.5 0 0 1 21 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 16.5Z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m3 15 4.5-4.5L12 15l3-3 6 6" />
-                                </svg>
-                                Lihat bukti transfer
-                            </a>
-                        @endif
+                        <x-admin.payment-proof-link :order="$order" class="mt-3" />
 
                         @if ($order->payment_status !== \App\Enums\PaymentStatus::Paid && $order->total_amount !== null)
                             <form method="POST" action="{{ route('admin.orders.confirm-payment', $order) }}" class="mt-3">
@@ -237,6 +296,9 @@
                     </div>
                 </x-card>
             @endif
+
+            {{-- Batalkan pesanan (tidak tampil kalau sudah dibatalkan) --}}
+            <x-admin.order-cancel :order="$order" />
         </div>
     </div>
 </x-app-layout>

@@ -4,6 +4,9 @@
 
         <x-alert type="success" :message="session('success')" />
 
+        {{-- Muncul cuma kalau pesanannya sudah dibatalkan --}}
+        <x-order.cancelled-notice :order="$order" class="mb-6" />
+
         <x-card class="overflow-hidden">
             {{-- Header: periode + status --}}
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
@@ -55,7 +58,7 @@
             <div class="flex items-center justify-between px-5 py-4 bg-gray-50 border-t border-gray-100">
                 <span class="text-sm font-medium text-gray-600">Total</span>
                 <span class="text-lg font-bold text-gray-900">
-                    {{ $order->total_amount !== null ? 'Rp'.number_format($order->total_amount, 0, ',', '.') : 'Menunggu verifikasi' }}
+                    {{ $order->total_amount !== null ? 'Rp'.number_format($order->total_amount, 0, ',', '.') : ($order->dibatalkan() ? '—' : 'Menunggu verifikasi') }}
                 </span>
             </div>
 
@@ -105,5 +108,14 @@
         <div class="mt-6">
             <x-order.payment-panel :order="$order" :action="route('member.orders.declare-paid', $order)" :bukti-url="route('member.orders.payment-proof', $order)" />
         </div>
+
+        {{-- Batalkan pesanan: boleh sendiri selama periode masih dibuka dan
+             belum dibayar, selebihnya lewat pengurus. --}}
+        <x-order.cancel-panel
+            class="mt-6"
+            :order="$order"
+            :action="route('member.orders.cancel', $order)"
+            :alasan="$alasanTidakBisaBatal"
+        />
     </div>
 </x-layouts.member>
