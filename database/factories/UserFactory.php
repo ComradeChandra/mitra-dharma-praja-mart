@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\AdminRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -30,7 +31,27 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            // Bawaan Admin Utama: tes lama ditulis saat semua akun berakses
+            // penuh. Tes untuk akun staf memakai ->pengurus().
+            'role' => AdminRole::AdminUtama,
+            'is_active' => true,
         ];
+    }
+
+    /** Akun staf biasa (bukan Admin Utama). */
+    public function pengurus(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => AdminRole::Pengurus,
+        ]);
+    }
+
+    /** Akun yang sudah dinonaktifkan. */
+    public function nonaktif(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
+        ]);
     }
 
     /**

@@ -92,13 +92,21 @@
                     </x-primary-button>
                 </div>
             </form>
+
+            {{-- Permintaan password baru ke antrean pengurus --}}
+            <p class="mt-4 text-center text-sm">
+                <a href="{{ route('member.password-request.create') }}" class="text-emerald-700 hover:text-emerald-900">
+                    Lupa password?
+                </a>
+            </p>
         </div>
 
         {{-- ========== NON-ANGGOTA ========== --}}
         <div x-show="peran === 'non-anggota'" x-cloak>
             <p class="mb-4 text-sm text-gray-600">
                 Pilih instansi kamu, lalu masukkan kode akses yang dibagikan pengurus
-                koperasi ke kantor kamu.
+                koperasi ke kantor kamu. Belum tahu kodenya? Tanyakan ke rekan sekantor
+                atau hubungi pengurus.
             </p>
 
             <x-input-error :messages="$errors->get('opd_department_id')" class="mb-4" />

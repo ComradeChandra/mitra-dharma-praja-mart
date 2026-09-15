@@ -92,12 +92,19 @@ test('nomor yang jelas salah ditolak dan tidak tersimpan', function (string $nom
     'kebanyakan angka' => '0812345678901234567',
 ]);
 
-test('cuma pengurus yang bisa membuka dan mengubah pengaturan', function () {
+test('cuma Admin Utama yang bisa membuka dan mengubah pengaturan', function () {
     $this->get(route('admin.settings.edit'))->assertRedirect(route('login'));
 
     $this->actingAs($this->anggota, 'member')
         ->put(route('admin.settings.update'), ['whatsapp_number' => '081299999999'])
         ->assertRedirect(route('login'));
+
+    // Akun staf biasa (Pengurus) juga ditolak
+    $staf = User::factory()->pengurus()->create();
+    $this->actingAs($staf, 'web')->get(route('admin.settings.edit'))->assertForbidden();
+    $this->actingAs($staf, 'web')
+        ->put(route('admin.settings.update'), ['whatsapp_number' => '081299999999'])
+        ->assertForbidden();
 
     expect(app(KontakPengurusService::class)->nomorWhatsApp())->toBeNull();
 });
@@ -155,7 +162,7 @@ test('selama nomor belum diisi, tombol dan tautan WhatsApp ke pengurus tidak tam
 
     $this->get(route('masuk'))
         ->assertOk()
-        ->assertDontSee('Lupa password atau kode akses?');
+        ->assertDontSee('Butuh bantuan untuk masuk? Hubungi pengurus');
 });
 
 test('halaman masuk menawarkan bantuan lewat WhatsApp pengurus', function () {
@@ -164,7 +171,7 @@ test('halaman masuk menawarkan bantuan lewat WhatsApp pengurus', function () {
     foreach ([route('masuk'), route('member.login'), route('non-member.login')] as $url) {
         $this->get($url)
             ->assertOk()
-            ->assertSee('Lupa password atau kode akses? Hubungi pengurus')
+            ->assertSee('Butuh bantuan untuk masuk? Hubungi pengurus')
             ->assertSee(rawurlencode('Saya butuh bantuan untuk masuk ke aplikasi Mitra Dharma Praja Mart.'), false);
     }
 });
@@ -219,10 +226,15 @@ test('tombol Hubungi Pengurus tidak tampil di area pengurus', function () {
         ->assertDontSee('aria-label="Hubungi pengurus lewat WhatsApp"', false);
 });
 
-test('dasbor mengingatkan pengurus selama nomor WhatsApp belum diisi', function () {
+test('dasbor mengingatkan Admin Utama selama nomor WhatsApp belum diisi', function () {
     $this->actingAs($this->admin, 'web')
         ->get(route('admin.dashboard'))
         ->assertSee('Nomor WhatsApp koperasi belum diisi');
+
+    // Pengurus biasa tidak bisa mengisinya, jadi tidak diingatkan
+    $this->actingAs(User::factory()->pengurus()->create(), 'web')
+        ->get(route('admin.dashboard'))
+        ->assertDontSee('Nomor WhatsApp koperasi belum diisi');
 
     ($this->isiNomor)();
 

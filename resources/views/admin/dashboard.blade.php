@@ -6,9 +6,25 @@
     <div class="py-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
+            {{-- Anggota yang lupa password menunggu dibuatkan yang baru.
+                 Tampil untuk semua pengurus: antreannya terbuka untuk siapa pun. --}}
+            @if ($permintaanLupaPassword > 0)
+                <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+                    <p class="text-sm text-amber-800">
+                        <span class="font-semibold">{{ $permintaanLupaPassword }} anggota</span>
+                        lupa password dan menunggu dibuatkan password baru.
+                    </p>
+                    <a href="{{ route('admin.password-requests.index') }}"
+                       class="shrink-0 text-sm font-medium text-amber-800 underline underline-offset-2 hover:text-amber-900">
+                        Buka antreannya
+                    </a>
+                </div>
+            @endif
+
             {{-- Pengingat: selama nomor WhatsApp koperasi kosong, anggota &
-                 non-anggota tidak punya tombol untuk menghubungi pengurus --}}
-            @if ($nomorWaBelumDiisi)
+                 non-anggota tidak punya tombol untuk menghubungi pengurus.
+                 Cuma untuk Admin Utama, karena cuma dia yang bisa mengisinya. --}}
+            @if ($nomorWaBelumDiisi && auth()->user()->can('admin-utama'))
                 <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
                     <div class="flex items-start gap-3 min-w-0">
                         <x-ikon-whatsapp class="h-5 w-5 mt-0.5 shrink-0 text-amber-700" />

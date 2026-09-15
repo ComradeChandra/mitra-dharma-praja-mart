@@ -71,7 +71,11 @@
             />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
+        <div class="flex items-center justify-between gap-4 mt-4">
+            {{-- Permintaan password baru ke antrean pengurus --}}
+            <a href="{{ route('member.password-request.create') }}" class="text-sm text-emerald-700 hover:text-emerald-900">
+                Lupa password?
+            </a>
             <x-primary-button :disabled="$members->isEmpty()">Masuk</x-primary-button>
         </div>
     </form>

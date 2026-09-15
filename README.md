@@ -9,8 +9,15 @@ WhatsApp dan menerima pembayaran lewat QRIS.
 
 ## Fitur
 
-- **Tiga jenis pengguna** — pengurus (email + password), anggota (kode anggota +
-  password dari pengurus), dan non-anggota (pilih OPD + kode akses OPD).
+- **Empat tingkatan pengguna** — Admin Utama dan Pengurus (email + password,
+  tiap staf punya akun sendiri), anggota (kode anggota + password dari
+  pengurus), dan non-anggota (pilih OPD + kode akses OPD). Admin Utama
+  mengelola akun pengurus dan pengaturan; tabel "siapa bisa apa" ada di
+  Admin → Akun Pengurus.
+- **Lupa password** anggota masuk ke antrean yang bisa ditangani pengurus mana
+  pun; password baru dikirim lewat WhatsApp ke nomor terdaftar.
+- **Bantuan & FAQ** yang bisa dibuka tanpa masuk, plus Profil Saya anggota yang
+  merangkum pesanan dan belanja tahun berjalan.
 - **Katalog & pemesanan** per periode, dengan konfirmasi sebelum kirim.
 - **Harga fluktuatif** (telur, sayur) dikunci pengurus saat verifikasi, untuk
   satu pesanan atau sekaligus semua pesanan di periode yang sama.
@@ -56,7 +63,8 @@ anggota `0001 A` / `anggota123`, non-anggota OPD *Sekretariat Daerah* / `opd1234
 ## Memasang di hosting
 
 Data contoh **tidak** ikut terpasang di server: `db:seed` di server cuma membuat
-akun pengurus pertama dari `.env`.
+akun pengurus pertama dari `.env`. Akun itu berperan **Admin Utama**; akun staf
+lain ditambahkan dari aplikasi (Admin → Akun Pengurus), bukan lewat seeder.
 
 1. **Bangun CSS/JS di laptop**, karena kebanyakan hosting tidak punya Node.js:
 

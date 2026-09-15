@@ -97,6 +97,7 @@
                                 <p class="text-xs text-gray-400">{{ $anggotaLogin->member_code }}</p>
                             </div>
                             <a href="{{ route('member.profile.edit') }}" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900">Profil Saya</a>
+                            <a href="{{ route('bantuan') }}" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900">Bantuan &amp; FAQ</a>
                             <form method="POST" action="{{ route('member.logout') }}" class="mt-1 pt-1 border-t border-gray-100">
                                 @csrf
                                 <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900">Keluar</button>
@@ -156,6 +157,9 @@
                 <x-responsive-nav-link :href="route('member.profile.edit')" :active="request()->routeIs('member.profile.*')">
                     Profil Saya
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('bantuan')" :active="request()->routeIs('bantuan')">
+                    Bantuan &amp; FAQ
+                </x-responsive-nav-link>
 
                 {{-- Nama anggota + tombol keluar ditaruh di sini, karena di layar
                      sempit keduanya disembunyikan dari header (cuma avatar). --}}
@@ -174,6 +178,8 @@
         <main>
             {{ $slot }}
         </main>
+
+        <x-footer-koperasi />
 
         {{-- Tombol WhatsApp ke pengurus, tampil kalau nomornya sudah diisi --}}
         <x-kontak-pengurus />

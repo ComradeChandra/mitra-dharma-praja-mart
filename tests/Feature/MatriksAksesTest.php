@@ -22,7 +22,8 @@ use Illuminate\Support\Facades\Storage;
 | bukan diketik manual, jadi rute baru otomatis ikut teruji. Siapa yang
 | boleh masuk diturunkan dari middleware rutenya:
 |
-|   auth:web           -> cuma admin
+|   auth:web           -> cuma akun pengurus; kalau ada can:admin-utama,
+|                         cuma Admin Utama (akun Pengurus biasa ditolak)
 |   auth:member        -> cuma anggota; rute {order} cuma pemiliknya
 |   non-member.session -> cuma sesi non-anggota; rute {order} cuma sesi yang
 |                         mengirim pesanannya (bukan rekan sekantor)
@@ -48,9 +49,12 @@ test('setiap rute cuma bisa dibuka peran yang berhak', function () {
     $opdLain = OpdDepartment::whereKeyNot($opd->id)->first();
     $pesananNon = Order::create(['order_period_id' => $periode->id, 'user_type' => UserType::NonMember, 'non_member_name' => 'Teti', 'opd_id' => $opd->id, 'whatsapp_number' => '62811', 'status' => OrderStatus::Verified, 'total_amount' => 70000, 'payment_proof_path' => $pesananA->payment_proof_path]);
 
+    $staf = User::factory()->pengurus()->create();
+
     $peran = [
         'tamu' => fn () => null,
         'admin' => fn () => $this->actingAs($admin, 'web'),
+        'pengurus' => fn () => $this->actingAs($staf, 'web'),
         'anggota-pemilik' => fn () => $this->actingAs($anggotaA, 'member'),
         'anggota-lain' => fn () => $this->actingAs($anggotaB, 'member'),
         'non-pemilik-sesi' => fn () => $this->withSession(['non_member_opd_id' => $opd->id, 'non_member_order_ids' => [$pesananNon->id]]),
@@ -84,10 +88,12 @@ test('setiap rute cuma bisa dibuka peran yang berhak', function () {
             'opd_department' => $opd->id,
             'order_period', 'orderPeriod' => $periode->id,
             'productRequest' => ProductRequest::first()->id,
+            'user' => $admin->id,
             default => throw new RuntimeException("parameter tak dikenal: $p di {$rute->uri()}"),
         }])->all();
         $url = route($rute->getName(), $param);
         $pakaiPesanan = in_array('order', $rute->parameterNames(), true);
+        $khususAdminUtama = in_array('can:admin-utama', $middleware, true);
 
         foreach ($peran as $namaPeran => $masuk) {
             $this->flushSession();
@@ -95,7 +101,7 @@ test('setiap rute cuma bisa dibuka peran yang berhak', function () {
             $masuk();
 
             $boleh = match ($wilayah) {
-                'admin' => $namaPeran === 'admin',
+                'admin' => $namaPeran === 'admin' || ($namaPeran === 'pengurus' && ! $khususAdminUtama),
                 'anggota' => $pakaiPesanan ? $namaPeran === 'anggota-pemilik' : str_starts_with($namaPeran, 'anggota'),
                 'non' => $pakaiPesanan ? $namaPeran === 'non-pemilik-sesi' : str_starts_with($namaPeran, 'non-'),
             };

@@ -4,7 +4,7 @@
     </x-slot>
 
     <div class="py-10">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <x-alert type="success" :message="session('success')" />
 
             {{-- Kartu 1: Informasi Profil (nama & email) --}}
@@ -47,6 +47,17 @@
                         <x-primary-button>Simpan Perubahan</x-primary-button>
                     </div>
                 </form>
+            </x-card>
+
+            {{-- Kartu: peran akun ini dan apa saja yang bisa dilakukannya.
+                 Kolom peran sendiri disorot di tabel. --}}
+            <x-card class="p-6">
+                <div class="flex flex-wrap items-center gap-3">
+                    <h3 class="font-semibold text-gray-800">Peran akun kamu</h3>
+                    <x-admin.badge :color="$user->role->color()">{{ $user->role->label() }}</x-admin.badge>
+                </div>
+                <p class="text-sm text-gray-500 mt-1 mb-4">{{ $user->role->keterangan() }}</p>
+                <x-admin.hak-akses :sorot="$user->role->value" />
             </x-card>
 
             {{-- Kartu 2: Ubah Password (form terpisah, sengaja tidak digabung

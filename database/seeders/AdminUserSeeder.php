@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\AdminRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -38,6 +39,10 @@ class AdminUserSeeder extends Seeder
                 'name' => 'Pengurus Koperasi',
                 'password' => Hash::make($password),
                 'email_verified_at' => now(),
+                // Akun pertama WAJIB Admin Utama: dialah yang nanti menambah
+                // akun pengurus lain lewat Admin -> Akun Pengurus.
+                'role' => AdminRole::AdminUtama,
+                'is_active' => true,
             ]);
 
             return;
@@ -51,6 +56,8 @@ class AdminUserSeeder extends Seeder
                 'name' => 'Pengurus Koperasi',
                 'password' => Hash::make($password),
                 'email_verified_at' => now(),
+                'role' => AdminRole::AdminUtama,
+                'is_active' => true,
             ]
         );
     }

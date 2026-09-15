@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\OpdDepartmentController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\OrderPeriodController;
+use App\Http\Controllers\Admin\PasswordResetRequestController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductRequestController;
 use App\Http\Controllers\Admin\ProfileController;
@@ -22,6 +24,11 @@ Route::get('/katalog/{product}', [CatalogController::class, 'show'])->name('cata
 // dipilih lewat dropdown peran. Cuma menampilkan formulirnya; proses login
 // tetap ditangani controller masing-masing (lihat LoginPortalController).
 Route::get('/masuk', LoginPortalController::class)->name('masuk');
+
+// Bantuan & pertanyaan umum (FAQ), terbuka untuk siapa saja: anggota,
+// non-anggota, maupun tamu yang belum bisa masuk. Isinya teks tetap, jadi
+// cukup Route::view tanpa controller.
+Route::view('/bantuan', 'bantuan.index')->name('bantuan');
 
 // Halaman depan ('/'):
 // - Sudah login (admin)  -> langsung ke dashboard admin
@@ -46,7 +53,8 @@ Route::get('/', function () {
 // admin tidak boleh bergantung pada setelan bawaan itu. Di aplikasi yang jalan
 // hasilnya sama (guard bawaannya web), tapi di tes, actingAs($anggota, 'member')
 // mengganti guard bawaan dan membuat anggota tampak bisa masuk admin.
-Route::middleware('auth:web')->prefix('admin')->name('admin.')->group(function () {
+// admin.aktif: akun pengurus yang dinonaktifkan saat masih login ikut dikeluarkan.
+Route::middleware(['auth:web', 'admin.aktif'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Route::resource otomatis bikin 7 route standar (index, create, store, edit,
@@ -90,10 +98,26 @@ Route::middleware('auth:web')->prefix('admin')->name('admin.')->group(function (
     Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
-    // Pengaturan koperasi yang diubah pengurus sendiri, sekarang isinya
-    // nomor WhatsApp untuk tombol "Hubungi Pengurus".
-    Route::get('pengaturan', [SettingController::class, 'edit'])->name('settings.edit');
-    Route::put('pengaturan', [SettingController::class, 'update'])->name('settings.update');
+    // Antrean "lupa password" anggota. Terbuka untuk SEMUA pengurus (bukan
+    // cuma Admin Utama), siapa pun yang sedang memegang aplikasi bisa membantu.
+    Route::get('lupa-password', [PasswordResetRequestController::class, 'index'])->name('password-requests.index');
+    Route::patch('lupa-password/{passwordResetRequest}/buatkan', [PasswordResetRequestController::class, 'reset'])->name('password-requests.reset');
+    Route::patch('lupa-password/{passwordResetRequest}/abaikan', [PasswordResetRequestController::class, 'dismiss'])->name('password-requests.dismiss');
+
+    // Khusus Admin Utama (Gate "admin-utama", lihat AppServiceProvider)
+    Route::middleware('can:admin-utama')->group(function () {
+        // Akun pengurus: tambah, ubah peran, nonaktifkan. Tanpa hapus &
+        // tanpa halaman detail (lihat Admin\AccountController).
+        Route::resource('akun-pengurus', AccountController::class)
+            ->except(['show', 'destroy'])
+            ->parameters(['akun-pengurus' => 'user'])
+            ->names('accounts');
+
+        // Pengaturan koperasi, sekarang isinya nomor WhatsApp untuk tombol
+        // "Hubungi Pengurus".
+        Route::get('pengaturan', [SettingController::class, 'edit'])->name('settings.edit');
+        Route::put('pengaturan', [SettingController::class, 'update'])->name('settings.update');
+    });
 });
 
 // Route login/logout admin (lihat routes/auth.php)

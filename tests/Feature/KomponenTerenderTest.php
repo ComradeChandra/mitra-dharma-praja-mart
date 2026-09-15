@@ -50,6 +50,8 @@ test('semua halaman admin terender tanpa tag komponen mentah', function () {
         route('admin.order-periods.index'), route('admin.order-periods.create'), route('admin.order-periods.edit', $periode), route('admin.order-periods.rekap', $periode),
         route('admin.orders.index'), route('admin.orders.show', $pesanan), route('admin.orders.struk', $pesanan),
         route('admin.product-requests.index'), route('admin.profile.edit'), route('admin.settings.edit'),
+        route('admin.accounts.index'), route('admin.accounts.create'), route('admin.accounts.edit', User::first()),
+        route('admin.password-requests.index'),
     ] as $url) {
         pastikanTerender($this->get($url), $url);
     }
@@ -64,14 +66,14 @@ test('semua halaman anggota terender tanpa tag komponen mentah', function () {
         route('member.dashboard'), route('member.orders.create'), route('member.orders.index'),
         route('member.orders.show', $pesanan), route('member.orders.struk', $pesanan),
         route('member.profile.edit'), route('member.product-requests.index'), route('member.product-requests.create'),
-        route('catalog.index'), route('catalog.show', Product::first()),
+        route('catalog.index'), route('catalog.show', Product::first()), route('bantuan'),
     ] as $url) {
         pastikanTerender($this->get($url), $url);
     }
 });
 
 test('halaman tamu dan non-anggota terender tanpa tag komponen mentah', function () {
-    foreach ([route('catalog.index'), route('masuk'), route('login'), route('member.login'), route('non-member.login')] as $url) {
+    foreach ([route('catalog.index'), route('masuk'), route('login'), route('member.login'), route('non-member.login'), route('member.password-request.create'), route('bantuan')] as $url) {
         pastikanTerender($this->get($url), $url);
     }
 

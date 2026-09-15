@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use Illuminate\Auth\Access\Response;
 use Illuminate\Http\Middleware\TrustProxies;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -33,5 +36,12 @@ class AppServiceProvider extends ServiceProvider
         if ($proxy = config('app.trusted_proxies')) {
             TrustProxies::at($proxy === '*' ? '*' : array_map('trim', explode(',', $proxy)));
         }
+
+        // Pembeda Admin Utama dan Pengurus (lihat App\Enums\AdminRole).
+        // Dipakai rute (middleware "can:admin-utama") dan tampilan (@can),
+        // jadi aturannya cuma ditulis di sini.
+        Gate::define('admin-utama', fn (User $user) => $user->adalahAdminUtama()
+            ? Response::allow()
+            : Response::deny('Halaman ini khusus Admin Utama koperasi.'));
     }
 }

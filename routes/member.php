@@ -3,6 +3,7 @@
 use App\Http\Controllers\Member\AuthenticatedSessionController;
 use App\Http\Controllers\Member\DashboardController;
 use App\Http\Controllers\Member\OrderController;
+use App\Http\Controllers\Member\PasswordResetRequestController;
 use App\Http\Controllers\Member\ProductRequestController;
 use App\Http\Controllers\Member\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +22,14 @@ Route::prefix('anggota')->name('member.')->group(function () {
     Route::middleware('guest:member')->group(function () {
         Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
         Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+
+        // Lupa password: kirim permintaan ke antrean pengurus (bukan reset
+        // otomatis, lihat PasswordResetService). Dibatasi 5 kiriman per menit
+        // supaya antreannya tidak bisa dibanjiri.
+        Route::get('lupa-password', [PasswordResetRequestController::class, 'create'])->name('password-request.create');
+        Route::post('lupa-password', [PasswordResetRequestController::class, 'store'])
+            ->middleware('throttle:5,1')
+            ->name('password-request.store');
     });
 
     // Middleware 'auth:member': cuma bisa diakses kalau sudah login sebagai anggota

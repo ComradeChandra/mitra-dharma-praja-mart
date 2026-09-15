@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\DashboardStatsService;
 use App\Services\KontakPengurusService;
+use App\Services\PasswordResetService;
 use App\Services\RecapService;
 use Illuminate\View\View;
 
@@ -22,6 +23,7 @@ class DashboardController extends Controller
         private DashboardStatsService $dashboardStatsService,
         private RecapService $recapService,
         private KontakPengurusService $kontakPengurus,
+        private PasswordResetService $lupaPassword,
     ) {}
 
     public function index(): View
@@ -44,10 +46,14 @@ class DashboardController extends Controller
             'progresBelanja' => $this->recapService->memberOrderProgressForPeriod($summary['periodeAktif']),
         ];
 
-        // Pengingat di dasbor kalau nomor WhatsApp koperasi belum diisi:
-        // selama kosong, pemesan tidak punya tombol untuk menghubungi pengurus.
-        $nomorWaBelumDiisi = $this->kontakPengurus->nomorWhatsApp() === null;
+        $pengingat = [
+            // Nomor WhatsApp koperasi belum diisi: selama kosong, pemesan
+            // tidak punya tombol untuk menghubungi pengurus.
+            'nomorWaBelumDiisi' => $this->kontakPengurus->nomorWhatsApp() === null,
+            // Anggota yang menunggu dibuatkan password baru
+            'permintaanLupaPassword' => $this->lupaPassword->jumlahMenunggu(),
+        ];
 
-        return view('admin.dashboard', [...$summary, ...$recap, 'nomorWaBelumDiisi' => $nomorWaBelumDiisi]);
+        return view('admin.dashboard', [...$summary, ...$recap, ...$pengingat]);
     }
 }

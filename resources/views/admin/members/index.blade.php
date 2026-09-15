@@ -1,13 +1,23 @@
 <x-app-layout :title="'Data Anggota — ' . config('app.name')">
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <x-page-heading>{{ __('Data Anggota') }}</x-page-heading>
                 <p class="text-sm text-gray-400">{{ $members->total() }} anggota terdaftar</p>
             </div>
-            <a href="{{ route('admin.members.create') }}">
-                <x-primary-button type="button">+ Tambah Anggota</x-primary-button>
-            </a>
+            <div class="flex items-center gap-4">
+                {{-- Antrean lupa password, dengan jumlah yang menunggu --}}
+                <a href="{{ route('admin.password-requests.index') }}"
+                   class="inline-flex items-center gap-2 text-sm font-medium text-emerald-700 hover:text-emerald-900">
+                    Lupa password
+                    @if ($jumlahLupaPassword > 0)
+                        <x-admin.badge color="amber">{{ $jumlahLupaPassword }} menunggu</x-admin.badge>
+                    @endif
+                </a>
+                <a href="{{ route('admin.members.create') }}">
+                    <x-primary-button type="button">+ Tambah Anggota</x-primary-button>
+                </a>
+            </div>
         </div>
     </x-slot>
 

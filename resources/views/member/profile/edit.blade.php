@@ -1,5 +1,6 @@
 {{--
-    Halaman profil anggota — ubah foto, nomor WhatsApp, alamat, dan password.
+    Halaman profil anggota: kartu anggota + ringkasan belanja tahun ini,
+    ubah foto/nomor WhatsApp/alamat, ganti password, dan bantuan.
 
     Nama lengkap & kode anggota SENGAJA ditampilkan tapi tidak bisa diubah:
     keduanya tetap dikelola pengurus (lihat catatan di Member\ProfileController).
@@ -12,11 +13,47 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-800">Profil Saya</h1>
                 <p class="text-sm text-gray-500 mt-1">
-                    Ubah foto, nomor WhatsApp, dan alamat kamu di sini.
+                    Data diri, password, dan bantuan kalau ada yang membingungkan.
                 </p>
             </div>
 
             <x-alert type="success" :message="session('success')" />
+
+            {{-- ========== Kartu anggota ========== --}}
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 to-emerald-700 p-6 text-white shadow-sm">
+                <div class="absolute inset-0 opacity-[0.08] [background-image:radial-gradient(circle,white_1px,transparent_1px)] [background-size:18px_18px]"></div>
+                <div class="relative flex items-center gap-4">
+                    @if ($member->photo_path)
+                        <img src="{{ \Illuminate\Support\Facades\Storage::url($member->photo_path) }}" alt=""
+                             class="h-16 w-16 rounded-full object-cover ring-2 ring-white/70 shrink-0">
+                    @else
+                        <span class="h-16 w-16 rounded-full bg-white text-teal-700 flex items-center justify-center text-2xl font-semibold shrink-0">
+                            {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($member->full_name, 0, 1)) }}
+                        </span>
+                    @endif
+                    <div class="min-w-0">
+                        <p class="text-lg font-bold truncate">{{ $member->full_name }}</p>
+                        <p class="text-sm text-teal-100">Anggota aktif · {{ $member->member_code }}</p>
+                        <p class="text-xs text-teal-200">Terdaftar sejak {{ $member->created_at->translatedFormat('F Y') }}</p>
+                    </div>
+                </div>
+
+                {{-- Ringkasan tahun ini --}}
+                <dl class="relative mt-5 grid grid-cols-2 gap-3">
+                    <div class="rounded-xl bg-white/10 px-4 py-3">
+                        <dt class="text-xs text-teal-100">Pesanan tahun {{ now()->year }}</dt>
+                        <dd class="text-xl font-bold">{{ $jumlahPesananTahunIni }}</dd>
+                    </div>
+                    <div class="rounded-xl bg-white/10 px-4 py-3">
+                        <dt class="text-xs text-teal-100">Belanja tahun {{ now()->year }}</dt>
+                        <dd class="text-xl font-bold">Rp{{ number_format($belanjaTahunIni, 0, ',', '.') }}</dd>
+                    </div>
+                </dl>
+                <p class="relative mt-3 text-xs text-teal-100">
+                    Belanja dihitung dari pesanan yang harganya sudah pasti.
+                    <a href="{{ route('member.dashboard') }}" class="underline underline-offset-2 hover:text-white">Lihat perkiraan SHU di Beranda</a>
+                </p>
+            </div>
 
             {{-- ========== Data diri ========== --}}
             <form
@@ -162,6 +199,34 @@
                     <x-primary-button>Ganti Password</x-primary-button>
                 </div>
             </form>
+
+            {{-- ========== Bantuan ========== --}}
+            <div class="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-6">
+                <h2 class="font-semibold text-gray-800">Butuh bantuan?</h2>
+                <p class="text-sm text-gray-500 mt-0.5">Jawaban untuk pertanyaan yang paling sering ditanyakan.</p>
+
+                {{-- Pintas ke kelompok pertanyaan di halaman Bantuan --}}
+                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                    @foreach ([
+                        'pembayaran' => 'Cara membayar lewat QRIS',
+                        'pembatalan' => 'Membatalkan atau mengubah pesanan',
+                        'akun' => 'Lupa password & ganti nomor WhatsApp',
+                        'anggota' => 'Apa itu perkiraan SHU',
+                    ] as $jangkar => $judul)
+                        <a href="{{ route('bantuan') }}#{{ $jangkar }}"
+                           class="flex items-center justify-between gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-gray-700 hover:border-emerald-300 hover:text-emerald-800 transition">
+                            {{ $judul }}
+                            <span class="text-gray-300" aria-hidden="true">→</span>
+                        </a>
+                    @endforeach
+                </div>
+
+                <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+                    <a href="{{ route('bantuan') }}" class="text-sm font-medium text-emerald-700 hover:text-emerald-900">Semua pertanyaan (FAQ)</a>
+                    {{-- Tidak tampil kalau nomor koperasi belum diisi --}}
+                    <x-kontak-pengurus varian="tautan" label="Hubungi pengurus lewat WhatsApp" />
+                </div>
+            </div>
 
         </div>
     </div>

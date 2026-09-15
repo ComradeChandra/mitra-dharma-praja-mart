@@ -54,16 +54,21 @@
                 </div>
             </div>
 
-            {{-- Bantuan masuk lewat WhatsApp pengurus. Yang paling sering
-                 terjadi: anggota lupa password yang dibuatkan pengurus, atau
-                 non-anggota belum tahu kode akses kantornya. Tidak tampil
-                 kalau nomor koperasi belum diisi. --}}
+            {{-- Bantuan masuk lewat WhatsApp pengurus, mis. non-anggota yang
+                 belum tahu kode akses kantornya. (Anggota yang lupa password
+                 punya jalan sendiri: "Lupa password?" di form masuk.) Tidak
+                 tampil kalau nomor koperasi belum diisi. --}}
             <x-kontak-pengurus
                 varian="tautan"
                 class="mt-5 px-4 py-2 rounded-lg hover:bg-white/70"
-                label="Lupa password atau kode akses? Hubungi pengurus"
+                label="Butuh bantuan untuk masuk? Hubungi pengurus"
                 pesan="Saya butuh bantuan untuk masuk ke aplikasi Mitra Dharma Praja Mart."
             />
+
+            {{-- Pertanyaan umum, bisa dibaca tanpa masuk --}}
+            <a href="{{ route('bantuan') }}" class="mt-1 inline-flex px-4 py-2 rounded-lg text-sm text-gray-500 hover:text-gray-800 hover:bg-white/70 transition">
+                Bantuan &amp; pertanyaan umum
+            </a>
 
             {{--
                 Tombol kembali — kalau orang salah pilih pintu masuk (mis. anggota
@@ -73,7 +78,7 @@
             --}}
             <a
                 href="{{ route('catalog.index') }}"
-                class="mt-6 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-white/70 transition"
+                class="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-white/70 transition"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m0 0 7 7m-7-7 7-7" />

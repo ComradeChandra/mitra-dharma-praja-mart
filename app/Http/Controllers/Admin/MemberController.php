@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreMemberRequest;
 use App\Http\Requests\Admin\UpdateMemberRequest;
 use App\Models\Member;
+use App\Services\PasswordResetService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -18,6 +19,8 @@ use Illuminate\View\View;
  */
 class MemberController extends Controller
 {
+    public function __construct(private PasswordResetService $lupaPassword) {}
+
     /**
      * Tampilkan daftar semua anggota, diurutkan dari yang terbaru diinput.
      */
@@ -28,7 +31,10 @@ class MemberController extends Controller
 
         $members = Member::cari($cari)->latest()->paginate(20)->withQueryString();
 
-        return view('admin.members.index', compact('members', 'cari'));
+        // Tautan ke antrean lupa password di kepala halaman, dengan jumlahnya
+        $jumlahLupaPassword = $this->lupaPassword->jumlahMenunggu();
+
+        return view('admin.members.index', compact('members', 'cari', 'jumlahLupaPassword'));
     }
 
     public function create(): View
@@ -70,6 +76,13 @@ class MemberController extends Controller
             ...$data,
             'is_active' => $request->boolean('is_active'),
         ]);
+
+        // Password diganti lewat form ini: permintaan lupa password anggota
+        // ini yang masih menunggu ikut ditutup, supaya staf lain tidak
+        // membuatkan password lagi.
+        if (isset($data['password'])) {
+            $this->lupaPassword->tutupKarenaPasswordDiganti($member, $request->user());
+        }
 
         return redirect()
             ->route('admin.members.index')

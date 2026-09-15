@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureAdminIsActive;
 use App\Http\Middleware\EnsureMemberIsActive;
 use App\Http\Middleware\EnsureNonMemberSession;
 use App\Http\Middleware\SecurityHeaders;
@@ -39,6 +40,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'non-member.session' => EnsureNonMemberSession::class,
             'member.aktif' => EnsureMemberIsActive::class,
+            // Akun pengurus yang dinonaktifkan saat masih login ikut dikeluarkan
+            'admin.aktif' => EnsureAdminIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

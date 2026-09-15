@@ -64,6 +64,8 @@
             {{ $slot }}
         </main>
 
+        <x-footer-koperasi />
+
         {{-- Tombol WhatsApp ke pengurus, tampil kalau nomornya sudah diisi --}}
         <x-kontak-pengurus />
     </body>

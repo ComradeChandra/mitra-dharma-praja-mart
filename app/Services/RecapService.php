@@ -360,6 +360,22 @@ class RecapService
     }
 
     /**
+     * Jumlah pesanan anggota di satu tahun (bawaan: tahun berjalan), tidak
+     * termasuk yang dibatalkan. Beda dari memberYearlySpending(): pesanan
+     * yang harganya belum pasti IKUT dihitung, karena yang ditanyakan di
+     * sini "berapa kali memesan", bukan "berapa rupiah". Dipakai Profil Saya.
+     */
+    public function memberOrderCountForYear(Member $member, ?int $year = null): int
+    {
+        $year ??= now()->year;
+
+        return Order::where('member_id', $member->id)
+            ->belumDibatalkan()
+            ->whereYear('created_at', $year)
+            ->count();
+    }
+
+    /**
      * Perkiraan SHU dari total belanja setahun.
      *
      * Persentasenya dibaca dari config/koperasi.php, TIDAK ditulis di sini

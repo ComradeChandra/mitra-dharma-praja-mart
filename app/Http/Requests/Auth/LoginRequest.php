@@ -50,6 +50,17 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Akun yang dinonaktifkan Admin Utama tidak boleh masuk. Dicek
+        // SETELAH password cocok, supaya pesan ini tidak membocorkan email
+        // mana saja yang terdaftar ke orang yang cuma menebak-nebak.
+        if (! Auth::guard('web')->user()->is_active) {
+            Auth::guard('web')->logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'Akun ini sedang dinonaktifkan. Hubungi Admin Utama koperasi kalau ini keliru.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

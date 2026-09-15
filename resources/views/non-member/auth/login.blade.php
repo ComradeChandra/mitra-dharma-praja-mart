@@ -7,7 +7,8 @@
 <x-guest-layout :title="'Masuk Non-Anggota — ' . config('app.name')" subtitle="Masuk sebagai Non-Anggota (per OPD)">
     <div class="mb-4 text-sm text-gray-600">
         Masuk sebagai non-anggota (staf OPD). Pilih nama OPD kamu, lalu masukkan
-        kode akses yang dibagikan admin koperasi ke OPD kamu.
+        kode akses yang dibagikan admin koperasi ke OPD kamu. Belum tahu kodenya?
+        Tanyakan ke rekan sekantor atau hubungi pengurus.
     </div>
 
     {{-- Pesan error umum (mis. kode akses salah) --}}

@@ -81,7 +81,7 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden xl:flex xl:items-center xl:ms-6">
-                <x-dropdown align="right" width="48">
+                <x-dropdown align="right" width="w-56">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center gap-2 pl-1.5 pr-3 py-1.5 border border-transparent rounded-full text-sm leading-4 font-medium text-teal-100 hover:bg-white/10 focus:outline-none transition ease-in-out duration-150">
                             {{-- Avatar dibalik warnanya (putih solid, bukan teal) biar
@@ -99,15 +99,28 @@
                     </x-slot>
 
                     <x-slot name="content">
+                        {{-- Peran akun yang sedang masuk, supaya jelas kenapa
+                             sebagian menu ada atau tidak ada --}}
+                        <div class="px-4 pt-2 pb-2 mb-1 border-b border-gray-100">
+                            <p class="text-xs text-gray-400">Masuk sebagai</p>
+                            <p class="text-sm font-medium text-gray-700">{{ Auth::user()->role->label() }}</p>
+                        </div>
+
                         <x-dropdown-link :href="route('admin.profile.edit')">
                             {{ __('Profil Saya') }}
                         </x-dropdown-link>
 
-                        {{-- Di menu akun, bukan di deretan menu atas: jarang
-                             dibuka, dan deretan atas sudah penuh di layar 1280px --}}
-                        <x-dropdown-link :href="route('admin.settings.edit')">
-                            Pengaturan
-                        </x-dropdown-link>
+                        {{-- Khusus Admin Utama. Di menu akun, bukan di deretan
+                             menu atas: jarang dibuka, dan deretan atas sudah
+                             penuh di layar 1280px --}}
+                        @can('admin-utama')
+                            <x-dropdown-link :href="route('admin.accounts.index')">
+                                Akun Pengurus
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('admin.settings.edit')">
+                                Pengaturan
+                            </x-dropdown-link>
+                        @endcan
 
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
@@ -165,7 +178,7 @@
         <div class="pt-4 pb-1 border-t border-white/15">
             <div class="px-4">
                 <div class="font-medium text-base text-white">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-teal-200">{{ Auth::user()->email }}</div>
+                <div class="font-medium text-sm text-teal-200">{{ Auth::user()->email }} · {{ Auth::user()->role->label() }}</div>
             </div>
 
             <div class="mt-3 space-y-1">
@@ -173,9 +186,14 @@
                     {{ __('Profil Saya') }}
                 </x-responsive-nav-link>
 
-                <x-responsive-nav-link :href="route('admin.settings.edit')" :active="request()->routeIs('admin.settings.*')">
-                    Pengaturan
-                </x-responsive-nav-link>
+                @can('admin-utama')
+                    <x-responsive-nav-link :href="route('admin.accounts.index')" :active="request()->routeIs('admin.accounts.*')">
+                        Akun Pengurus
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.settings.edit')" :active="request()->routeIs('admin.settings.*')">
+                        Pengaturan
+                    </x-responsive-nav-link>
+                @endcan
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">

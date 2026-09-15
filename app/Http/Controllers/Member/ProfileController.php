@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Member\UpdatePasswordRequest;
 use App\Http\Requests\Member\UpdateProfileRequest;
 use App\Services\ImageStorageService;
+use App\Services\RecapService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -20,12 +21,21 @@ use Illuminate\View\View;
  */
 class ProfileController extends Controller
 {
-    public function __construct(private ImageStorageService $imageStorage) {}
+    public function __construct(
+        private ImageStorageService $imageStorage,
+        private RecapService $recapService,
+    ) {}
 
     public function edit(): View
     {
+        $member = Auth::guard('member')->user();
+
         return view('member.profile.edit', [
-            'member' => Auth::guard('member')->user(),
+            'member' => $member,
+            // Ringkasan di kartu anggota. Perkiraan SHU sengaja TIDAK diulang
+            // di sini (sudah ada di Beranda); kartunya menautkan ke sana.
+            'jumlahPesananTahunIni' => $this->recapService->memberOrderCountForYear($member),
+            'belanjaTahunIni' => $this->recapService->memberYearlySpending($member),
         ]);
     }
 
