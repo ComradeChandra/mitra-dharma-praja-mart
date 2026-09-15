@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Member;
 
+use App\Http\Controllers\Concerns\RedirectsWithinArea;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Member\LoginRequest;
 use App\Models\Member;
@@ -17,6 +18,8 @@ use Illuminate\View\View;
  */
 class AuthenticatedSessionController extends Controller
 {
+    use RedirectsWithinArea;
+
     public function create(): View
     {
         // Daftar anggota buat dropdown pilihan nama, anggota tinggal memilih
@@ -39,7 +42,9 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('member.dashboard', absolute: false));
+        // Halaman di luar /anggota yang tadi sempat dibuka tidak dipakai,
+        // lihat RedirectsWithinArea.
+        return $this->keTujuanDiWilayahSendiri($request, '/anggota', route('member.dashboard', absolute: false));
     }
 
     public function destroy(Request $request): RedirectResponse

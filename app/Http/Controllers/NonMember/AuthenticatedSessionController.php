@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\NonMember;
 
+use App\Http\Controllers\Concerns\RedirectsWithinArea;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\NonMember\LoginRequest;
 use App\Models\OpdDepartment;
@@ -18,6 +19,8 @@ use Illuminate\View\View;
  */
 class AuthenticatedSessionController extends Controller
 {
+    use RedirectsWithinArea;
+
     public function __construct(private NonMemberSessionService $sesiNonAnggota) {}
 
     /**
@@ -37,7 +40,9 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
         $this->sesiNonAnggota->masuk($opd);
 
-        return redirect()->intended(route('non-member.orders.create', absolute: false));
+        // Halaman di luar /non-anggota yang tadi sempat dibuka tidak dipakai,
+        // lihat RedirectsWithinArea.
+        return $this->keTujuanDiWilayahSendiri($request, '/non-anggota', route('non-member.orders.create', absolute: false));
     }
 
     public function destroy(Request $request): RedirectResponse
