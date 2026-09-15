@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CancelOrderRequest;
+use App\Http\Requests\Admin\RemoveOrderItemRequest;
 use App\Http\Requests\Admin\VerifyOrderRequest;
 use App\Models\Order;
 use App\Services\OrderCancellationService;
@@ -77,7 +78,10 @@ class OrderController extends Controller
         // yang sama, buat pilihan "terapkan ke semua" di form kunci harga.
         $pesananLainMenunggu = $this->orderService->pesananLainMenungguHarga($order);
 
-        return view('admin.orders.show', compact('order', 'invoiceText', 'whatsAppLink', 'pesananLainMenunggu'));
+        // null berarti kartu "Hapus barang dari pesanan" boleh tampil
+        $alasanTidakBisaHapusBarang = $this->pembatalan->alasanTidakBisaHapusBarang($order);
+
+        return view('admin.orders.show', compact('order', 'invoiceText', 'whatsAppLink', 'pesananLainMenunggu', 'alasanTidakBisaHapusBarang'));
     }
 
     /**
@@ -149,6 +153,20 @@ class OrderController extends Controller
         return redirect()
             ->route('admin.orders.show', $order)
             ->with('success', $pesan);
+    }
+
+    /**
+     * Pengurus menghapus satu barang dari pesanan, misalnya karena habis di
+     * grosir. Total dihitung ulang dan pemesan melihat catatannya; aturannya
+     * ada di OrderCancellationService::hapusBarang().
+     */
+    public function removeItem(RemoveOrderItemRequest $request, Order $order): RedirectResponse
+    {
+        $this->pembatalan->hapusBarang($order, $request->barang(), $request->alasan());
+
+        return redirect()
+            ->route('admin.orders.show', $order)
+            ->with('success', 'Barang dihapus dari pesanan dan totalnya sudah dihitung ulang. Kirim ulang invoice supaya pemesan menerima rincian terbaru.');
     }
 
     /**

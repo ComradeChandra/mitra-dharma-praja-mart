@@ -417,6 +417,25 @@ class OrderService
     }
 
     /**
+     * Hitung ulang total dan status setelah isi pesanan berubah, mis. satu
+     * barang dihapus pengurus (OrderCancellationService::hapusBarang()).
+     *
+     * Masih ada barang yang harganya kosong: kembali menunggu verifikasi,
+     * tanpa total. Semua sudah berharga: terverifikasi dengan total baru.
+     * Pesanan yang tadinya Invoiced ikut kembali ke Verified, karena invoice
+     * lama memuat barang yang sudah tidak ada dan perlu dikirim ulang.
+     */
+    public function hitungUlang(Order $order): void
+    {
+        if (! $this->recalculateIfComplete($order)) {
+            $order->update([
+                'total_amount' => null,
+                'status' => OrderStatus::Pending,
+            ]);
+        }
+    }
+
+    /**
      * Kalau semua item sudah punya harga, total langsung dihitung dan pesanan
      * ditandai terverifikasi tanpa perlu admin membukanya dulu.
      *

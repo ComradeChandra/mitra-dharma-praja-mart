@@ -16,6 +16,8 @@ WhatsApp dan menerima pembayaran lewat QRIS.
   satu pesanan atau sekaligus semua pesanan di periode yang sama.
 - **Pembatalan pesanan** oleh pemesan (selama periode dibuka dan belum bayar)
   atau oleh pengurus; pesanan batal tetap tercatat tapi tidak dihitung di rekap.
+  Pengurus juga bisa menghapus satu barang yang tidak bisa dipenuhi, dengan
+  catatan yang terlihat oleh pemesan.
 - **Invoice WhatsApp** berupa teks + tautan pembayaran, dikirim lewat wa.me.
 - **Pembayaran QRIS** statis, pemesan melampirkan bukti, pengurus mencocokkan.
 - **Struk resmi** yang bisa dicetak atau disimpan sebagai PDF.

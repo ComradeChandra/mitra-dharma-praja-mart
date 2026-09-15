@@ -36,6 +36,11 @@ Rincian Pesanan:
 @foreach ($order->orderItems as $item)
 {!! $loop->iteration !!}. {!! $item->product->name !!} — {!! $item->quantity !!} x Rp{!! number_format($item->price_at_order, 0, ',', '.') !!} = Rp{!! number_format($item->quantity * $item->price_at_order, 0, ',', '.') !!}
 @endforeach
+@if (filled($order->catatan_pengurus))
+
+Catatan pengurus:
+{!! $order->catatan_pengurus !!}
+@endif
 
 *Total: Rp{!! number_format($order->total_amount, 0, ',', '.') !!}*
 

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\PaymentStatus;
+use App\Http\Requests\Concerns\HasAlasan;
 use App\Models\Order;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -17,6 +18,8 @@ use Illuminate\Validation\Rule;
  */
 class CancelOrderRequest extends FormRequest
 {
+    use HasAlasan;
+
     /**
      * Rutenya sudah dijaga middleware auth:web (cuma pengurus).
      */
@@ -31,7 +34,7 @@ class CancelOrderRequest extends FormRequest
         $order = $this->route('order');
 
         return [
-            'alasan' => ['nullable', 'string', 'max:255'],
+            'alasan' => $this->aturanAlasan(),
             // Rule::when, BUKAN ['required_if', 'nullable', 'accepted']:
             // "accepted" di Laravel tetap diperiksa walau kotaknya tidak
             // dikirim, jadi pesanan yang belum dibayar (yang tidak menampilkan
@@ -47,21 +50,10 @@ class CancelOrderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'alasan.string' => 'Alasan harus berupa teks.',
-            'alasan.max' => 'Alasan maksimal 255 karakter.',
+            ...$this->pesanAlasan(),
             'uang_dikembalikan.required' => 'Pembayaran pesanan ini sudah berjalan. Centang dulu bahwa uang pemesan dikembalikan.',
             'uang_dikembalikan.accepted' => 'Pembayaran pesanan ini sudah berjalan. Centang dulu bahwa uang pemesan dikembalikan.',
         ];
-    }
-
-    /**
-     * Alasan yang sudah dirapikan; isian kosong atau cuma spasi jadi null.
-     */
-    public function alasan(): ?string
-    {
-        $alasan = trim((string) $this->validated('alasan'));
-
-        return $alasan === '' ? null : $alasan;
     }
 
     public function uangDikembalikan(): bool

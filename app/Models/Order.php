@@ -39,6 +39,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'cancelled_at',
     'cancelled_by',
     'cancellation_reason',
+    'catatan_pengurus',
 ])]
 class Order extends Model
 {

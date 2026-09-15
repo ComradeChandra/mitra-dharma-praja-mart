@@ -6,6 +6,7 @@ use App\Enums\CancelledBy;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\OrderPeriod;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
@@ -22,12 +23,25 @@ use Illuminate\Support\Facades\DB;
  * - Pesanan yang dibatalkan TIDAK dihapus. Statusnya jadi Dibatalkan, stok
  *   barangnya dikembalikan, dan pesanan itu tidak lagi dihitung di rekap,
  *   grafik, maupun SHU.
+ * - Satu barang saja (16 Sep 2026): cuma pengurus, selama pembayaran belum
+ *   berjalan, dan bukan barang terakhir di pesanan (untuk itu, batalkan
+ *   pesanannya). Barangnya dihapus dari pesanan, stoknya kembali, total
+ *   dihitung ulang, dan kejadiannya dicatat di catatan_pengurus supaya
+ *   pemesan tahu kenapa isi pesanannya berubah.
  *
  * Semua aturan itu sengaja dikumpulkan di sini, bukan tersebar di
  * controller, supaya gampang diubah kalau koperasi memutuskan lain.
  */
 class OrderCancellationService
 {
+    /**
+     * Penghitung total dipinjam dari OrderService, supaya aturan "kapan
+     * pesanan terverifikasi" tidak punya dua salinan.
+     */
+    public function __construct(
+        private OrderService $orderService,
+    ) {}
+
     /**
      * Kenapa pemesan TIDAK bisa membatalkan pesanan ini sendiri, atau null
      * kalau bisa. Kalimatnya langsung ditampilkan ke pemesan.
@@ -127,18 +141,95 @@ class OrderCancellationService
     }
 
     /**
-     * Kembalikan stok barang yang stoknya dilacak. Pasangan dari
-     * OrderService::kurangiStok() yang mengurangi stok saat pesanan dikirim.
-     * Produk pre-order murni tidak punya angka stok, jadi dilewati.
+     * Kenapa pengurus TIDAK bisa menghapus satu barang dari pesanan ini, atau
+     * null kalau bisa. Dipakai halaman detail pesanan untuk menampilkan atau
+     * menyembunyikan kartu "Hapus barang", dan dipakai lagi saat menghapus.
+     */
+    public function alasanTidakBisaHapusBarang(Order $order): ?string
+    {
+        if ($order->dibatalkan()) {
+            return 'Pesanan ini sudah dibatalkan.';
+        }
+
+        // Sama dengan aturan kunci harga: begitu uang berpindah, isi pesanan
+        // tidak diubah diam-diam. Selisihnya urusan pengurus dan pemesan.
+        if ($order->payment_status !== PaymentStatus::Unpaid) {
+            return 'Pembayaran pesanan ini sudah berjalan, jadi isinya tidak bisa diubah lagi. Kalau perlu, batalkan pesanannya lalu kembalikan uangnya.';
+        }
+
+        if ($order->orderItems()->count() < 2) {
+            return 'Ini satu-satunya barang di pesanan ini. Kalau barangnya tidak bisa dipenuhi, batalkan pesanannya.';
+        }
+
+        return null;
+    }
+
+    /**
+     * Pengurus menghapus satu barang dari pesanan, mis. karena habis di grosir.
+     *
+     * @param  string|null  $alasan  ikut dicatat dan terlihat oleh pemesan
+     */
+    public function hapusBarang(Order $order, OrderItem $item, ?string $alasan): void
+    {
+        abort_unless((int) $item->order_id === (int) $order->id, 404);
+
+        DB::transaction(function () use ($order, $item, $alasan) {
+            // Dikunci dan dibaca ulang: pemesan bisa saja menyatakan bayar
+            // atau membatalkan tepat bersamaan.
+            $terkini = Order::whereKey($order->id)->lockForUpdate()->first();
+            $tidakBisa = $this->alasanTidakBisaHapusBarang($terkini);
+            abort_if($tidakBisa !== null, 422, (string) $tidakBisa);
+
+            $item->loadMissing('product');
+
+            // Hapus bersyarat: kalau barangnya keburu dihapus di tab lain,
+            // stoknya jangan dikembalikan dua kali.
+            $dihapus = OrderItem::whereKey($item->id)->where('order_id', $order->id)->delete();
+            if ($dihapus === 0) {
+                return;
+            }
+
+            $this->kembalikanStokBarang($item);
+
+            $baris = sprintf(
+                '%s: %s (%d) dihapus dari pesanan oleh pengurus.%s',
+                now()->translatedFormat('d M Y'),
+                $item->product?->name ?? 'Barang',
+                $item->quantity,
+                // Diakhiri tepat satu titik, walau pengurus sudah mengetik titik sendiri
+                $alasan ? ' Alasan: '.rtrim($alasan, '. ').'.' : '',
+            );
+            $terkini->update([
+                'catatan_pengurus' => trim($terkini->catatan_pengurus."\n".$baris),
+            ]);
+
+            $this->orderService->hitungUlang($terkini);
+        });
+
+        $order->refresh();
+    }
+
+    /**
+     * Kembalikan stok semua barang di pesanan yang dibatalkan.
      */
     private function kembalikanStok(Order $order): void
     {
         $order->load('orderItems.product');
 
         foreach ($order->orderItems as $item) {
-            if ($item->product?->has_stock_tracking) {
-                Product::whereKey($item->product_id)->increment('stock', $item->quantity);
-            }
+            $this->kembalikanStokBarang($item);
+        }
+    }
+
+    /**
+     * Kembalikan stok satu barang, kalau stoknya dilacak. Pasangan dari
+     * OrderService::kurangiStok() yang mengurangi stok saat pesanan dikirim.
+     * Produk pre-order murni tidak punya angka stok, jadi dilewati.
+     */
+    private function kembalikanStokBarang(OrderItem $item): void
+    {
+        if ($item->product?->has_stock_tracking) {
+            Product::whereKey($item->product_id)->increment('stock', $item->quantity);
         }
     }
 }

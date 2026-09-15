@@ -32,6 +32,9 @@
             {{-- Muncul cuma kalau pesanannya sudah dibatalkan --}}
             <x-order.cancelled-notice :order="$order" />
 
+            {{-- Riwayat perubahan isi pesanan, sama dengan yang dilihat pemesan --}}
+            <x-order.admin-note :order="$order" />
+
             {{-- Pesanan batal yang pembayarannya sempat berjalan. Kartu invoice
                  (tempat info bayar biasanya) tidak tampil untuk pesanan batal,
                  padahal pengurus masih butuh status & bukti transfernya untuk
@@ -295,6 +298,12 @@
                         @endif
                     </div>
                 </x-card>
+            @endif
+
+            {{-- Hapus satu barang: cuma kalau pesanannya masih berlaku, belum
+                 dibayar, dan barangnya lebih dari satu --}}
+            @if ($alasanTidakBisaHapusBarang === null)
+                <x-admin.order-remove-item :order="$order" />
             @endif
 
             {{-- Batalkan pesanan (tidak tampil kalau sudah dibatalkan) --}}

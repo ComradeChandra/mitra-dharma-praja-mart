@@ -73,6 +73,9 @@ Route::middleware('auth:web')->prefix('admin')->name('admin.')->group(function (
     Route::patch('pesanan/{order}/verifikasi', [OrderController::class, 'verify'])->name('orders.verify');
     Route::patch('pesanan/{order}/tandai-terkirim', [OrderController::class, 'markInvoiced'])->name('orders.mark-invoiced');
     Route::patch('pesanan/{order}/batalkan', [OrderController::class, 'cancel'])->name('orders.cancel');
+    // Hapus satu barang dari pesanan (mis. habis di grosir); barangnya
+    // dipilih di form, dan wajib milik pesanan ini (RemoveOrderItemRequest).
+    Route::patch('pesanan/{order}/hapus-barang', [OrderController::class, 'removeItem'])->name('orders.remove-item');
 
     // Peninjauan permintaan produk (Modul 8), admin cuma approve/reject,
     // bukan CRUD penuh (tidak ada create/edit/delete dari sisi admin).
