@@ -43,4 +43,19 @@ return [
         'email' => env('ADMIN_EMAIL', 'admin@mitradharma.test'),
         'password' => env('ADMIN_PASSWORD', 'admin12345'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Identitas aplikasi
+    |--------------------------------------------------------------------------
+    | Ditampilkan di halaman "Tentang Aplikasi" (khusus pengurus). Pencipta dan
+    | tahun sesuai berkas LICENSE, jangan dihapus (lihat butir Atribusi di
+    | LICENSE). Naikkan 'versi' kalau ada perubahan besar.
+    */
+    'aplikasi' => [
+        'versi' => '1.0',
+        'pembuat' => 'Chandra Harkat Raharja',
+        'peran_pembuat' => 'PKL di UPTD Cimahi Technopark',
+        'tahun' => 2026,
+    ],
 ];

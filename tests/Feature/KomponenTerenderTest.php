@@ -51,7 +51,7 @@ test('semua halaman admin terender tanpa tag komponen mentah', function () {
         route('admin.orders.index'), route('admin.orders.show', $pesanan), route('admin.orders.struk', $pesanan),
         route('admin.product-requests.index'), route('admin.profile.edit'), route('admin.settings.edit'),
         route('admin.accounts.index'), route('admin.accounts.create'), route('admin.accounts.edit', User::first()),
-        route('admin.password-requests.index'),
+        route('admin.password-requests.index'), route('admin.tentang'),
     ] as $url) {
         pastikanTerender($this->get($url), $url);
     }

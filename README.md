@@ -7,6 +7,9 @@ WhatsApp dan menerima pembayaran lewat QRIS.
 
 *Kebersamaan untuk Kesejahteraan.*
 
+Dibuat oleh **Chandra Harkat Raharja** (PKL di UPTD Cimahi Technopark, 2026).
+Hak cipta dan ketentuan pemakaian ada di berkas [LICENSE](LICENSE).
+
 ## Fitur
 
 - **Empat tingkatan pengguna** — Admin Utama dan Pengurus (email + password,

@@ -98,6 +98,10 @@ Route::middleware(['auth:web', 'admin.aktif'])->prefix('admin')->name('admin.')-
     Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
+    // Tentang Aplikasi: versi + kredit pembuat. Terbuka untuk semua pengurus.
+    // Isinya statis, jadi cukup Route::view tanpa controller.
+    Route::view('tentang', 'admin.tentang')->name('tentang');
+
     // Antrean "lupa password" anggota. Terbuka untuk SEMUA pengurus (bukan
     // cuma Admin Utama), siapa pun yang sedang memegang aplikasi bisa membantu.
     Route::get('lupa-password', [PasswordResetRequestController::class, 'index'])->name('password-requests.index');

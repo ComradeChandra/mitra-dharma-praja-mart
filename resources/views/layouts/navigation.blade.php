@@ -122,6 +122,10 @@
                             </x-dropdown-link>
                         @endcan
 
+                        <x-dropdown-link :href="route('admin.tentang')">
+                            Tentang Aplikasi
+                        </x-dropdown-link>
+
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -194,6 +198,10 @@
                         Pengaturan
                     </x-responsive-nav-link>
                 @endcan
+
+                <x-responsive-nav-link :href="route('admin.tentang')" :active="request()->routeIs('admin.tentang')">
+                    Tentang Aplikasi
+                </x-responsive-nav-link>
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
