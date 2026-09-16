@@ -23,7 +23,7 @@
             <form
                 method="POST"
                 action="{{ route('non-member.product-requests.store') }}"
-                class="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5"
+                class="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-card p-6 space-y-5"
             >
                 @csrf
 

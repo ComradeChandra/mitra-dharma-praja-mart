@@ -29,7 +29,7 @@
 @endphp
 
 <div
-    class="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-5"
+    class="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-card p-5"
     x-data="{ cara: {{ \Illuminate\Support\Js::from($metodeTerpilih) }} }"
 >
     <h3 class="font-semibold text-gray-800 text-sm mb-1">Cara Terima Barang</h3>

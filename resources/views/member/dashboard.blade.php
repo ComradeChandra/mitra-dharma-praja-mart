@@ -39,7 +39,7 @@
                     tempat, jadi begitu koperasi menetapkan angkanya orang
                     harus mengubek tampilan.
                 --}}
-                <div class="relative overflow-hidden bg-gradient-to-br from-teal-600 to-teal-800 rounded-xl shadow-sm p-6 text-white">
+                <div class="relative overflow-hidden bg-gradient-to-br from-teal-600 to-teal-800 rounded-2xl shadow-card p-6 text-white">
                     <div class="absolute inset-0 opacity-[0.08] [background-image:radial-gradient(circle,white_1px,transparent_1px)] [background-size:18px_18px]"></div>
                     <div class="relative">
                         <p class="text-xs font-medium uppercase tracking-wide text-teal-100">Belanja Kamu Tahun {{ now()->year }}</p>
@@ -70,7 +70,7 @@
 
                 {{-- Ajakan pesan produk. CTA utama sekarang pemesanan sudah aktif (Modul 3) --}}
                 <a href="{{ route('member.orders.create') }}"
-                   class="relative overflow-hidden block bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-sm p-6 text-white hover:shadow-lg transition group">
+                   class="relative overflow-hidden block bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl shadow-card p-6 text-white hover:shadow-card-hover hover:-translate-y-0.5 transition duration-200 group">
                     <div class="absolute -right-6 -bottom-6 h-28 w-28 rounded-full bg-white/10"></div>
                     <div class="relative flex items-center justify-between">
                         <div>
@@ -84,12 +84,12 @@
                 {{-- Dua ajakan sekunder berdampingan: lihat katalog & riwayat pesanan --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <a href="{{ route('catalog.index') }}"
-                       class="flex items-center justify-between gap-3 bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition group">
+                       class="flex items-center justify-between gap-3 bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-card p-4 hover:shadow-card-hover transition group">
                         <span class="text-sm font-medium text-gray-700">Lihat Katalog Produk</span>
                         <span class="text-gray-300 group-hover:text-gray-500 group-hover:translate-x-1 transition">→</span>
                     </a>
                     <a href="{{ route('member.orders.index') }}"
-                       class="flex items-center justify-between gap-3 bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition group">
+                       class="flex items-center justify-between gap-3 bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-card p-4 hover:shadow-card-hover transition group">
                         <span class="text-sm font-medium text-gray-700">Pesanan Saya</span>
                         <span class="text-gray-300 group-hover:text-gray-500 group-hover:translate-x-1 transition">→</span>
                     </a>
@@ -97,7 +97,7 @@
 
                 {{-- Ajakan ajukan permintaan produk baru --}}
                 <a href="{{ route('member.product-requests.index') }}"
-                   class="relative overflow-hidden block bg-gradient-to-br from-teal-500 to-emerald-600 rounded-xl shadow-sm p-6 text-white hover:shadow-lg transition group">
+                   class="relative overflow-hidden block bg-gradient-to-br from-teal-500 to-emerald-600 rounded-2xl shadow-card p-6 text-white hover:shadow-card-hover hover:-translate-y-0.5 transition duration-200 group">
                     <div class="absolute -right-6 -bottom-6 h-28 w-28 rounded-full bg-white/10"></div>
                     <div class="relative flex items-center justify-between">
                         <div>

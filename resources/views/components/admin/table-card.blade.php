@@ -11,7 +11,7 @@
 
     Slot: isi kartunya — biasanya @if(tabel) ... @else <x-admin.empty-state />.
 --}}
-<div {{ $attributes->merge(['class' => 'bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm overflow-hidden']) }}>
+<div {{ $attributes->merge(['class' => 'bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-card overflow-hidden']) }}>
     {{--
         overflow-x-auto: tabel yang kelebaran bisa DIGESER ke samping, bukan
         dipotong. Kartu pembungkus di luar tetap `overflow-hidden` supaya

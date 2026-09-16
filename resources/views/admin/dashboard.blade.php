@@ -9,7 +9,7 @@
             {{-- Anggota yang lupa password menunggu dibuatkan yang baru.
                  Tampil untuk semua pengurus: antreannya terbuka untuk siapa pun. --}}
             @if ($permintaanLupaPassword > 0)
-                <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
                     <p class="text-sm text-amber-800">
                         <span class="font-semibold">{{ $permintaanLupaPassword }} anggota</span>
                         lupa password dan menunggu dibuatkan password baru.
@@ -25,7 +25,7 @@
                  non-anggota tidak punya tombol untuk menghubungi pengurus.
                  Cuma untuk Admin Utama, karena cuma dia yang bisa mengisinya. --}}
             @if ($nomorWaBelumDiisi && auth()->user()->can('admin-utama'))
-                <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
                     <div class="flex items-start gap-3 min-w-0">
                         <x-ikon-whatsapp class="h-5 w-5 mt-0.5 shrink-0 text-amber-700" />
                         <p class="text-sm text-amber-800">
@@ -43,7 +43,7 @@
             {{-- Kartu status periode pemesanan, paling atas karena ini info
                  yang paling sering dicek admin tiap hari. Pakai gradient biar
                  beda bobot visualnya dari kartu statistik di bawahnya. --}}
-            <div class="relative overflow-hidden rounded-xl p-6 text-white
+            <div class="relative overflow-hidden rounded-2xl shadow-card p-6 text-white
                         {{ $periodeAktif ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-gray-500 to-gray-600' }}">
                 <div class="absolute inset-0 opacity-[0.08] [background-image:radial-gradient(circle,white_1px,transparent_1px)] [background-size:18px_18px]"></div>
                 <div class="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10"></div>
@@ -354,7 +354,7 @@
                         @endphp
 
                         <a href="{{ route('admin.order-periods.rekap', ['orderPeriod' => $periodeAktif, 'tab' => 'anggota']) }}"
-                           class="block bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition duration-150">
+                           class="block bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-card p-5 hover:shadow-card-hover hover:-translate-y-0.5 transition duration-200">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="font-semibold text-gray-800 text-sm">Sudah Belanja</h3>
                                 <span class="text-xs text-emerald-700 font-medium">Lihat daftar →</span>

@@ -60,7 +60,7 @@
                 method="POST"
                 action="{{ route('member.profile.update') }}"
                 enctype="multipart/form-data"
-                class="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5"
+                class="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-card p-6 space-y-5"
             >
                 @csrf
                 @method('PATCH')
@@ -145,7 +145,7 @@
             <form
                 method="POST"
                 action="{{ route('member.profile.password.update') }}"
-                class="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5"
+                class="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-card p-6 space-y-5"
             >
                 @csrf
                 @method('PUT')
@@ -201,7 +201,7 @@
             </form>
 
             {{-- ========== Bantuan ========== --}}
-            <div class="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div class="bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-card p-6">
                 <h2 class="font-semibold text-gray-800">Butuh bantuan?</h2>
                 <p class="text-sm text-gray-500 mt-0.5">Jawaban untuk pertanyaan yang paling sering ditanyakan.</p>
 

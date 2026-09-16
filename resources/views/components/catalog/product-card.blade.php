@@ -17,7 +17,7 @@
 --}}
 @props(['product'])
 
-<div class="group bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col hover:shadow-lg hover:border-gray-200 hover:-translate-y-0.5 transition duration-200">
+<div class="group bg-white rounded-2xl border border-gray-100 shadow-card overflow-hidden flex flex-col hover:shadow-card-hover hover:border-gray-200 hover:-translate-y-1 transition duration-200">
     {{-- Foto produk, atau kotak abu-abu placeholder kalau belum ada foto.
          Sedikit zoom pas di-hover (group-hover) biar terasa hidup kayak online shop. --}}
     {{-- Foto dan nama mengantar ke halaman detail produk. Tombol "Pesan" di
@@ -39,21 +39,25 @@
                 kotak abu-abu identik dan terkesan rusak.
             --}}
             @php
+                // Rona per kategori: gradient lembut biar tidak flat, plus
+                // huruf monogram di atasnya. Warnanya konsisten per kategori
+                // (crc32), jadi katalog yang produknya belum berfoto tetap
+                // enak dilihat, bukan deretan kotak abu-abu identik.
                 $rona = [
-                    ['bg-emerald-50', 'text-emerald-300'],
-                    ['bg-amber-50', 'text-amber-300'],
-                    ['bg-sky-50', 'text-sky-300'],
-                    ['bg-rose-50', 'text-rose-300'],
-                    ['bg-violet-50', 'text-violet-300'],
-                    ['bg-lime-50', 'text-lime-300'],
+                    ['from-emerald-50 to-emerald-100', 'text-emerald-300'],
+                    ['from-amber-50 to-amber-100', 'text-amber-300'],
+                    ['from-sky-50 to-sky-100', 'text-sky-300'],
+                    ['from-rose-50 to-rose-100', 'text-rose-300'],
+                    ['from-violet-50 to-violet-100', 'text-violet-300'],
+                    ['from-lime-50 to-lime-100', 'text-lime-300'],
                 ];
                 [$latar, $tinta] = $rona[crc32($product->category) % count($rona)];
             @endphp
 
             {{-- Tulisan "Belum ada foto" sengaja dihapus: di produk jadi itu terbaca
                  seperti halaman yang belum selesai. --}}
-            <div class="w-full h-full flex items-center justify-center {{ $latar }}" aria-hidden="true">
-                <span class="text-5xl font-semibold tracking-tight {{ $tinta }}">
+            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br {{ $latar }} group-hover:scale-105 transition duration-300" aria-hidden="true">
+                <span class="text-5xl font-semibold tracking-tight {{ $tinta }} drop-shadow-sm">
                     {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($product->name, 0, 1)) }}
                 </span>
             </div>

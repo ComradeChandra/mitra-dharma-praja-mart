@@ -28,7 +28,7 @@
 
 <{{ $tag }}
     @if ($href) href="{{ $href }}" @endif
-    {{ $attributes->merge(['class' => 'group block bg-white/95 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm p-5 ' . ($href ? 'hover:shadow-md hover:-translate-y-0.5 transition duration-150' : '')]) }}
+    {{ $attributes->merge(['class' => 'group block bg-white/95 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-card p-5 ' . ($href ? 'hover:shadow-card-hover hover:-translate-y-0.5 transition duration-200' : '')]) }}
 >
     <div class="flex items-center gap-3">
         <span class="shrink-0 h-11 w-11 rounded-lg {{ $colorClasses }} flex items-center justify-center">
