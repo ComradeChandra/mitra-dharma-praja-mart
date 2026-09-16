@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderPeriod;
 use App\Models\Product;
 use App\Services\RecapService;
+use App\Services\ShuService;
 
 /**
  * Perkiraan SHU di beranda anggota.
@@ -86,6 +87,20 @@ test('beranda menampilkan satu angka begitu persentasenya ditetapkan', function 
         ->assertOk()
         ->assertSee('Rp10.000')
         ->assertDontSee('persentase pasti ditentukan koperasi');
+});
+
+test('persentase dari Pengaturan menimpa nilai bawaan config', function () {
+    // Bawaan config satu angka; Pengaturan diisi angka lain
+    config(['koperasi.shu.persen_min' => 0.5, 'koperasi.shu.persen_maks' => 0.5]);
+    app(ShuService::class)->simpan(1.0, 2.0);
+
+    $hasil = app(RecapService::class)->estimasiShu(1000000);
+
+    expect($hasil['persenMin'])->toBe(1.0);
+    expect($hasil['persenMaks'])->toBe(2.0);
+    expect($hasil['min'])->toBe(10000.0);
+    expect($hasil['maks'])->toBe(20000.0);
+    expect($hasil['rentang'])->toBeTrue();
 });
 
 test('anggota yang belum belanja tidak dikasih angka SHU', function () {

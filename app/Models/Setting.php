@@ -9,8 +9,9 @@ use Illuminate\Database\Eloquent\Model;
  * Model untuk tabel settings: pengaturan koperasi yang diubah pengurus
  * lewat Admin -> Pengaturan. Isinya satu baris saja.
  *
- * Membaca & menyimpannya lewat KontakPengurusService, jangan langsung dari
- * controller atau Blade.
+ * Membaca & menyimpannya lewat service, jangan langsung dari controller atau
+ * Blade: nomor WhatsApp lewat KontakPengurusService, persentase SHU lewat
+ * ShuService.
  */
-#[Fillable(['whatsapp_number'])]
+#[Fillable(['whatsapp_number', 'shu_persen_min', 'shu_persen_maks'])]
 class Setting extends Model {}

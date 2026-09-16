@@ -117,10 +117,11 @@ Route::middleware(['auth:web', 'admin.aktif'])->prefix('admin')->name('admin.')-
             ->parameters(['akun-pengurus' => 'user'])
             ->names('accounts');
 
-        // Pengaturan koperasi, sekarang isinya nomor WhatsApp untuk tombol
-        // "Hubungi Pengurus".
+        // Pengaturan koperasi: nomor WhatsApp untuk tombol "Hubungi Pengurus",
+        // dan persentase SHU yang tampil di beranda anggota.
         Route::get('pengaturan', [SettingController::class, 'edit'])->name('settings.edit');
         Route::put('pengaturan', [SettingController::class, 'update'])->name('settings.update');
+        Route::put('pengaturan/shu', [SettingController::class, 'updateShu'])->name('settings.shu.update');
     });
 });
 

@@ -14,9 +14,13 @@ return [
     | 0,5%-1% dengan catatan "nanti kita ngobrol", jadi sampai sekarang yang
     | ditampilkan ke anggota masih berupa perkiraan rentang, bukan angka pasti.
     |
-    | CARA MENGUBAHNYA setelah pengurus memutuskan: cukup ganti dua nilai di
-    | bawah ini (atau isi SHU_PERSEN_MIN & SHU_PERSEN_MAKS di berkas .env).
-    | Tidak perlu menyentuh kode atau tampilan mana pun.
+    | CARA MENGUBAHNYA: sekarang paling gampang lewat aplikasi —
+    | Admin Utama -> Pengaturan -> "Persentase SHU". Nilai dari sana disimpan
+    | di tabel settings dan menimpa angka bawaan di bawah ini (lihat ShuService).
+    |
+    | Angka di bawah cuma dipakai sebagai NILAI BAWAAN selama koperasi belum
+    | mengisinya dari aplikasi (mis. tepat setelah hosting, sebelum ada yang
+    | membuka halaman Pengaturan).
     |
     | Kalau nanti diputuskan satu angka pasti, isi keduanya sama — tampilannya
     | otomatis berubah dari rentang jadi satu angka.
@@ -26,10 +30,6 @@ return [
     'shu' => [
         'persen_min' => (float) env('SHU_PERSEN_MIN', 0.5),
         'persen_maks' => (float) env('SHU_PERSEN_MAKS', 1.0),
-
-        // Ditampilkan di bawah angka estimasi. Kalau persentasenya sudah pasti,
-        // kalimat ini sebaiknya ikut diganti.
-        'sudah_final' => (bool) env('SHU_SUDAH_FINAL', false),
     ],
     /*
     |--------------------------------------------------------------------------

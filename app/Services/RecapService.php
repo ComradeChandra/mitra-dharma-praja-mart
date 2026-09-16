@@ -25,6 +25,8 @@ use Illuminate\Support\Collection;
  */
 class RecapService
 {
+    public function __construct(private ShuService $shu) {}
+
     /**
      * Status yang harganya sudah final dan boleh masuk hitungan rekap.
      *
@@ -378,20 +380,19 @@ class RecapService
     /**
      * Perkiraan SHU dari total belanja setahun.
      *
-     * Persentasenya dibaca dari config/koperasi.php, TIDAK ditulis di sini
-     * maupun di tampilan. Koperasi belum menetapkan angkanya (di rapat disebut
-     * kisaran 0,5%-1%, "nanti kita ngobrol"), jadi begitu diputuskan cukup
-     * ganti nilai di config, tanpa menyentuh kode.
+     * Persentasenya diambil dari ShuService (satu sumber), TIDAK ditulis di
+     * sini maupun di tampilan. Admin Utama mengaturnya di Admin -> Pengaturan;
+     * selama belum diisi, dipakai bawaan config/koperasi.php. Koperasi belum
+     * menetapkan angka pastinya (di rapat disebut kisaran 0,5%-1%).
      *
-     * Kalau batas bawah dan atasnya diisi sama, artinya persentasenya sudah
-     * pasti dan tampilannya berhenti berupa rentang.
+     * Kalau batas bawah dan atasnya sama, artinya persentasenya sudah pasti
+     * dan tampilannya berhenti berupa rentang.
      *
-     * @return array{min: float, maks: float, persenMin: float, persenMaks: float, rentang: bool, sudahFinal: bool}
+     * @return array{min: float, maks: float, persenMin: float, persenMaks: float, rentang: bool}
      */
     public function estimasiShu(float $belanjaSetahun): array
     {
-        $persenMin = (float) config('koperasi.shu.persen_min');
-        $persenMaks = (float) config('koperasi.shu.persen_maks');
+        ['min' => $persenMin, 'maks' => $persenMaks] = $this->shu->persentase();
 
         return [
             'min' => $belanjaSetahun * $persenMin / 100,
@@ -399,7 +400,6 @@ class RecapService
             'persenMin' => $persenMin,
             'persenMaks' => $persenMaks,
             'rentang' => $persenMin !== $persenMaks,
-            'sudahFinal' => (bool) config('koperasi.shu.sudah_final'),
         ];
     }
 }

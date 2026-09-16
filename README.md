@@ -36,7 +36,8 @@ Hak cipta dan ketentuan pemakaian ada di berkas [LICENSE](LICENSE).
 - **Struk resmi** yang bisa dicetak atau disimpan sebagai PDF.
 - **Rekap** per produk (belanja grosir), per OPD, dan per anggota.
 - **Usulan produk** dari anggota & non-anggota, disetujui atau ditolak pengurus.
-- **Perkiraan SHU** dari akumulasi belanja tahunan anggota.
+- **Perkiraan SHU** dari akumulasi belanja tahunan anggota; persentasenya
+  diatur Admin Utama di Admin → Pengaturan (tanpa menyentuh kode).
 
 ## Kebutuhan server
 
