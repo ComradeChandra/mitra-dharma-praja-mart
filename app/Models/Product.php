@@ -45,20 +45,17 @@ class Product extends Model
     /**
      * Status ketersediaan yang boleh dilihat pelanggan.
      *
-     * Angka stoknya sendiri cuma muncul di dashboard admin, sesuai aturan di
-     * CLAUDE.md. Alasannya angka stok membingungkan di sistem pre-order,
-     * karena barangnya sering belum ada saat dipesan.
-     *
-     * Produk yang stoknya tidak dilacak selalu dianggap tersedia. Itu justru
-     * kasus pre-order murni: barangnya dibelanjakan setelah pesanan terkumpul.
+     * Pada sistem pre-order, setiap produk yang masih ditawarkan (aktif) bisa
+     * dipesan — angka stok TIDAK membatasi pemesanan (keputusan Chandra,
+     * 16 Sep 2026, dari masukan tim Cimahi Technopark: pemesan tidak melihat
+     * angka stok, dan koperasi baru belanja setelah pesanan terkumpul, jadi
+     * pesanan tidak boleh ditolak karena stok). Untuk menyembunyikan sebuah
+     * produk sementara, pengurus menonaktifkannya. Angka stok murni jadi
+     * informasi bagi pengurus (lihat CLAUDE.md).
      */
     public function isAvailable(): bool
     {
-        if (! $this->has_stock_tracking) {
-            return true;
-        }
-
-        return (int) $this->stock > 0;
+        return (bool) $this->is_active;
     }
 
     /** Produk yang tampil di katalog pelanggan. */

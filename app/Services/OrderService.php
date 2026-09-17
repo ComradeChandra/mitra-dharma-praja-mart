@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\DeliveryMethod;
+use App\Enums\KeputusanStok;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\UserType;
@@ -16,7 +17,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 /**
  * Logika pemesanan (Modul 3). Dipisah dari controller sesuai aturan service
@@ -66,6 +66,7 @@ class OrderService
             ]);
 
             $this->createOrderItemsFor($order, $items);
+            $this->tandaiTinjauanStokBila($order);
             $this->recalculateIfComplete($order);
 
             return $order->fresh('orderItems');
@@ -101,6 +102,7 @@ class OrderService
             ]);
 
             $this->createOrderItemsFor($order, $items);
+            $this->tandaiTinjauanStokBila($order);
             $this->recalculateIfComplete($order);
 
             return $order->fresh('orderItems');
@@ -365,6 +367,12 @@ class OrderService
         foreach ($items as $item) {
             $product = $products->get($item['product_id']);
 
+            // Snapshot stok tercatat SEBELUM dikurangi, khusus produk yang
+            // stoknya dilacak. Dari sini "melebihi stok" dihitung (quantity >
+            // stok_saat_pesan) untuk ditinjau pengurus. Produk pre-order murni
+            // stoknya null, jadi tidak pernah dianggap melebihi stok.
+            $stokSaatPesan = $product->has_stock_tracking ? (int) $product->stock : null;
+
             // Stok dikurangi DULU, baru itemnya disimpan, dan urutan ini
             // penting. Menyimpan order_item membuat database mengambil kunci
             // baca pada baris produk karena ada relasi ke sana. Kalau
@@ -373,7 +381,9 @@ class OrderService
             // sama-sama menunggu kunci tulis, dan keduanya macet.
             //
             // Cuma berlaku buat produk yang stoknya dilacak. Produk pre-order
-            // murni tidak punya angka stok untuk dikurangi.
+            // murni tidak punya angka stok untuk dikurangi. Stok boleh jadi
+            // minus (lihat kurangiStok) — pesanan tidak pernah ditolak karena
+            // stok pada sistem pre-order.
             if ($product->has_stock_tracking) {
                 $this->kurangiStok($product, $item['quantity']);
             }
@@ -381,6 +391,7 @@ class OrderService
             $order->orderItems()->create([
                 'product_id' => $product->id,
                 'quantity' => $item['quantity'],
+                'stok_saat_pesan' => $stokSaatPesan,
                 // Produk non-fluktuatif: harga langsung dikunci pakai harga
                 // jual saat ini. Produk fluktuatif (mis. telur, sayur):
                 // dikosongkan dulu, baru diisi admin saat verifikasi.
@@ -390,30 +401,34 @@ class OrderService
     }
 
     /**
-     * Kurangi stok dengan syarat stoknya memang masih cukup.
+     * Kalau pesanan memuat barang yang melebihi stok tercatat, tandai butuh
+     * ditinjau pengurus (17 Sep 2026). Pesanannya TIDAK ditolak — cuma diberi
+     * penanda supaya muncul di dasbor dan pengurus memutuskan (Setujui: belanja
+     * lebih / Tolak: sesuaikan ke stok). Lihat OrderCancellationService.
+     */
+    private function tandaiTinjauanStokBila(Order $order): void
+    {
+        $order->load('orderItems');
+
+        if ($order->adaMelebihiStok()) {
+            $order->update(['keputusan_stok' => KeputusanStok::Menunggu]);
+        }
+    }
+
+    /**
+     * Kurangi stok produk yang dilacak.
      *
-     * Syaratnya ditaruh di klausa WHERE, bukan dicek di PHP lebih dulu.
-     * Form Request sudah menolak pesanan yang melebihi stok, tapi
-     * pengecekannya membaca stok sebelum transaksi dimulai. Kalau dua orang
-     * memesan barang yang sama pada saat bersamaan, keduanya bisa lolos
-     * pengecekan itu lalu sama-sama mengurangi, dan stoknya jadi minus.
-     *
-     * Dengan syarat di WHERE, database sendiri yang memutuskan siapa yang
-     * kebagian. Kalau tidak ada baris yang terpengaruh berarti stoknya keburu
-     * habis, dan pesanannya dibatalkan seluruhnya karena masih di dalam
-     * DB::transaction().
+     * Stok BOLEH menjadi minus, dan itu disengaja: pada sistem pre-order,
+     * pesanan tidak pernah ditolak karena stok (keputusan Chandra, 16 Sep
+     * 2026 — lihat CLAUDE.md). Angka minus justru berguna bagi pengurus
+     * sebagai penanda "perlu belanja sebanyak itu lebih dari yang ada di
+     * tangan". Karena tidak ada lagi syarat kecukupan stok, dua pesanan
+     * bersamaan pun aman: decrement bersifat atomik di database, jadi
+     * hasilnya tetap benar tanpa penjaga tambahan.
      */
     private function kurangiStok(Product $product, int $jumlah): void
     {
-        $berhasil = Product::whereKey($product->id)
-            ->where('stock', '>=', $jumlah)
-            ->decrement('stock', $jumlah);
-
-        if ($berhasil === 0) {
-            throw ValidationException::withMessages([
-                'quantity' => "Stok {$product->name} keburu habis dipesan orang lain. Coba kurangi jumlahnya.",
-            ]);
-        }
+        Product::whereKey($product->id)->decrement('stock', $jumlah);
     }
 
     /**

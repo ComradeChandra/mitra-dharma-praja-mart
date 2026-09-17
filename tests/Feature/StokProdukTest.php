@@ -1,18 +1,22 @@
 <?php
 
+use App\Enums\DeliveryMethod;
 use App\Enums\OrderPeriodStatus;
 use App\Models\Member;
 use App\Models\OrderPeriod;
 use App\Models\Product;
+use App\Services\OrderService;
 
 /**
- * Aturan stok — dua hal yang beda tapi nyambung:
+ * Aturan stok pada sistem pre-order (diperbarui 16 Sep 2026):
  *
- * 1. Pelanggan CUMA boleh lihat "Tersedia"/"Tidak tersedia", TIDAK PERNAH
- *    angka stoknya (aturan tegas di CLAUDE.md, dasarnya kekhawatiran Teh Teti
- *    di rapat: angka stok bikin bingung karena ini sistem pre-order).
- * 2. Stok berkurang otomatis pas ada yang pesan, tapi cuma buat produk yang
- *    memang dilacak stoknya (has_stock_tracking).
+ * 1. Pelanggan TIDAK PERNAH melihat angka stok, hanya "Tersedia" (aturan
+ *    tegas di CLAUDE.md).
+ * 2. Pesanan TIDAK PERNAH ditolak karena stok — ini pre-order, koperasi baru
+ *    belanja setelah pesanan terkumpul. Stok tetap berkurang otomatis (buat
+ *    produk yang dilacak) dan BOLEH jadi minus, sebagai penanda bagi pengurus
+ *    bahwa perlu belanja lebih. Untuk menyembunyikan produk, pengurus
+ *    menonaktifkannya (bukan lewat stok).
  */
 beforeEach(function () {
     $this->periode = OrderPeriod::create([
@@ -68,10 +72,24 @@ test('katalog publik TIDAK menampilkan angka stok, cuma status tersedia', functi
     $response->assertDontSee('Stok tersedia:');
 });
 
-test('produk berstok habis tampil "Tidak tersedia" di katalog', function () {
+test('produk berstok yang stoknya 0 tetap bisa dipesan (pre-order)', function () {
+    // Angka stok tidak lagi menentukan ketersediaan. Selama produknya aktif,
+    // ia tetap tampil "Tersedia" dan bisa dipesan.
     $this->berstok->update(['stock' => 0]);
 
-    $this->get(route('catalog.index'))->assertSee('Tidak tersedia');
+    $this->get(route('catalog.index'))
+        ->assertSee('Beras Berstok')
+        ->assertSee('Tersedia')
+        ->assertDontSee('Tidak tersedia');
+});
+
+test('produk yang dinonaktifkan tidak muncul di katalog', function () {
+    // Cara pengurus menyembunyikan produk sekarang lewat status aktif,
+    // bukan lewat stok.
+    $this->berstok->update(['is_active' => false]);
+
+    expect($this->berstok->fresh()->isAvailable())->toBeFalse();
+    $this->get(route('catalog.index'))->assertDontSee('Beras Berstok');
 });
 
 test('produk tanpa pelacakan stok selalu dianggap tersedia', function () {
@@ -110,77 +128,47 @@ test('produk tanpa pelacakan stok TIDAK ikut dikurangi', function () {
     expect($this->preOrder->fresh()->stock)->toBeNull();
 });
 
-test('tidak bisa pesan melebihi stok yang tersedia', function () {
+test('boleh pesan melebihi stok — tidak ditolak, dan stok jadi minus', function () {
+    // Inti keputusan 16 Sep 2026: pesanan pre-order tidak ditolak karena stok.
     $this->actingAs($this->anggota, 'member')
         ->post(route('member.orders.store'), [
             'delivery_method' => 'ambil',
             'quantity' => [$this->berstok->id => 51],
         ])
-        ->assertSessionHasErrors('quantity.'.$this->berstok->id);
+        ->assertSessionHasNoErrors();
 
-    // Pesanannya tidak jadi dibuat, stok tidak berubah.
-    $this->assertDatabaseCount('orders', 0);
-    expect($this->berstok->fresh()->stock)->toBe(50);
+    // Pesanannya jadi, dan stok jadi -1 sebagai penanda perlu belanja 1 lebih.
+    $this->assertDatabaseCount('orders', 1);
+    expect($this->berstok->fresh()->stock)->toBe(-1);
 });
 
-test('service menolak pengurangan kalau stok keburu habis', function () {
-    // Penjaga lapis terakhir. Form Request sudah menolak pesanan yang melebihi
-    // stok, tapi pengecekannya membaca stok sebelum transaksi jalan. Kalau dua
-    // orang memesan bersamaan, keduanya bisa lolos pengecekan itu. Di sini
-    // service dipanggil langsung supaya validasi form terlewati, meniru
-    // kondisi balapan tersebut.
+test('service tetap membuat pesanan walau stok kurang, stok jadi minus', function () {
+    // Tanpa validasi form pun (mis. kondisi balapan dua pemesan), service
+    // tidak menolak — stok cukup dibiarkan minus.
     $this->berstok->update(['stock' => 3]);
 
-    expect(fn () => app(\App\Services\OrderService::class)->createOrder(
+    app(OrderService::class)->createOrder(
         $this->anggota,
         $this->periode,
         [['product_id' => $this->berstok->id, 'quantity' => 5]],
-        \App\Enums\DeliveryMethod::Ambil,
+        DeliveryMethod::Ambil,
         null,
-    ))->toThrow(\Illuminate\Validation\ValidationException::class);
+    );
 
-    // Pesanannya batal seluruhnya, stok tidak berubah, tidak ada item nyangkut.
-    $this->assertDatabaseCount('orders', 0);
-    $this->assertDatabaseCount('order_items', 0);
-    expect($this->berstok->fresh()->stock)->toBe(3);
+    $this->assertDatabaseCount('orders', 1);
+    expect($this->berstok->fresh()->stock)->toBe(-2);
 });
 
-test('stok tidak pernah jadi minus walau dipesan pas-pasan', function () {
+test('stok pas-pasan berkurang tepat sampai 0', function () {
     $this->berstok->update(['stock' => 4]);
 
-    app(\App\Services\OrderService::class)->createOrder(
+    app(OrderService::class)->createOrder(
         $this->anggota,
         $this->periode,
         [['product_id' => $this->berstok->id, 'quantity' => 4]],
-        \App\Enums\DeliveryMethod::Ambil,
+        DeliveryMethod::Ambil,
         null,
     );
 
     expect($this->berstok->fresh()->stock)->toBe(0);
-});
-
-test('pesan kesalahan stok benar-benar sampai ke layar, bukan cuma ke session', function () {
-    // Ini pernah salah dan lolos cukup lama. Validator mendaftarkan errornya
-    // dengan kunci "quantity.{id}", sementara halaman pemesanan cuma
-    // menampilkan $errors->get('quantity') — yang tidak mencakup kunci
-    // berindeks itu. Akibatnya pesanan ditolak diam-diam: orang balik ke form
-    // tanpa satu pun keterangan kenapa pesanannya tidak masuk.
-    //
-    // Tes lama cuma memeriksa errornya ada di session, jadi tidak ketahuan.
-    // Yang diperiksa di sini adalah yang benar-benar dibaca orang di layar.
-    // Dikirim dulu, baru halamannya dibuka lagi. Tidak memakai
-    // followingRedirects() karena penolakan validasi memakai back(), dan di
-    // dalam tes tidak ada halaman sebelumnya, jadi larinya ke "/" bukan ke
-    // form pemesanan.
-    $this->actingAs($this->anggota, 'member')
-        ->post(route('member.orders.store'), [
-            'delivery_method' => 'ambil',
-            'quantity' => [$this->berstok->id => 51],
-        ]);
-
-    $this->actingAs($this->anggota, 'member')
-        ->get(route('member.orders.create'))
-        ->assertOk()
-        ->assertSee('Stok Beras Berstok tinggal 50, tidak bisa pesan 51')
-        ->assertSee('melebihi stok');
 });

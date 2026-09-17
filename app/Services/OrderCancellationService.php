@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\CancelledBy;
+use App\Enums\KeputusanStok;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Models\Order;
@@ -203,6 +204,129 @@ class OrderCancellationService
                 'catatan_pengurus' => trim($terkini->catatan_pengurus."\n".$baris),
             ]);
 
+            $this->orderService->hitungUlang($terkini);
+        });
+
+        $order->refresh();
+    }
+
+    /**
+     * TINJAUAN STOK (17 Sep 2026). Pesanan yang melebihi stok tercatat ditandai
+     * "menunggu" saat dikirim (OrderService::tandaiTinjauanStokBila). Dua cara
+     * pengurus menyelesaikannya:
+     *
+     * Setujui: koperasi akan belanja lebih untuk menutup kekurangannya, jadi
+     * pesanan lanjut apa adanya. Tidak menyentuh stok maupun isi pesanan, cuma
+     * mencatat keputusannya. Aman ditekan dua kali: kalau sudah diputuskan,
+     * tidak diubah lagi.
+     *
+     * @param  int|null  $olehUserId  pengurus yang memutuskan (auth()->id())
+     */
+    public function setujuiStok(Order $order, ?int $olehUserId): void
+    {
+        DB::transaction(function () use ($order, $olehUserId) {
+            $terkini = Order::whereKey($order->id)->lockForUpdate()->first();
+
+            // Idempoten: cuma yang masih "menunggu" yang diputuskan.
+            if (! $terkini->menungguTinjauanStok()) {
+                return;
+            }
+
+            $terkini->update([
+                'keputusan_stok' => KeputusanStok::Disetujui,
+                'keputusan_stok_oleh' => $olehUserId,
+                'keputusan_stok_pada' => now(),
+            ]);
+        });
+
+        $order->refresh();
+    }
+
+    /**
+     * Tolak: barang yang melebihi stok disesuaikan turun ke jumlah stok
+     * tercatat saat dipesan. Kalau stoknya 0, barang itu dihapus dari pesanan.
+     * Stok yang tadi terpakai dikembalikan sebesar selisihnya, total dihitung
+     * ulang, dan pemesan melihat catatannya (di halaman pesanan & invoice).
+     *
+     * Kalau semua barang yang tersisa justru barang yang tidak tersedia sama
+     * sekali (stok 0), pesanannya jadi kosong — itu ditolak dengan pesan yang
+     * mengarahkan pengurus membatalkan pesanannya saja.
+     *
+     * Sama seperti hapus barang: hanya boleh selama pembayaran belum berjalan,
+     * karena begitu uang berpindah, isi pesanan tidak diubah diam-diam.
+     *
+     * @param  string|null  $alasan  ikut dicatat dan terlihat oleh pemesan
+     * @param  int|null  $olehUserId  pengurus yang memutuskan (auth()->id())
+     */
+    public function tolakKarenaStok(Order $order, ?string $alasan, ?int $olehUserId): void
+    {
+        DB::transaction(function () use ($order, $alasan, $olehUserId) {
+            $terkini = Order::whereKey($order->id)->lockForUpdate()->first();
+
+            // Idempoten: kalau sudah diputuskan (mis. tombol ditekan dua kali),
+            // tidak diubah lagi.
+            if (! $terkini->menungguTinjauanStok()) {
+                return;
+            }
+
+            abort_if(
+                $terkini->payment_status !== PaymentStatus::Unpaid,
+                422,
+                'Pembayaran pesanan ini sudah berjalan, jadi isinya tidak bisa diubah lagi. Kalau perlu, batalkan pesanannya lalu kembalikan uangnya.',
+            );
+
+            $terkini->load('orderItems.product');
+            $melebihi = $terkini->barangMelebihiStok();
+
+            // Barang yang stok tercatatnya 0 akan hilang seluruhnya. Kalau
+            // menghapusnya membuat pesanan tak bersisa barang, arahkan pengurus
+            // membatalkan pesanan saja daripada meninggalkan pesanan kosong.
+            $akanHilang = $melebihi->filter(fn (OrderItem $i) => (int) $i->stok_saat_pesan <= 0)->count();
+            abort_if(
+                $terkini->orderItems->count() - $akanHilang < 1,
+                422,
+                'Semua barang di pesanan ini tidak tersedia. Batalkan pesanannya saja daripada mengosongkannya.',
+            );
+
+            $catatan = [];
+            foreach ($melebihi as $item) {
+                $tersedia = max(0, (int) $item->stok_saat_pesan);
+                $dikembalikan = $item->quantity - $tersedia;
+                $nama = $item->product?->name ?? 'Barang';
+
+                if ($tersedia === 0) {
+                    // Tidak tersedia sama sekali: hapus barangnya.
+                    OrderItem::whereKey($item->id)->where('order_id', $terkini->id)->delete();
+                    $catatan[] = sprintf('%s (%d) dihapus karena stok tidak tersedia.', $nama, $item->quantity);
+                } else {
+                    // Sebagian tersedia: turunkan jumlahnya ke stok tercatat.
+                    OrderItem::whereKey($item->id)->update(['quantity' => $tersedia]);
+                    $catatan[] = sprintf('%s disesuaikan dari %d ke %d karena stok terbatas.', $nama, $item->quantity, $tersedia);
+                }
+
+                // Kembalikan stok sebesar selisih yang tadi terpakai. Barang
+                // yang melebihi stok selalu produk yang dilacak (stok_saat_pesan
+                // tidak null), jadi selalu ada stok untuk dikembalikan.
+                if ($dikembalikan > 0) {
+                    Product::whereKey($item->product_id)->increment('stock', $dikembalikan);
+                }
+            }
+
+            $prefix = now()->translatedFormat('d M Y').': ';
+            $baris = $prefix.implode(' ', $catatan);
+            if ($alasan) {
+                $baris .= ' Alasan: '.rtrim($alasan, '. ').'.';
+            }
+
+            $terkini->update([
+                'catatan_pengurus' => trim($terkini->catatan_pengurus."\n".$baris),
+                'keputusan_stok' => KeputusanStok::Ditolak,
+                'keputusan_stok_oleh' => $olehUserId,
+                'keputusan_stok_pada' => now(),
+            ]);
+
+            // Total & status dihitung ulang (mis. pesanan Invoiced kembali ke
+            // Verified supaya invoice dikirim ulang dengan rincian terbaru).
             $this->orderService->hitungUlang($terkini);
         });
 

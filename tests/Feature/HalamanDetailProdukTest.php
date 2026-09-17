@@ -51,12 +51,14 @@ test('angka stok TIDAK muncul di halaman detail', function () {
     expect($terlihat)->not->toContain('Stok');
 });
 
-test('produk yang stoknya habis ditandai tidak tersedia', function () {
+test('produk yang stoknya 0 tetap ditandai tersedia (pre-order)', function () {
+    // Angka stok tidak lagi menentukan ketersediaan: selama produknya aktif,
+    // tetap bisa dipesan (keputusan 16 Sep 2026).
     $this->beras->update(['stock' => 0]);
 
     $this->get(route('catalog.show', $this->beras))
-        ->assertSee('Tidak tersedia')
-        ->assertDontSee('>Tersedia<', false);
+        ->assertSee('Tersedia')
+        ->assertDontSee('Tidak tersedia');
 });
 
 test('produk fluktuatif menampilkan penjelasan, bukan angka harga', function () {

@@ -114,27 +114,13 @@ trait ValidatesOrderQuantities
             return;
         }
 
-        // Cek stok. cuma berlaku buat produk yang stoknya memang dilacak.
-        // Produk pre-order murni (has_stock_tracking = false) tidak dibatasi
-        // sama sekali, karena barangnya justru belum ada saat dipesan.
-        //
-        // Input jumlahnya sudah dimatikan di form kalau produk tidak tersedia
-        // (lihat x-order.product-row), tapi tetap dicek ulang di sini karena
-        // form bisa saja dikirim dari halaman yang sudah basi atau diutak-atik.
-        foreach ($quantities as $productId => $qty) {
-            $product = $products->get((int) $productId);
-
-            if (! $product->has_stock_tracking) {
-                continue;
-            }
-
-            if ((int) $qty > (int) $product->stock) {
-                $validator->errors()->add(
-                    'quantity.'.$productId,
-                    "Stok {$product->name} tinggal {$product->stock}, tidak bisa pesan {$qty}.",
-                );
-            }
-        }
+        // Sengaja TIDAK ada pembatasan terhadap stok di sini. Ini sistem
+        // pre-order: koperasi baru belanja setelah pesanan terkumpul, dan
+        // pemesan pun tidak melihat angka stok, jadi pesanan tidak boleh
+        // ditolak karena melebihi stok (keputusan Chandra, 16 Sep 2026, dari
+        // masukan tim Cimahi Technopark — lihat CLAUDE.md). Stok tetap
+        // berkurang di OrderService (boleh jadi minus) sebagai informasi
+        // bagi pengurus, bukan penghalang pemesanan.
     }
 
     /**

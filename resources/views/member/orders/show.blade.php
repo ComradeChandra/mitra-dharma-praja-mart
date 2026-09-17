@@ -10,6 +10,9 @@
         {{-- Muncul kalau pengurus pernah mengubah isi pesanan ini --}}
         <x-order.admin-note :order="$order" class="mb-6" />
 
+        {{-- Catatan halus kalau sebagian barang melebihi persediaan (tanpa angka stok) --}}
+        <x-order.catatan-stok :order="$order" class="mb-6" />
+
         <x-card class="overflow-hidden">
             {{-- Header: periode + status --}}
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">

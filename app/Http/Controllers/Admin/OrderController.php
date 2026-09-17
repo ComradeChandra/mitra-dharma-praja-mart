@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CancelOrderRequest;
 use App\Http\Requests\Admin\RemoveOrderItemRequest;
+use App\Http\Requests\Admin\TolakStokRequest;
 use App\Http\Requests\Admin\VerifyOrderRequest;
 use App\Models\Order;
 use App\Services\OrderCancellationService;
@@ -39,6 +40,8 @@ class OrderController extends Controller
     {
         $status = $request->query('status');
         $statusBayar = $request->query('bayar');
+        // Datang dari pengingat dasbor "Pesanan melebihi stok, perlu ditinjau".
+        $perluTinjauanStok = $request->boolean('tinjauan_stok');
 
         // Dua penyaring terpisah karena status pesanan dan status pembayaran
         // bergerak sendiri-sendiri. Aturan penyaringannya ada di scope model.
@@ -46,11 +49,12 @@ class OrderController extends Controller
         $orders = Order::with('member', 'orderPeriod')
             ->statusPesanan($status)
             ->statusPembayaran($statusBayar)
+            ->when($perluTinjauanStok, fn ($query) => $query->perluTinjauanStok())
             ->latest()
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.orders.index', compact('orders', 'status', 'statusBayar'));
+        return view('admin.orders.index', compact('orders', 'status', 'statusBayar', 'perluTinjauanStok'));
     }
 
     /**
@@ -195,5 +199,32 @@ class OrderController extends Controller
         return redirect()
             ->route('admin.orders.show', $order)
             ->with('success', 'Pesanan ditandai invoice sudah terkirim.');
+    }
+
+    /**
+     * Tinjauan stok — Setujui: koperasi belanja lebih, pesanan lanjut apa
+     * adanya. Aturannya di OrderCancellationService::setujuiStok().
+     */
+    public function setujuiStok(Order $order): RedirectResponse
+    {
+        $this->pembatalan->setujuiStok($order, auth()->id());
+
+        return redirect()
+            ->route('admin.orders.show', $order)
+            ->with('success', 'Pesanan disetujui. Koperasi akan belanja lebih untuk menutup kekurangan stok; isi pesanan tidak berubah.');
+    }
+
+    /**
+     * Tinjauan stok — Tolak: barang yang melebihi stok disesuaikan ke stok
+     * tercatat (atau dihapus kalau stoknya 0). Aturannya di
+     * OrderCancellationService::tolakKarenaStok().
+     */
+    public function tolakStok(TolakStokRequest $request, Order $order): RedirectResponse
+    {
+        $this->pembatalan->tolakKarenaStok($order, $request->alasan(), auth()->id());
+
+        return redirect()
+            ->route('admin.orders.show', $order)
+            ->with('success', 'Jumlah barang disesuaikan ke stok yang tersedia dan totalnya dihitung ulang. Kirim ulang invoice supaya pemesan menerima rincian terbaru.');
     }
 }

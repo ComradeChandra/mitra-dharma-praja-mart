@@ -35,6 +35,10 @@
             {{-- Riwayat perubahan isi pesanan, sama dengan yang dilihat pemesan --}}
             <x-order.admin-note :order="$order" />
 
+            {{-- Tinjauan stok: muncul kalau pesanan melebihi stok tercatat dan
+                 belum diputuskan (Setujui: belanja lebih / Tolak: sesuaikan). --}}
+            <x-admin.tinjauan-stok :order="$order" />
+
             {{-- Pesanan batal yang pembayarannya sempat berjalan. Kartu invoice
                  (tempat info bayar biasanya) tidak tampil untuk pesanan batal,
                  padahal pengurus masih butuh status & bukti transfernya untuk
@@ -121,7 +125,12 @@
                             <div class="flex items-center justify-between gap-4 px-5 py-3">
                                 <div class="min-w-0">
                                     <p class="text-sm font-medium text-gray-800 truncate">{{ $item->product->name }}</p>
-                                    <p class="text-xs text-gray-400">{{ $item->quantity }} pcs · {{ $item->product->category }}</p>
+                                    <p class="text-xs text-gray-400">
+                                        {{ $item->quantity }} pcs · {{ $item->product->category }}
+                                        @if ($item->melebihiStok())
+                                            <span class="text-amber-700">· melebihi stok tercatat ({{ $item->stok_saat_pesan }})</span>
+                                        @endif
+                                    </p>
                                 </div>
 
                                 @if ($item->price_at_order !== null)

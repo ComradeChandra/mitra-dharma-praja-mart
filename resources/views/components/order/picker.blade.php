@@ -104,7 +104,7 @@
                  tapi barisnya bisa sedang tersembunyi oleh penyaring, jadi
                  diberi penanda di atas juga. --}}
             @if ($errors->has('quantity.*'))
-                <x-alert type="error" message="Ada produk yang jumlahnya melebihi stok. Cek keterangan merah di daftar produk di bawah." />
+                <x-alert type="error" message="Ada produk yang jumlahnya belum benar. Cek keterangan merah di daftar produk di bawah." />
             @endif
 
             {{--

@@ -85,6 +85,10 @@ Route::middleware(['auth:web', 'admin.aktif'])->prefix('admin')->name('admin.')-
     // Hapus satu barang dari pesanan (mis. habis di grosir); barangnya
     // dipilih di form, dan wajib milik pesanan ini (RemoveOrderItemRequest).
     Route::patch('pesanan/{order}/hapus-barang', [OrderController::class, 'removeItem'])->name('orders.remove-item');
+    // Tinjauan stok untuk pesanan yang melebihi stok tercatat (17 Sep 2026):
+    // Setujui (koperasi belanja lebih) atau Tolak (sesuaikan ke stok tercatat).
+    Route::patch('pesanan/{order}/setujui-stok', [OrderController::class, 'setujuiStok'])->name('orders.setujui-stok');
+    Route::patch('pesanan/{order}/tolak-stok', [OrderController::class, 'tolakStok'])->name('orders.tolak-stok');
 
     // Peninjauan permintaan produk (Modul 8), admin cuma approve/reject,
     // bukan CRUD penuh (tidak ada create/edit/delete dari sisi admin).

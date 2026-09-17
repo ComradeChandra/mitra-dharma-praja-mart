@@ -59,6 +59,15 @@
                 @endforeach
             </div>
 
+            {{-- Datang dari pengingat dasbor: daftar disaring ke pesanan yang
+                 melebihi stok tercatat dan belum ditinjau. --}}
+            @if ($perluTinjauanStok)
+                <div class="flex items-center justify-between gap-3 mb-4 rounded-lg bg-amber-50 border border-amber-200 px-4 py-2.5">
+                    <span class="text-sm text-amber-800">Menampilkan pesanan yang <span class="font-medium">perlu tinjauan stok</span>.</span>
+                    <a href="{{ route('admin.orders.index') }}" class="text-sm text-amber-700 hover:text-amber-900 underline">Tampilkan semua</a>
+                </div>
+            @endif
+
             <x-admin.table-card>
                 @if ($orders->isNotEmpty())
                     <table class="min-w-full divide-y divide-gray-100">
@@ -88,6 +97,10 @@
                                         <x-admin.badge :color="$order->status->badgeColor()">
                                             {{ $order->status->label() }}
                                         </x-admin.badge>
+                                        {{-- Penanda pesanan yang melebihi stok tercatat & belum ditinjau --}}
+                                        @if ($order->menungguTinjauanStok())
+                                            <span class="block text-[11px] text-amber-700 mt-0.5">perlu tinjauan stok</span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-3 whitespace-nowrap text-sm">
                                         {{-- Pesanan batal tidak ditagih, status bayarnya tidak relevan lagi --}}

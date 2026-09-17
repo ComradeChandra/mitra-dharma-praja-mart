@@ -389,6 +389,22 @@
                         </a>
                     @endif
 
+                    {{-- Pesanan yang melebihi stok tercatat & belum diputuskan pengurus --}}
+                    @if ($tinjauanStokMenunggu > 0)
+                        <a href="{{ route('admin.orders.index', ['tinjauan_stok' => 1]) }}"
+                           class="flex items-center justify-between gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 hover:bg-amber-100 transition">
+                            <div class="flex items-center gap-3">
+                                <span class="h-9 w-9 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-sm font-bold shrink-0">
+                                    {{ $tinjauanStokMenunggu }}
+                                </span>
+                                <span class="text-sm font-medium text-amber-800">
+                                    Pesanan melebihi stok, perlu ditinjau
+                                </span>
+                            </div>
+                            <span class="text-amber-600">→</span>
+                        </a>
+                    @endif
+
                     {{-- Permintaan produk yang belum ditinjau, ditonjolkan kalau ada --}}
                     @if ($permintaanMenunggu > 0)
                         <a href="{{ route('admin.product-requests.index') }}"

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\CancelledBy;
 use App\Enums\DeliveryMethod;
+use App\Enums\KeputusanStok;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\UserType;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 /**
  * Model untuk tabel orders.
@@ -40,6 +42,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'cancelled_by',
     'cancellation_reason',
     'catatan_pengurus',
+    'keputusan_stok',
+    'keputusan_stok_oleh',
+    'keputusan_stok_pada',
 ])]
 class Order extends Model
 {
@@ -75,6 +80,8 @@ class Order extends Model
             'cancelled_by' => CancelledBy::class,
             'delivery_method' => DeliveryMethod::class,
             'total_amount' => 'decimal:2',
+            'keputusan_stok' => KeputusanStok::class,
+            'keputusan_stok_pada' => 'datetime',
         ];
     }
 
@@ -89,6 +96,7 @@ class Order extends Model
     {
         return sprintf('MDP-%s-%04d', $this->created_at->format('ym'), $this->id);
     }
+
     /**
      * Saring per status pesanan. Nilai yang tidak dikenal diabaikan, jadi
      * pemanggilnya tidak perlu menulis if sendiri (pola yang sama dengan
@@ -166,5 +174,54 @@ class Order extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Relasi: pengurus yang memutuskan tinjauan stok (null selama belum
+     * diputuskan). Foreign key-nya keputusan_stok_oleh, bukan tebakan otomatis.
+     */
+    public function peninjauStok(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'keputusan_stok_oleh');
+    }
+
+    /**
+     * Pesanan yang menunggu ditinjau pengurus karena melebihi stok tercatat.
+     * Dipakai badge daftar pesanan dan pengingat dasbor. Cukup baca kolom
+     * keputusan_stok, tidak perlu memuat item-nya.
+     */
+    public function scopePerluTinjauanStok(Builder $query): Builder
+    {
+        return $query->where('keputusan_stok', KeputusanStok::Menunggu);
+    }
+
+    /**
+     * Pesanan ini melebihi stok dan pengurus belum memutuskan. Sekadar
+     * pembacaan kolom, tidak menyentuh item. Namanya beda dari scope
+     * perluTinjauanStok() supaya keduanya tidak bertabrakan (scope dipanggil
+     * gaya query, ini dipanggil pada instance).
+     */
+    public function menungguTinjauanStok(): bool
+    {
+        return $this->keputusan_stok === KeputusanStok::Menunggu;
+    }
+
+    /**
+     * Ada barang yang dipesan melebihi stok tercatat. Butuh orderItems dimuat.
+     */
+    public function adaMelebihiStok(): bool
+    {
+        return $this->orderItems->contains(fn (OrderItem $item) => $item->melebihiStok());
+    }
+
+    /**
+     * Barang-barang yang jumlahnya melebihi stok tercatat. Butuh orderItems
+     * dimuat; dipakai panel "Tinjauan stok" di halaman detail pesanan.
+     *
+     * @return Collection<int, OrderItem>
+     */
+    public function barangMelebihiStok(): Collection
+    {
+        return $this->orderItems->filter(fn (OrderItem $item) => $item->melebihiStok())->values();
     }
 }

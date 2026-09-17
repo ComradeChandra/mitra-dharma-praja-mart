@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\OrderPeriod;
 use App\Models\Product;
 use App\Models\ProductRequest;
+use Illuminate\Support\Collection;
 
 /**
  * Ringkasan angka + aktivitas terbaru buat dashboard admin (kartu statistik,
@@ -28,10 +29,11 @@ class DashboardStatsService
      * @return array{
      *     stats: array{totalAnggota: int, anggotaAktif: int, totalProduk: int, totalOpd: int},
      *     periodeAktif: OrderPeriod|null,
-     *     anggotaTerbaru: \Illuminate\Support\Collection,
-     *     produkTerbaru: \Illuminate\Support\Collection,
+     *     anggotaTerbaru: Collection,
+     *     produkTerbaru: Collection,
      *     permintaanMenunggu: int,
      *     pembayaranMenunggu: int,
+     *     tinjauanStokMenunggu: int,
      * }
      */
     public function summary(): array
@@ -67,6 +69,14 @@ class DashboardStatsService
             // mengira uangnya sudah masuk semua.
             // Pesanan yang sudah dibatalkan tidak perlu dicocokkan lagi.
             'pembayaranMenunggu' => Order::where('payment_status', PaymentStatus::AwaitingConfirmation)
+                ->belumDibatalkan()
+                ->count(),
+
+            // Pesanan yang jumlahnya melebihi stok tercatat dan belum diputuskan
+            // pengurus (Setujui: belanja lebih / Tolak: sesuaikan ke stok).
+            // Sistem pre-order tidak menolak pesanan, jadi kelebihan stok tidak
+            // boleh lewat begitu saja tanpa ada yang meninjau (17 Sep 2026).
+            'tinjauanStokMenunggu' => Order::perluTinjauanStok()
                 ->belumDibatalkan()
                 ->count(),
         ];
