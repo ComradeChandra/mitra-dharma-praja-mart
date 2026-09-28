@@ -129,8 +129,8 @@ test('anggota TIDAK bisa menghapus data lewat kirim request admin langsung', fun
 });
 
 test('non-anggota TIDAK bisa masuk halaman khusus anggota (profil/SHU)', function (string $routeName) {
-    // Ini menjaga batasan dari Pak Emir: non-anggota boleh memesan, tapi
-    // TIDAK punya akses profil belanja tahunan & SHU (lihat CLAUDE.md, Aktor).
+    // Non-anggota boleh memesan, tapi TIDAK punya akses ke profil belanja
+    // tahunan & SHU; halaman-halaman itu khusus anggota.
     $this->withSession(['non_member_opd_id' => $this->opdSatu->id])
         ->get(route($routeName))
         ->assertRedirect(route('member.login'));

@@ -2,8 +2,7 @@
     Isi <head> yang sama di semua layout: ikon, deskripsi, warna bilah browser
     di HP, dan pratinjau tautan (Open Graph).
 
-    KENAPA ADA: tautan aplikasi ini disebar lewat WhatsApp (Pak Emir di rapat
-    pertama: "saya sebar link ke staf-staf DPMTSP"). Tanpa Open Graph,
+    KENAPA ADA: tautan aplikasi ini disebar lewat WhatsApp. Tanpa Open Graph,
     pratinjaunya di WhatsApp cuma alamat polos tanpa judul maupun logo.
 
     Sebelumnya lima layout menulis ikonnya sendiri-sendiri dengan alamat

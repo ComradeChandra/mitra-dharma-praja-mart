@@ -116,11 +116,11 @@ trait ValidatesOrderQuantities
 
         // Sengaja TIDAK ada pembatasan terhadap stok di sini. Ini sistem
         // pre-order: koperasi baru belanja setelah pesanan terkumpul, dan
-        // pemesan pun tidak melihat angka stok, jadi pesanan tidak boleh
-        // ditolak karena melebihi stok (keputusan Chandra, 16 Sep 2026, dari
-        // masukan tim Cimahi Technopark — lihat CLAUDE.md). Stok tetap
-        // berkurang di OrderService (boleh jadi minus) sebagai informasi
-        // bagi pengurus, bukan penghalang pemesanan.
+        // pemesan pun tidak melihat angka stok, jadi pesanan tidak ditolak
+        // karena melebihi stok. Stok tetap berkurang di OrderService (boleh
+        // jadi minus) sebagai informasi bagi pengurus, dan pesanan yang
+        // melebihi stok ditandai untuk ditinjau pengurus
+        // (OrderService::tandaiTinjauanStokBila), bukan dihalangi di sini.
     }
 
     /**

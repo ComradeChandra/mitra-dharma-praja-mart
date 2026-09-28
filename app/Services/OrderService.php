@@ -117,8 +117,9 @@ class OrderService
      * lain di PERIODE YANG SAMA yang memuat barang itu dan harganya masih
      * kosong (15 Sep 2026). Tanpa ini, 30 pesanan telur berarti mengetik harga
      * telur 30 kali. Yang tidak ikut diubah: pesanan yang harganya sudah diisi
-     * satu per satu (tidak ditimpa, sesuai keputusan Chandra), pesanan yang
-     * sudah dibatalkan, dan pesanan di periode lain (harga pasarnya lain).
+     * satu per satu (tidak ditimpa, karena harga yang diisi manual dianggap
+     * disengaja), pesanan yang sudah dibatalkan, dan pesanan di periode lain
+     * (harga pasarnya lain).
      *
      * Semuanya di satu transaksi: kalau satu pesanan gagal, tidak ada yang
      * berubah sama sekali.
@@ -419,10 +420,9 @@ class OrderService
      * Kurangi stok produk yang dilacak.
      *
      * Stok BOLEH menjadi minus, dan itu disengaja: pada sistem pre-order,
-     * pesanan tidak pernah ditolak karena stok (keputusan Chandra, 16 Sep
-     * 2026 — lihat CLAUDE.md). Angka minus justru berguna bagi pengurus
-     * sebagai penanda "perlu belanja sebanyak itu lebih dari yang ada di
-     * tangan". Karena tidak ada lagi syarat kecukupan stok, dua pesanan
+     * pesanan tidak pernah ditolak karena stok. Angka minus justru berguna
+     * bagi pengurus sebagai penanda "perlu belanja sebanyak itu lebih dari
+     * yang ada di tangan". Karena tidak ada lagi syarat kecukupan stok, dua pesanan
      * bersamaan pun aman: decrement bersifat atomik di database, jadi
      * hasilnya tetap benar tanpa penjaga tambahan.
      */

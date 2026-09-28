@@ -1,8 +1,8 @@
 {{--
     Panel pembayaran QRIS di halaman pesanan, dilihat pemesan.
 
-    Diminta Pak Emir (Zoom 3 Sep 2026): gambar QRIS koperasi ditempel setelah
-    pesanan dikirim, lalu status bayarnya kelihatan di dashboard pengurus.
+    Menampilkan gambar QRIS koperasi setelah pesanan dikirim, beserta status
+    bayarnya (status yang sama juga kelihatan di dasbor pengurus).
 
     QRIS-nya statis, bukan payment gateway. Uang masuk langsung ke rekening
     koperasi dan aplikasi tidak pernah diberi tahu, jadi pemesan yang

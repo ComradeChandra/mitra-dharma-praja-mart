@@ -38,9 +38,12 @@ test('hero banner menampilkan info periode yang sedang dibuka', function () {
     ]);
 
     // $escape di-set false karena teks yang dicari mengandung tanda kutip ganda
-    // literal (bukan hasil {{ }} yang di-escape otomatis oleh Blade)
+    // literal (bukan hasil {{ }} yang di-escape otomatis oleh Blade).
+    // Pakai translatedFormat, sama seperti tampilannya: format() selalu
+    // berbahasa Inggris, jadi tes ini sempat gagal tiap kali tanggal
+    // selesainya jatuh di bulan Mei/Agustus/Oktober/Desember ("Oct" ≠ "Okt").
     $this->get(route('catalog.index'))
-        ->assertSee('Periode "Periode Agustus" dibuka sampai '.$selesai->format('d M Y'), false);
+        ->assertSee('Periode "Periode Agustus" dibuka sampai '.$selesai->translatedFormat('d M Y'), false);
 });
 
 test('hero banner kasih tau kalau belum ada periode yang dibuka', function () {
@@ -50,8 +53,8 @@ test('hero banner kasih tau kalau belum ada periode yang dibuka', function () {
 test('periode yang status-nya open TAPI tanggalnya sudah lewat tidak dianggap dibuka', function () {
     // Ini penjaga buat bug yang pernah ada: dulu kodenya cuma cek kolom
     // status, jadi kalau admin lupa klik "tutup", pemesanan tetap jalan
-    // lewat dari tanggal selesai — padahal Pak Emir minta pemesanan cuma
-    // bisa "dari tanggal sekian sampai tanggal sekian".
+    // lewat dari tanggal selesai, padahal pemesanan cuma boleh berjalan di
+    // dalam rentang tanggal periodenya.
     OrderPeriod::create([
         'label' => 'Periode Kadaluarsa', 'start_date' => now()->subMonth(),
         'end_date' => now()->subDay(), 'status' => 'open',

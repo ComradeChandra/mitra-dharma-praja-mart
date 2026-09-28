@@ -184,7 +184,8 @@ test('rekan sekantor tidak bisa membuka pesanan orang lain', function () {
     $pesanan = kirimPesananNonAnggota($this->opd, $this->beras->id, 'Teh Teti');
 
     // Sesi baru, kode akses kantor yang sama persis: inilah rekan sekantor.
-    // Boleh memesan atas nama OPD ini, tapi bukan membaca pesanan Teh Teti.
+    // Boleh memesan atas nama OPD ini, tapi tidak boleh membaca pesanan
+    // rekan sekantornya.
     $this->flushSession();
 
     $this->withSession(sesiNonAnggota($this->opd))

@@ -43,7 +43,7 @@ Hak cipta dan ketentuan pemakaian ada di berkas [LICENSE](LICENSE).
 
 | | Versi |
 |---|---|
-| PHP | 8.3 atau lebih baru, dengan ekstensi `pdo_mysql`, `mbstring`, `openssl`, `fileinfo`, `tokenizer`, `xml`, `ctype`, `curl` |
+| PHP | **8.4.1 atau lebih baru** (paket Symfony 8 di `composer.lock` mewajibkannya; di PHP 8.3 `composer install` akan ditolak), dengan ekstensi `pdo_mysql`, `mbstring`, `openssl`, `fileinfo`, `tokenizer`, `xml`, `ctype`, `curl` |
 | Database | MySQL 8 atau MariaDB 10.6+ |
 | Composer | 2.x |
 | Node.js | 20+ (**cuma untuk membangun CSS/JS**, tidak perlu ada di server) |

@@ -13,7 +13,7 @@ use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Pembatalan pesanan (15 Sep 2026). Aturannya diputuskan Chandra:
+ * Aturan pembatalan pesanan dan penghapusan satu barang dari pesanan:
  *
  * - Pemesan boleh membatalkan pesanannya sendiri selama periodenya masih
  *   dibuka dan pesanannya belum dibayar. Setelah periode ditutup, koperasi

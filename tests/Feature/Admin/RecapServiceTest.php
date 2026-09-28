@@ -209,7 +209,7 @@ test('topMembers TIDAK ikut menghitung pesanan non-anggota (khusus anggota)', fu
 
     $result = $this->recap->topMembers();
 
-    // Cuma 2 nama (anggotaSering & anggotaJarang) — "Teh Teti" (non-anggota) tidak ikut.
+    // Cuma 2 nama (anggotaSering & anggotaJarang); pemesan non-anggota tidak ikut.
     expect($result['labels'])->toHaveCount(2);
     expect($result['labels'])->not->toContain('Teh Teti');
 });

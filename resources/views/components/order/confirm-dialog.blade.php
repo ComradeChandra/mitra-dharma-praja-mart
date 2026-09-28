@@ -4,9 +4,7 @@
 
     KENAPA ADA: tombol "Kirim Pesanan" dulu langsung mengirim. Pemesan tidak
     pernah melihat sekali lagi barang apa saja yang akan terkirim, padahal
-    pesanan yang sudah dikirim tidak bisa diubah sendiri. Pak Emir di rapat
-    pertama juga menggambarkan langkah ini: "baru nanti di sini spot total
-    ... oke konfirmasi pemesanan" (CLAUDE.md, Lampiran A).
+    pesanan yang sudah dikirim tidak bisa diubah sendiri.
 
     Ini BUKAN checkout bertahap. Tidak ada halaman baru, tidak ada keranjang;
     cuma satu jendela berisi apa yang sudah diisi di form, lalu kirim atau

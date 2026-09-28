@@ -2,12 +2,9 @@
     Bilah ringkasan: berapa jenis produk yang sudah diisi, perkiraan totalnya,
     dan tombol kirim. Bisa dibuka buat melihat rinciannya.
 
-    Ini BUKAN keranjang belanja. Di rapat, keranjang ditolak — Pak Emir:
-    "ini keranjang atau gini? Ini enggak usah... dia volume aja, mau beli
-    berapa... terus bukan tambah keranjang, sudah ada... baru nanti di sini
-    spot total dari dia, oke konfirmasi pemesanan". Jadi jumlah tetap diisi
-    langsung di baris produknya; yang ada di sini cuma cara melihat kembali
-    apa yang sudah diisi tanpa perlu menyaring daftarnya dulu.
+    Ini BUKAN keranjang belanja: jumlah tetap diisi langsung di baris
+    produknya. Yang ada di sini cuma cara melihat kembali apa yang sudah
+    diisi tanpa perlu menyaring daftarnya dulu.
 
     Di HP menempel di dasar layar supaya tombol kirim selalu terjangkau. Di
     layar lebar dia ikut masuk kolom kanan, jadi tidak perlu menempel lagi

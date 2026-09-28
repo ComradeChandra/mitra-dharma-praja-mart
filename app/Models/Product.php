@@ -46,12 +46,10 @@ class Product extends Model
      * Status ketersediaan yang boleh dilihat pelanggan.
      *
      * Pada sistem pre-order, setiap produk yang masih ditawarkan (aktif) bisa
-     * dipesan — angka stok TIDAK membatasi pemesanan (keputusan Chandra,
-     * 16 Sep 2026, dari masukan tim Cimahi Technopark: pemesan tidak melihat
-     * angka stok, dan koperasi baru belanja setelah pesanan terkumpul, jadi
-     * pesanan tidak boleh ditolak karena stok). Untuk menyembunyikan sebuah
-     * produk sementara, pengurus menonaktifkannya. Angka stok murni jadi
-     * informasi bagi pengurus (lihat CLAUDE.md).
+     * dipesan — angka stok TIDAK membatasi pemesanan, karena pemesan tidak
+     * melihat angka stok dan koperasi baru belanja setelah pesanan
+     * terkumpul. Untuk menyembunyikan sebuah produk sementara, pengurus
+     * menonaktifkannya. Angka stok murni jadi informasi bagi pengurus.
      */
     public function isAvailable(): bool
     {

@@ -13,9 +13,8 @@ namespace App\Enums;
  * QRIS koperasi itu QRIS statis cetakan, bukan payment gateway. Uangnya masuk
  * langsung ke rekening koperasi dan aplikasi tidak pernah diberi tahu apa pun.
  * Karena itu perpindahan status di sini digerakkan manusia, bukan webhook:
- * pemesan menyatakan sudah bayar, pengurus mencocokkan ke mutasi lalu
- * mengonfirmasi. Alur ini yang disetujui Pak Emir sendiri (3 Sep 2026, lihat
- * Lampiran C di CLAUDE.md).
+ * pemesan menyatakan sudah bayar (Unpaid → AwaitingConfirmation), lalu
+ * pengurus mencocokkan ke mutasi rekening dan mengonfirmasi (→ Paid).
  */
 enum PaymentStatus: string
 {

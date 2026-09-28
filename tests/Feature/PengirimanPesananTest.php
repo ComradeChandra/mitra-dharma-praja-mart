@@ -221,11 +221,9 @@ test('halaman pesan pakai dua kolom di layar lebar, menumpuk di HP', function ()
 });
 
 test('ringkasan bisa dibuka buat melihat apa saja yang sudah diisi', function () {
-    // Ini BUKAN keranjang. Di rapat keranjang ditolak — Pak Emir: "ini
-    // keranjang atau gini? Ini enggak usah... dia volume aja, mau beli
-    // berapa... terus bukan tambah keranjang". Jadi jumlah tetap diisi
-    // langsung di baris produknya; yang ditambahkan cuma cara melihat kembali
-    // isinya tanpa perlu menyaring daftarnya dulu.
+    // Ini BUKAN keranjang: jumlah tetap diisi langsung di baris produknya;
+    // yang ditambahkan cuma cara melihat kembali isinya tanpa perlu
+    // menyaring daftarnya dulu.
     $anggota = App\Models\Member::create([
         'member_code' => '0010 A', 'full_name' => 'Uji Ringkasan',
         'whatsapp_number' => '628100000010', 'password' => 'anggota123', 'is_active' => true,

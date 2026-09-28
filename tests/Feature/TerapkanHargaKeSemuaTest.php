@@ -17,9 +17,8 @@ use App\Models\User;
 |--------------------------------------------------------------------------
 | Tanpa pilihan "semua", 30 pesanan telur berarti mengetik harga telur 30
 | kali. Yang ikut diisi cuma pesanan di PERIODE YANG SAMA yang harga barang
-| itu masih kosong; yang sudah diisi satu per satu tidak ditimpa (keputusan
-| Chandra), begitu juga pesanan yang dibatalkan dan yang pembayarannya
-| sudah berjalan.
+| itu masih kosong; yang sudah diisi satu per satu tidak ditimpa, begitu
+| juga pesanan yang dibatalkan dan yang pembayarannya sudah berjalan.
 */
 
 beforeEach(function () {

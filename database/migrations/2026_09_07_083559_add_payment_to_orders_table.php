@@ -7,9 +7,8 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Kolom pembayaran QRIS pada pesanan.
  *
- * Diminta Pak Emir lewat Zoom 3 Sep 2026: gambar QRIS koperasi ditempel
- * setelah pesanan dikirim, lalu status bayarnya kelihatan di dashboard
- * pengurus.
+ * Setelah pesanan dikirim, pemesan melihat gambar QRIS koperasi, dan status
+ * bayarnya kelihatan di dasbor pengurus.
  *
  * QRIS-nya statis, jadi tidak ada webhook yang memberi tahu aplikasi kalau
  * ada yang bayar. Perpindahan statusnya digerakkan manusia, dan kolom-kolom

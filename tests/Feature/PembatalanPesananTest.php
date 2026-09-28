@@ -19,7 +19,7 @@ use App\Services\RecapService;
 |--------------------------------------------------------------------------
 | Pembatalan pesanan (15 Sep 2026)
 |--------------------------------------------------------------------------
-| Aturan yang diputuskan Chandra:
+| Aturan yang dijaga tes ini:
 | - pemesan boleh membatalkan sendiri selama periode masih dibuka dan
 |   belum dibayar; selebihnya lewat pengurus
 | - pengurus boleh kapan saja; kalau pembayaran sudah berjalan wajib

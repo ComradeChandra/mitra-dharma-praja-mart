@@ -15,13 +15,11 @@ use Illuminate\Support\Facades\Storage;
 /**
  * Pembayaran lewat QRIS koperasi.
  *
- * Diminta Pak Emir lewat Zoom 3 Sep 2026 (lihat Lampiran C di CLAUDE.md).
- *
  * QRIS koperasi itu QRIS statis cetakan, BUKAN payment gateway. Uangnya masuk
  * langsung ke rekening koperasi dan aplikasi tidak pernah diberi tahu apa pun,
  * jadi tidak ada webhook yang bisa menandai lunas otomatis. Alurnya dua
  * langkah: pemesan menyatakan sudah bayar, pengurus mencocokkan ke mutasi
- * lalu mengonfirmasi. Ini yang disetujui Pak Emir sendiri sebagai jalan manual.
+ * lalu mengonfirmasi.
  */
 beforeEach(function () {
     $this->admin = User::factory()->create();
