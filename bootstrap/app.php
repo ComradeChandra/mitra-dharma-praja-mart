@@ -44,8 +44,15 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.aktif' => EnsureAdminIsActive::class,
         ]);
     })
+
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Error dijawab JSON (401, 422, dst) hanya untuk alamat api/* dan rute
+        // notifikasi pesanan baru, yang dipanggil JavaScript, bukan dibuka
+        // manusia. Tanpa ini, sesi yang habis dijawab "pindah ke halaman
+        // login" dan isian yang salah dijawab "kembali ke halaman sebelumnya",
+        // dua-duanya tidak berarti apa-apa bagi fetch() di notif-pesanan.js.
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*'),
+            fn (Request $request) => $request->is('api/*')
+                || $request->routeIs('admin.orders.baru'),
         );
     })->create();

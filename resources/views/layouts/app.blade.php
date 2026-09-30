@@ -42,5 +42,9 @@
                 {{ $slot }}
             </main>
         </div>
+
+        {{-- Notifikasi pesanan baru. Layout ini cuma dipakai halaman admin,
+             jadi cukup dipasang di sini sekali. --}}
+        <x-admin.notif-pesanan />
     </body>
 </html>

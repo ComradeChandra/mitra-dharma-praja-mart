@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\OpdDepartmentController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\OrderPeriodController;
 use App\Http\Controllers\Admin\PasswordResetRequestController;
+use App\Http\Controllers\Admin\PesananBaruController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductRequestController;
 use App\Http\Controllers\Admin\ProfileController;
@@ -75,6 +76,13 @@ Route::middleware(['auth:web', 'admin.aktif'])->prefix('admin')->name('admin.')-
     // Bukan CRUD biasa (tidak ada create/edit/delete, pesanan hanya dibuat
     // anggota, bukan admin). Pesanan bisa dibatalkan, tapi tidak dihapus.
     Route::get('pesanan', [OrderController::class, 'index'])->name('orders.index');
+
+    // Notifikasi pesanan baru (JSON, dipanggil berkala oleh
+    // resources/js/notif-pesanan.js). Alamatnya "pesanan-baru", BUKAN
+    // "pesanan/baru": yang kedua bentrok dengan rute pesanan/{order} di bawah,
+    // kata "baru" akan dianggap nomor pesanan.
+    Route::get('pesanan-baru', PesananBaruController::class)->name('orders.baru');
+
     Route::get('pesanan/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('pesanan/{order}/struk', [OrderController::class, 'struk'])->name('orders.struk');
     Route::patch('pesanan/{order}/konfirmasi-bayar', [OrderController::class, 'confirmPayment'])->name('orders.confirm-payment');
