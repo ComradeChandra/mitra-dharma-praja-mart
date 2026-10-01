@@ -7,7 +7,8 @@
 // 2. memperkecil foto yang terlalu besar SEBELUM dikirim;
 // 3. (kalau diminta lewat :pratinjau) menampilkan pratinjau foto;
 // 4. (kalau diminta lewat :potong, saat ini foto produk) membuka jendela
-//    untuk mengatur potongan foto persegi, hitungannya di potong-foto.js.
+//    dengan kotak potong persegi yang sudutnya bisa ditarik; hitungannya di
+//    potong-foto.js.
 //
 // KENAPA DIPERKECIL: server menerima paling besar 2 MB, sedangkan foto kamera
 // HP sekarang 3–8 MB. Anggota yang memotret struk ATM sebagai bukti transfer,
@@ -20,13 +21,16 @@
 // Bukti transfer sengaja TIDAK bisa dipotong: harus utuh untuk dicocokkan.
 
 import Alpine from 'alpinejs';
-import { geser, keadaanAwal, perbesar, potongKeBerkas, skala } from './potong-foto';
+import { geserKotak, kotakAwal, potongKeBerkas, tarikSudut, tataLetak, ubahUkuranTengah } from './potong-foto';
 
 // Sedikit di bawah batas server (2 MB) supaya ada ruang.
 const BATAS_BYTE = 1.8 * 1024 * 1024;
 // Cukup tajam untuk dibaca pengurus, jauh lebih kecil dari foto kamera.
 const SISI_TERPANJANG = 1600;
 const MUTU_JPEG = 0.82;
+
+// Jarak geser/ubah ukuran per tekanan tombol keyboard (piksel layar).
+const LANGKAH_TOMBOL = 10;
 
 Alpine.data('inputBerkas', ({ potong = false, pratinjau = false } = {}) => {
     // Disimpan di luar state Alpine: elemen gambar yang dibungkus proxy
@@ -44,8 +48,9 @@ Alpine.data('inputBerkas', ({ potong = false, pratinjau = false } = {}) => {
         // --- jendela potong
         potongTerbuka: false,
         fotoUrl: '',
-        k: null, // keadaan potongan, lihat potong-foto.js
-        titikSeret: null,
+        t: null, // tata letak foto di dalam bingkai, lihat potong-foto.js
+        kotak: null, // kotak potong { x, y, sisi }
+        seret: null, // tarikan yang sedang berjalan: { jenis, x0, y0, kotak0 }
 
         async pilih(event) {
             const input = event.target;
@@ -134,48 +139,85 @@ Alpine.data('inputBerkas', ({ potong = false, pratinjau = false } = {}) => {
                 return;
             }
 
-            this.k = keadaanAwal(dimuat.naturalWidth, dimuat.naturalHeight, this.$refs.bingkai.clientWidth);
+            this.t = tataLetak(dimuat.naturalWidth, dimuat.naturalHeight, this.$refs.bingkai.clientWidth);
+            this.kotak = kotakAwal(this.t);
         },
 
-        // Posisi & ukuran foto di dalam bingkai, untuk atribut style.
+        // Posisi & ukuran foto utuh di dalam bingkai, untuk atribut style.
         get gayaFoto() {
-            if (!this.k) {
+            if (!this.t) {
                 return '';
             }
-            const s = skala(this.k);
 
-            return `width:${this.k.lebarAsli * s}px;height:${this.k.tinggiAsli * s}px;`
-                + `transform:translate(${this.k.x}px,${this.k.y}px)`;
+            return `left:${this.t.ox}px;top:${this.t.oy}px;width:${this.t.lebar}px;height:${this.t.tinggi}px`;
         },
 
-        mulaiGeser(event) {
-            this.titikSeret = { x: event.clientX, y: event.clientY };
-            // Gerakan jari/tetikus tetap diikuti walau keluar dari bingkai.
-            event.currentTarget.setPointerCapture(event.pointerId);
+        // Posisi & ukuran kotak potong, untuk atribut style.
+        get gayaKotak() {
+            if (!this.kotak) {
+                return '';
+            }
+
+            return `left:${this.kotak.x}px;top:${this.kotak.y}px;width:${this.kotak.sisi}px;height:${this.kotak.sisi}px`;
         },
 
-        lanjutGeser(event) {
-            if (!this.titikSeret || !this.k) {
+        // Titik jari/tetikus, relatif terhadap pojok kiri-atas bingkai.
+        titikDi(event) {
+            const kotakBingkai = this.$refs.bingkai.getBoundingClientRect();
+
+            return { x: event.clientX - kotakBingkai.left, y: event.clientY - kotakBingkai.top };
+        },
+
+        // jenis: 'geser' (menarik bagian tengah kotak) atau nama sudut
+        // ('kiri-atas', 'kanan-atas', 'kiri-bawah', 'kanan-bawah').
+        mulaiSeret(event, jenis) {
+            if (!this.kotak) {
                 return;
             }
-            this.k = geser(this.k, event.clientX - this.titikSeret.x, event.clientY - this.titikSeret.y);
-            this.titikSeret = { x: event.clientX, y: event.clientY };
+            const titik = this.titikDi(event);
+            this.seret = { jenis, x0: titik.x, y0: titik.y, kotak0: { ...this.kotak } };
+            // Gerakan tetap diikuti walau jari/tetikus keluar dari bingkai.
+            this.$refs.bingkai.setPointerCapture(event.pointerId);
         },
 
-        akhiriGeser() {
-            this.titikSeret = null;
-        },
-
-        // Tombol panah keyboard, untuk yang tidak memakai tetikus/layar sentuh.
-        geserTombol(dx, dy) {
-            if (this.k) {
-                this.k = geser(this.k, dx, dy);
+        lanjutSeret(event) {
+            if (!this.seret || !this.t) {
+                return;
             }
+            const titik = this.titikDi(event);
+            const { jenis, x0, y0, kotak0 } = this.seret;
+
+            this.kotak = jenis === 'geser'
+                ? geserKotak(this.t, kotak0, titik.x - x0, titik.y - y0)
+                : tarikSudut(this.t, kotak0, jenis, titik.x, titik.y);
         },
 
-        ubahPerbesar(nilai) {
-            if (this.k) {
-                this.k = perbesar(this.k, nilai);
+        akhiriSeret() {
+            this.seret = null;
+        },
+
+        // Keyboard, untuk yang tidak memakai tetikus/layar sentuh:
+        // panah = pindahkan kotak, + / − = ubah ukuran kotak.
+        tombolKeyboard(event) {
+            if (!this.kotak) {
+                return;
+            }
+            const geser = {
+                ArrowLeft: [-LANGKAH_TOMBOL, 0],
+                ArrowRight: [LANGKAH_TOMBOL, 0],
+                ArrowUp: [0, -LANGKAH_TOMBOL],
+                ArrowDown: [0, LANGKAH_TOMBOL],
+            }[event.key];
+
+            if (geser) {
+                event.preventDefault();
+                this.kotak = geserKotak(this.t, this.kotak, ...geser);
+            } else if (['+', '='].includes(event.key)) {
+                event.preventDefault();
+                this.kotak = ubahUkuranTengah(this.t, this.kotak, LANGKAH_TOMBOL);
+            } else if (['-', '_'].includes(event.key)) {
+                event.preventDefault();
+                this.kotak = ubahUkuranTengah(this.t, this.kotak, -LANGKAH_TOMBOL);
             }
         },
 
@@ -184,14 +226,14 @@ Alpine.data('inputBerkas', ({ potong = false, pratinjau = false } = {}) => {
 
             // Tombol dinonaktifkan selama potongan belum siap, ini sekadar
             // jaring pengaman kalau tetap tertekan.
-            if (!gambar || !this.k) {
+            if (!gambar || !this.kotak) {
                 return;
             }
 
             this.sedangMemproses = true;
 
             try {
-                const hasil = await potongKeBerkas(gambar, this.k, berkasAsli.name);
+                const hasil = await potongKeBerkas(gambar, this.t, this.kotak, berkasAsli.name);
 
                 if (hasil) {
                     gantiIsiInput(input, hasil);
@@ -224,8 +266,9 @@ Alpine.data('inputBerkas', ({ potong = false, pratinjau = false } = {}) => {
                 URL.revokeObjectURL(this.fotoUrl);
             }
             this.fotoUrl = '';
-            this.k = null;
-            this.titikSeret = null;
+            this.t = null;
+            this.kotak = null;
+            this.seret = null;
             gambar = null;
             berkasAsli = null;
         },

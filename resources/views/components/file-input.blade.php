@@ -21,7 +21,8 @@
     - accept    : jenis berkas yang boleh dipilih, mis. "image/jpeg,image/png"
     - pratinjau : true = tampilkan pratinjau kecil foto yang dipilih
     - potong    : true = setelah memilih foto, buka jendela untuk mengatur
-                  potongan PERSEGI (geser + perbesar). Dipakai foto produk,
+                  potongan PERSEGI (kotak potong yang sudutnya bisa ditarik
+                  dan bisa dipindah). Dipakai foto produk,
                   yang di katalog memang tampil persegi. Otomatis ikut
                   menampilkan pratinjau. JANGAN dipakai untuk bukti transfer:
                   bukti harus utuh untuk dicocokkan pengurus.
@@ -104,52 +105,66 @@
             <div class="max-h-[92vh] w-full max-w-sm overflow-y-auto rounded-2xl bg-white p-5 shadow-xl">
                 <h3 id="{{ $id }}-judul-potong" class="text-base font-semibold text-gray-900">Atur foto</h3>
                 <p class="mt-1 text-sm text-gray-500">
-                    Geser foto untuk memilih bagian yang tampil, lalu perbesar kalau perlu.
+                    Tarik sudut kotak untuk mengubah ukurannya, tarik bagian tengahnya untuk memindahkan.
                     Isi kotak inilah yang tampil di katalog.
                 </p>
 
-                {{-- Bingkai persegi. touch-none: geseran jari menggerakkan
-                     foto, bukan menggulir halaman. --}}
-                <div
-                    x-ref="bingkai"
-                    tabindex="0"
-                    aria-label="Potongan foto. Geser dengan tetikus, jari, atau tombol panah."
-                    class="relative mt-4 aspect-square w-full touch-none cursor-grab overflow-hidden rounded-xl bg-gray-100 active:cursor-grabbing focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    x-on:pointerdown="mulaiGeser($event)"
-                    x-on:pointermove="lanjutGeser($event)"
-                    x-on:pointerup="akhiriGeser()"
-                    x-on:pointercancel="akhiriGeser()"
-                    x-on:keydown.arrow-left.prevent="geserTombol(-10, 0)"
-                    x-on:keydown.arrow-right.prevent="geserTombol(10, 0)"
-                    x-on:keydown.arrow-up.prevent="geserTombol(0, -10)"
-                    x-on:keydown.arrow-down.prevent="geserTombol(0, 10)"
-                >
-                    <img
-                        x-show="k"
-                        :src="fotoUrl"
-                        :style="gayaFoto"
-                        alt=""
-                        draggable="false"
-                        class="pointer-events-none absolute left-0 top-0 max-w-none select-none"
+                {{-- Bingkai gelap persegi. Padding (p-3) memberi ruang untuk
+                     pegangan sudut yang menonjol keluar dari kotak. --}}
+                <div class="mt-4 aspect-square w-full overflow-hidden rounded-xl bg-gray-900 p-3">
+                    {{-- Area tempat foto utuh digambar; semua hitungan
+                         potong-foto.js relatif terhadap area ini.
+                         touch-none: tarikan jari menggerakkan kotak, bukan
+                         menggulir halaman. --}}
+                    <div
+                        x-ref="bingkai"
+                        tabindex="0"
+                        aria-label="Potongan foto. Tarik dengan tetikus atau jari; atau pakai tombol panah untuk memindah dan + / − untuk mengubah ukuran."
+                        class="relative h-full w-full touch-none select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                        x-on:pointermove="lanjutSeret($event)"
+                        x-on:pointerup="akhiriSeret()"
+                        x-on:pointercancel="akhiriSeret()"
+                        x-on:keydown="tombolKeyboard($event)"
                     >
-                </div>
+                        <img
+                            x-show="kotak"
+                            :src="fotoUrl"
+                            :style="gayaFoto"
+                            alt=""
+                            draggable="false"
+                            class="pointer-events-none absolute max-w-none select-none"
+                        >
 
-                <label class="mt-4 flex items-center gap-3 text-sm text-gray-600">
-                    <span class="shrink-0">Perbesar</span>
-                    <input
-                        type="range"
-                        min="1"
-                        max="3"
-                        step="0.01"
-                        :value="k ? k.perbesar : 1"
-                        x-on:input="ubahPerbesar($event.target.value)"
-                        class="w-full accent-emerald-700"
-                    >
-                </label>
+                        {{-- Kotak potong. Bayangan raksasa menggelapkan semua
+                             bagian di luar kotak (dipotong overflow-hidden
+                             bingkai), jadi tidak perlu empat panel gelap. --}}
+                        <div
+                            x-show="kotak"
+                            :style="gayaKotak"
+                            class="absolute cursor-move border-2 border-white shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]"
+                            x-on:pointerdown="mulaiSeret($event, 'geser')"
+                        >
+                            {{-- Pegangan sudut. .stop: menarik sudut tidak ikut
+                                 dianggap menarik kotak (memindahkan). --}}
+                            @foreach ([
+                                'kiri-atas' => '-left-3 -top-3 cursor-nwse-resize',
+                                'kanan-atas' => '-right-3 -top-3 cursor-nesw-resize',
+                                'kiri-bawah' => '-left-3 -bottom-3 cursor-nesw-resize',
+                                'kanan-bawah' => '-right-3 -bottom-3 cursor-nwse-resize',
+                            ] as $sudut => $letak)
+                                <span
+                                    data-sudut="{{ $sudut }}"
+                                    class="absolute {{ $letak }} h-6 w-6 rounded-md border-2 border-white bg-emerald-600 shadow"
+                                    x-on:pointerdown.stop="mulaiSeret($event, '{{ $sudut }}')"
+                                ></span>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
 
                 <div class="mt-5 flex justify-end gap-2">
                     <x-secondary-button type="button" x-on:click="batal()">Batal</x-secondary-button>
-                    <x-primary-button type="button" x-on:click="pakai()" x-bind:disabled="!k || sedangMemproses">
+                    <x-primary-button type="button" x-on:click="pakai()" x-bind:disabled="!kotak || sedangMemproses">
                         Pakai foto ini
                     </x-primary-button>
                 </div>

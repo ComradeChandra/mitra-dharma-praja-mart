@@ -2,86 +2,136 @@
 // untuk komponen x-file-input yang diberi :potong="true" (saat ini foto
 // produk, yang di katalog memang ditampilkan persegi).
 //
-// Dipisah dari file-input.js supaya hitungannya bisa diuji tanpa browser
-// (tests/js/potong-foto.test.mjs).
+// Cara kerjanya seperti alat crop di HP: foto tampil UTUH di dalam bingkai,
+// lalu ada KOTAK POTONG persegi di atasnya. Sudut kotak ditarik untuk mengubah
+// ukurannya, bagian tengahnya ditarik untuk memindahkannya.
 //
-// "Keadaan" (k) menyimpan posisi foto di dalam bingkai:
-// - x, y        : letak pojok kiri-atas foto terhadap bingkai (piksel layar,
-//                 selalu <= 0 karena foto selalu menutupi bingkai)
-// - skalaDasar  : skala supaya foto pas menutupi bingkai (seperti object-cover)
-// - perbesar    : pengali dari penggeser, 1 sampai PERBESAR_MAKS
-
-export const PERBESAR_MAKS = 3;
+// Dipisah dari file-input.js supaya hitungannya bisa diuji tanpa browser
+// (tests/js/potong-foto.test.mjs). Semua ukuran dalam piksel layar relatif
+// terhadap bingkai, kecuali yang disebut "asli" (piksel foto sebenarnya).
+//
+// - t (tata letak): di mana foto digambar di dalam bingkai
+//     { lebarAsli, tinggiAsli, skala, ox, oy, lebar, tinggi }
+// - kotak: kotak potong { x, y, sisi }
 
 // Sisi foto hasil potongan. Cukup tajam untuk kartu katalog dan halaman
 // detail, dan jauh di bawah batas unggah server (2 MB).
 export const SISI_HASIL = 800;
+
+// Kotak terkecil (piksel layar): lebih kecil dari ini pegangan sudutnya
+// saling tumpuk dan susah ditarik di layar HP.
+export const KOTAK_TERKECIL = 48;
+
 const MUTU_JPEG = 0.85;
 
-/** Keadaan awal: foto menutupi bingkai penuh dan berada di tengah. */
-export function keadaanAwal(lebarAsli, tinggiAsli, sisiBingkai) {
-    const skalaDasar = sisiBingkai / Math.min(lebarAsli, tinggiAsli);
-
-    return batasi({
-        lebarAsli,
-        tinggiAsli,
-        sisiBingkai,
-        skalaDasar,
-        perbesar: 1,
-        x: (sisiBingkai - lebarAsli * skalaDasar) / 2,
-        y: (sisiBingkai - tinggiAsli * skalaDasar) / 2,
-    });
-}
-
-/** Skala tampilan saat ini (piksel layar per piksel asli). */
-export function skala(k) {
-    return k.skalaDasar * k.perbesar;
-}
-
-/**
- * Foto tidak boleh digeser sampai bingkai memperlihatkan ruang kosong:
- * pojok kiri-atas foto dijaga di antara (sisiBingkai - ukuranFoto) dan 0.
- */
-export function batasi(k) {
-    const lebar = k.lebarAsli * skala(k);
-    const tinggi = k.tinggiAsli * skala(k);
+/** Foto digambar utuh di tengah bingkai persegi (seperti object-contain). */
+export function tataLetak(lebarAsli, tinggiAsli, sisiBingkai) {
+    const skala = Math.min(sisiBingkai / lebarAsli, sisiBingkai / tinggiAsli);
+    const lebar = lebarAsli * skala;
+    const tinggi = tinggiAsli * skala;
 
     return {
-        ...k,
-        x: Math.min(0, Math.max(k.sisiBingkai - lebar, k.x)),
-        y: Math.min(0, Math.max(k.sisiBingkai - tinggi, k.y)),
+        lebarAsli,
+        tinggiAsli,
+        skala,
+        lebar,
+        tinggi,
+        ox: (sisiBingkai - lebar) / 2,
+        oy: (sisiBingkai - tinggi) / 2,
     };
 }
 
-/** Geser foto sejauh dx, dy piksel layar. */
-export function geser(k, dx, dy) {
-    return batasi({ ...k, x: k.x + dx, y: k.y + dy });
+/** Batas ukuran kotak: tidak boleh melebihi sisi foto yang lebih pendek. */
+function batasUkuran(t) {
+    const maks = Math.min(t.lebar, t.tinggi);
+
+    return { min: Math.min(KOTAK_TERKECIL, maks), maks };
 }
 
-/** Ubah perbesaran; titik tengah bingkai tetap menunjuk bagian foto yang sama. */
-export function perbesar(k, nilai) {
-    const baru = Math.min(PERBESAR_MAKS, Math.max(1, Number(nilai) || 1));
-    const rasio = baru / k.perbesar;
-    const tengah = k.sisiBingkai / 2;
+const jepit = (nilai, bawah, atas) => Math.min(atas, Math.max(bawah, nilai));
 
-    return batasi({
-        ...k,
-        perbesar: baru,
-        x: tengah - (tengah - k.x) * rasio,
-        y: tengah - (tengah - k.y) * rasio,
-    });
+/** Kotak tidak boleh keluar dari foto. */
+function dalamFoto(t, kotak) {
+    return {
+        sisi: kotak.sisi,
+        x: jepit(kotak.x, t.ox, t.ox + t.lebar - kotak.sisi),
+        y: jepit(kotak.y, t.oy, t.oy + t.tinggi - kotak.sisi),
+    };
 }
 
-/** Bagian foto ASLI (piksel asli) yang sedang terlihat di dalam bingkai. */
-export function areaSumber(k) {
-    const s = skala(k);
+/** Kotak awal: persegi terbesar yang muat, di tengah foto. */
+export function kotakAwal(t) {
+    const sisi = batasUkuran(t).maks;
 
-    return { x: -k.x / s, y: -k.y / s, sisi: k.sisiBingkai / s };
+    return {
+        sisi,
+        x: t.ox + (t.lebar - sisi) / 2,
+        y: t.oy + (t.tinggi - sisi) / 2,
+    };
 }
 
-/** Potong gambar sesuai bingkai, hasilnya berkas JPEG persegi. */
-export async function potongKeBerkas(gambar, k, namaAsli) {
-    const area = areaSumber(k);
+/** Pindahkan kotak sejauh dx, dy (dari posisi kotak saat mulai ditarik). */
+export function geserKotak(t, kotak, dx, dy) {
+    return dalamFoto(t, { ...kotak, x: kotak.x + dx, y: kotak.y + dy });
+}
+
+/**
+ * Tarik salah satu sudut ke titik (px, py). Sudut SEBERANGNYA jadi jangkar
+ * dan tidak bergerak. Kotak tetap persegi: sisinya mengikuti arah tarikan
+ * yang lebih jauh, lalu dijepit supaya tidak keluar dari foto.
+ *
+ * sudut: 'kiri-atas' | 'kanan-atas' | 'kiri-bawah' | 'kanan-bawah'
+ * awal : kotak saat sudut mulai ditarik
+ */
+export function tarikSudut(t, awal, sudut, px, py) {
+    const kiri = sudut.startsWith('kiri');
+    const atas = sudut.endsWith('atas');
+
+    // Jangkar = sudut seberang dari yang ditarik.
+    const ax = kiri ? awal.x + awal.sisi : awal.x;
+    const ay = atas ? awal.y + awal.sisi : awal.y;
+
+    // Seberapa jauh dari jangkar ke titik tarik (positif = kotak membesar).
+    const mauX = kiri ? ax - px : px - ax;
+    const mauY = atas ? ay - py : py - ay;
+
+    // Ruang yang tersedia dari jangkar sampai tepi foto.
+    const ruangX = kiri ? ax - t.ox : t.ox + t.lebar - ax;
+    const ruangY = atas ? ay - t.oy : t.oy + t.tinggi - ay;
+
+    const { min } = batasUkuran(t);
+    const maks = Math.min(ruangX, ruangY);
+    const sisi = jepit(Math.max(mauX, mauY), Math.min(min, maks), maks);
+
+    return {
+        sisi,
+        x: kiri ? ax - sisi : ax,
+        y: atas ? ay - sisi : ay,
+    };
+}
+
+/** Ubah ukuran kotak dengan titik tengahnya tetap (untuk tombol + dan −). */
+export function ubahUkuranTengah(t, kotak, selisih) {
+    const { min, maks } = batasUkuran(t);
+    const sisi = jepit(kotak.sisi + selisih, min, maks);
+    const tengahX = kotak.x + kotak.sisi / 2;
+    const tengahY = kotak.y + kotak.sisi / 2;
+
+    return dalamFoto(t, { sisi, x: tengahX - sisi / 2, y: tengahY - sisi / 2 });
+}
+
+/** Bagian foto ASLI (piksel asli) yang ada di dalam kotak potong. */
+export function areaSumber(t, kotak) {
+    return {
+        x: (kotak.x - t.ox) / t.skala,
+        y: (kotak.y - t.oy) / t.skala,
+        sisi: kotak.sisi / t.skala,
+    };
+}
+
+/** Potong gambar sesuai kotak, hasilnya berkas JPEG persegi. */
+export async function potongKeBerkas(gambar, t, kotak, namaAsli) {
+    const area = areaSumber(t, kotak);
     // Foto yang sudah kecil tidak diperbesar (cuma jadi buram).
     const sisi = Math.max(1, Math.round(Math.min(SISI_HASIL, area.sisi)));
 
