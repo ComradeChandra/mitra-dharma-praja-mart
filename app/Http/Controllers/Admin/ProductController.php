@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\StoreProductRequest;
 use App\Http\Requests\Admin\UpdateProductRequest;
 use App\Models\Product;
 use App\Services\ImageStorageService;
+use App\Services\KategoriProdukService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -21,7 +22,10 @@ use Illuminate\View\View;
  */
 class ProductController extends Controller
 {
-    public function __construct(private ImageStorageService $imageStorage) {}
+    public function __construct(
+        private ImageStorageService $imageStorage,
+        private KategoriProdukService $kategori,
+    ) {}
 
     public function index(Request $request): View
     {
@@ -36,7 +40,10 @@ class ProductController extends Controller
 
     public function create(): View
     {
-        return view('admin.products.create');
+        // Kategori yang sudah dipakai, jadi saran di kotak "Kategori".
+        $daftarKategori = $this->kategori->daftar();
+
+        return view('admin.products.create', compact('daftarKategori'));
     }
 
     public function store(StoreProductRequest $request): RedirectResponse
@@ -56,7 +63,9 @@ class ProductController extends Controller
 
     public function edit(Product $product): View
     {
-        return view('admin.products.edit', compact('product'));
+        $daftarKategori = $this->kategori->daftar();
+
+        return view('admin.products.edit', compact('product', 'daftarKategori'));
     }
 
     public function update(UpdateProductRequest $request, Product $product): RedirectResponse

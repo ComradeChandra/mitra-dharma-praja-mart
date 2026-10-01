@@ -38,15 +38,28 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
                 <x-input-label for="category" value="Kategori" />
+                {{-- list="daftar-kategori": kotak isian biasa yang menampilkan
+                     kategori yang sudah ada sebagai saran, tapi tetap bisa
+                     diketik kategori baru. Isiannya juga dirapikan di server
+                     (Concerns\RapikanKategori) supaya "sembako" ikut masuk
+                     kelompok "Sembako" di katalog. --}}
                 <x-text-input
                     id="category"
                     name="category"
                     type="text"
+                    list="daftar-kategori"
+                    autocomplete="off"
                     class="block mt-1 w-full"
                     placeholder="Contoh: Sembako"
                     :value="old('category', $product->category ?? '')"
                     required
                 />
+                <datalist id="daftar-kategori">
+                    @foreach ($daftarKategori ?? [] as $namaKategori)
+                        <option value="{{ $namaKategori }}"></option>
+                    @endforeach
+                </datalist>
+                <p class="mt-1.5 text-xs text-gray-400">Pilih dari daftar, atau ketik kategori baru.</p>
                 <x-input-error :messages="$errors->get('category')" class="mt-2" />
             </div>
 

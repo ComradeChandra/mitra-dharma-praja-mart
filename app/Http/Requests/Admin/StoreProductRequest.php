@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Concerns\RapikanKategori;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -9,6 +10,9 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class StoreProductRequest extends FormRequest
 {
+    // Isian kategori dirapikan dulu (spasi, huruf besar-kecil) sebelum divalidasi.
+    use RapikanKategori;
+
     public function authorize(): bool
     {
         return true;
