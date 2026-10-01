@@ -24,8 +24,10 @@
             <img src="{{ \Illuminate\Support\Facades\Storage::url($product->image_path) }}" alt="{{ $product->name }}" class="h-20 w-20 object-cover rounded-lg border border-gray-200 mb-3">
         @endif
 
-        <x-file-input name="image" accept="image/jpeg,image/png" />
-        <p class="mt-1.5 text-xs text-gray-400">Opsional — JPG/PNG. Foto yang besar otomatis diperkecil.</p>
+        {{-- :potong: setelah memilih foto, pengurus bisa mengatur potongan
+             persegi, persis seperti yang tampil di kartu katalog --}}
+        <x-file-input name="image" accept="image/jpeg,image/png" :potong="true" />
+        <p class="mt-1.5 text-xs text-gray-400">Opsional — JPG/PNG. Setelah memilih foto, kamu bisa mengatur bagian yang tampil di katalog.</p>
         <x-input-error :messages="$errors->get('image')" class="mt-2" />
     </div>
 
