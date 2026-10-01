@@ -77,16 +77,35 @@ test('Pengurus tetap bisa mengerjakan pekerjaan harian', function () {
     }
 });
 
-test('menu Akun Pengurus dan Pengaturan cuma muncul untuk Admin Utama', function () {
+test('tab Pengurus dan menu Pengaturan cuma muncul untuk Admin Utama', function () {
+    // Akun Pengurus dibuka dari tab "Pengurus" di halaman Anggota (1 Okt 2026),
+    // bukan lagi dari menu akun. Pengaturan tetap di menu akun.
+    $this->actingAs($this->utama, 'web')
+        ->get(route('admin.members.index'))
+        ->assertSee('aria-label="Jenis pengguna"', false)
+        ->assertSee(route('admin.accounts.index'), false);
+
     $this->actingAs($this->utama, 'web')
         ->get(route('admin.dashboard'))
-        ->assertSee(route('admin.accounts.index'), false)
         ->assertSee(route('admin.settings.edit'), false);
+
+    $this->actingAs($this->staf, 'web')
+        ->get(route('admin.members.index'))
+        ->assertDontSee('aria-label="Jenis pengguna"', false)
+        ->assertDontSee(route('admin.accounts.index'), false);
 
     $this->actingAs($this->staf, 'web')
         ->get(route('admin.dashboard'))
         ->assertDontSee(route('admin.accounts.index'), false)
         ->assertDontSee(route('admin.settings.edit'), false);
+});
+
+test('halaman Akun Pengurus menandai tab Pengurus yang sedang dibuka', function () {
+    $this->actingAs($this->utama, 'web')
+        ->get(route('admin.accounts.index'))
+        ->assertOk()
+        ->assertSee('aria-current="page"', false)
+        ->assertSee('+ Tambah Pengurus');
 });
 
 test('akun nonaktif tidak bisa masuk', function () {

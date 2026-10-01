@@ -52,7 +52,9 @@
                         </svg>
                         {{ __('Pesanan') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('admin.members.index')" :active="request()->routeIs('admin.members.*')">
+                    {{-- Akun Pengurus ikut menyalakan menu ini: halamannya
+                         sekarang jadi tab "Pengurus" di halaman Anggota --}}
+                    <x-nav-link :href="route('admin.members.index')" :active="request()->routeIs('admin.members.*', 'admin.accounts.*')">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 me-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="9" cy="7" r="3" /><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" /><circle cx="17" cy="8" r="2.3" /><path d="M14.7 20c.25-2.35 1.7-4.25 3.65-5" />
                         </svg>
@@ -112,11 +114,10 @@
 
                         {{-- Khusus Admin Utama. Di menu akun, bukan di deretan
                              menu atas: jarang dibuka, dan deretan atas sudah
-                             penuh di layar 1280px --}}
+                             penuh di layar 1280px. Akun Pengurus tidak lagi di
+                             sini: sekarang jadi tab "Pengurus" di halaman Anggota
+                             (komponen x-admin.tab-orang). --}}
                         @can('admin-utama')
-                            <x-dropdown-link :href="route('admin.accounts.index')">
-                                Akun Pengurus
-                            </x-dropdown-link>
                             <x-dropdown-link :href="route('admin.settings.edit')">
                                 Pengaturan
                             </x-dropdown-link>
@@ -164,7 +165,7 @@
             <x-responsive-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')">
                 {{ __('Pesanan') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('admin.members.index')" :active="request()->routeIs('admin.members.*')">
+            <x-responsive-nav-link :href="route('admin.members.index')" :active="request()->routeIs('admin.members.*', 'admin.accounts.*')">
                 {{ __('Anggota') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.opd-departments.index')" :active="request()->routeIs('admin.opd-departments.*')">
@@ -191,9 +192,6 @@
                 </x-responsive-nav-link>
 
                 @can('admin-utama')
-                    <x-responsive-nav-link :href="route('admin.accounts.index')" :active="request()->routeIs('admin.accounts.*')">
-                        Akun Pengurus
-                    </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('admin.settings.edit')" :active="request()->routeIs('admin.settings.*')">
                         Pengaturan
                     </x-responsive-nav-link>

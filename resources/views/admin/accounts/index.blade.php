@@ -6,13 +6,17 @@
                 <p class="text-sm text-gray-400">Setiap staf koperasi masuk dengan akunnya sendiri.</p>
             </div>
             <a href="{{ route('admin.accounts.create') }}">
-                <x-primary-button type="button">+ Tambah Akun</x-primary-button>
+                <x-primary-button type="button">+ Tambah Pengurus</x-primary-button>
             </a>
         </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-8">
+            {{-- Tab Anggota | Pengurus: halaman ini sekarang dibuka dari tab
+                 di halaman Data Anggota, bukan dari menu akun --}}
+            <x-admin.tab-orang />
+
             <x-alert type="success" :message="session('success')" />
 
             <x-admin.table-card>

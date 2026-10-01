@@ -23,6 +23,9 @@
 
     <div class="py-12">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+            {{-- Tab Anggota | Pengurus (cuma tampil untuk Admin Utama) --}}
+            <x-admin.tab-orang class="mb-6" />
+
             <x-alert type="success" :message="session('success')" />
             <x-alert type="error" :message="session('error')" />
 
