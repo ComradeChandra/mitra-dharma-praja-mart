@@ -2,16 +2,17 @@
 
 use App\Models\Product;
 use App\Models\User;
+use App\Services\KategoriProdukService;
 
 /*
 |--------------------------------------------------------------------------
-| Kategori produk: saran dari kategori yang sudah ada + perapian isian
-| (1 Okt 2026)
+| Kategori produk: dropdown kategori yang sudah ada + "Buat kategori baru",
+| dan perapian isian (1 Okt 2026)
 |--------------------------------------------------------------------------
 | Katalog mengelompokkan produk berdasarkan tulisan kategori yang persis sama,
 | jadi "Sembako", "sembako", dan "Sembako " tidak boleh tersimpan sebagai tiga
-| kategori berbeda. Form produk menyarankan kategori yang sudah ada (datalist),
-| dan server merapikan isiannya sebelum disimpan.
+| kategori berbeda. Form produk punya dropdown kategori yang sudah ada + pilihan
+| "+ Buat kategori baru", dan server merapikan isiannya sebelum disimpan.
 */
 
 beforeEach(function () {
@@ -29,18 +30,59 @@ beforeEach(function () {
     ];
 });
 
-test('form tambah dan ubah produk menyarankan kategori yang sudah ada', function () {
+test('form tambah dan ubah produk punya dropdown kategori + pilihan kategori baru', function () {
     ($this->buatProduk)('Sembako');
     $minuman = ($this->buatProduk)('Minuman');
 
     foreach ([route('admin.products.create'), route('admin.products.edit', $minuman)] as $alamat) {
         $this->actingAs($this->admin)->get($alamat)
             ->assertOk()
-            ->assertSee('list="daftar-kategori"', false)
-            ->assertSee('<option value="Minuman"></option>', false)
-            ->assertSee('<option value="Sembako"></option>', false);
+            ->assertSee('name="category"', false)
+            ->assertSee('>Minuman</option>', false)
+            ->assertSee('>Sembako</option>', false)
+            ->assertSee('+ Buat kategori baru')
+            ->assertSee('name="category_baru"', false);
     }
+
+    // Di form ubah, kategori produknya sendiri yang terpilih.
+    $this->actingAs($this->admin)->get(route('admin.products.edit', $minuman))
+        ->assertSee('<option value="Minuman" selected', false);
 });
+
+test('website baru tanpa kategori langsung meminta nama kategori baru', function () {
+    $this->actingAs($this->admin)->get(route('admin.products.create'))
+        ->assertOk()
+        ->assertSee('<option value="'.KategoriProdukService::PILIHAN_BARU.'" selected', false);
+});
+
+test('memilih "+ Buat kategori baru" menyimpan nama yang diketik', function () {
+    ($this->buatProduk)('Sembako');
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.products.store'), [
+            ...($this->isian)(KategoriProdukService::PILIHAN_BARU),
+            'category_baru' => '  Minuman   Dingin ',
+        ])
+        ->assertRedirect(route('admin.products.index'));
+
+    expect(Product::where('name', 'Produk Baru')->value('category'))->toBe('Minuman Dingin');
+});
+
+test('memilih "+ Buat kategori baru" tanpa mengetik namanya ditolak', function (mixed $namaBaru) {
+    $this->actingAs($this->admin)
+        ->post(route('admin.products.store'), [
+            ...($this->isian)(KategoriProdukService::PILIHAN_BARU),
+            'category_baru' => $namaBaru,
+        ])
+        ->assertSessionHasErrors('category');
+
+    // Jangan sampai tersimpan sebagai kategori bernama "__baru__".
+    expect(Product::count())->toBe(0);
+})->with([
+    'kosong' => [''],
+    'cuma spasi' => ['   '],
+    'isian aneh' => [['a', 'b']],
+]);
 
 test('kategori yang beda huruf besar-kecilnya ikut kategori yang sudah ada', function () {
     ($this->buatProduk)('Sembako');

@@ -18,6 +18,13 @@ use Illuminate\Support\Collection;
 class KategoriProdukService
 {
     /**
+     * Nilai pilihan "+ Buat kategori baru" di dropdown kategori. Kalau ini yang
+     * terkirim, nama kategorinya diambil dari kolom category_baru
+     * (lihat Requests\Concerns\RapikanKategori).
+     */
+    public const PILIHAN_BARU = '__baru__';
+
+    /**
      * Semua kategori yang sedang dipakai produk (termasuk produk nonaktif),
      * urut abjad. Dipakai sebagai daftar saran (datalist) di form produk.
      *
