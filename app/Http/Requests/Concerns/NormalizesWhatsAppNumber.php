@@ -15,7 +15,8 @@ namespace App\Http\Requests\Concerns;
  * mengubahnya ke format internasional saat membuat tautan wa.me.
  *
  * Dipakai form yang punya kolom whatsapp_number: tambah/ubah anggota (admin),
- * profil anggota, dan pesanan non-anggota.
+ * profil anggota, dan pesanan non-anggota. Impor anggota (ImporAnggotaService)
+ * memanggil rapikanNomorWhatsApp() langsung supaya aturannya sama persis.
  */
 trait NormalizesWhatsAppNumber
 {
@@ -24,7 +25,13 @@ trait NormalizesWhatsAppNumber
         $nomor = $this->input('whatsapp_number');
 
         if (is_string($nomor)) {
-            $this->merge(['whatsapp_number' => preg_replace('/[\s\-.()+]/u', '', $nomor)]);
+            $this->merge(['whatsapp_number' => self::rapikanNomorWhatsApp($nomor)]);
         }
+    }
+
+    /** Buang spasi, strip, titik, kurung, dan tanda + dari nomor WhatsApp. */
+    public static function rapikanNomorWhatsApp(string $nomor): string
+    {
+        return preg_replace('/[\s\-.()+]/u', '', $nomor);
     }
 }

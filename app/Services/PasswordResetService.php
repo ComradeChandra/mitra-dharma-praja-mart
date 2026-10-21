@@ -27,13 +27,11 @@ use Illuminate\Support\Facades\DB;
  */
 class PasswordResetService
 {
-    /**
-     * Huruf & angka untuk password acak. Tanpa yang mirip satu sama lain
-     * (0/o, 1/l/i), karena anggota mengetiknya ulang dari WhatsApp.
-     */
-    private const HURUF = 'abcdefghjkmnpqrstuvwxyz23456789';
-
-    public function __construct(private WhatsAppLinkService $tautanWhatsApp) {}
+    public function __construct(
+        private WhatsAppLinkService $tautanWhatsApp,
+        // Pembuat password acak dipakai bersama dengan impor anggota
+        private PasswordAcakService $passwordAcak,
+    ) {}
 
     /**
      * Catat permintaan dari anggota. Kalau anggota ini masih punya permintaan
@@ -77,7 +75,7 @@ class PasswordResetService
                 abort(422, $this->kalimatSudahDitangani($permintaan));
             }
 
-            $password = $this->passwordAcak();
+            $password = $this->passwordAcak->buat();
             $permintaan->member->update(['password' => $password]);
             $this->tutupSemua($permintaan->member, $pengurus, PasswordResetStatus::Selesai);
 
@@ -155,16 +153,5 @@ class PasswordResetService
         $kapan = $permintaan->handled_at?->translatedFormat('d M Y, H:i');
 
         return "Permintaan ini sudah ditangani {$siapa}".($kapan ? " pada {$kapan}" : '').'.';
-    }
-
-    /** Password 8 karakter acak dari HURUF, memakai random_int (acak kriptografis). */
-    private function passwordAcak(): string
-    {
-        $hasil = '';
-        for ($i = 0; $i < 8; $i++) {
-            $hasil .= self::HURUF[random_int(0, strlen(self::HURUF) - 1)];
-        }
-
-        return $hasil;
     }
 }

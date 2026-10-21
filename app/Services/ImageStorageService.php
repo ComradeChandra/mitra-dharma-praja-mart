@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -39,6 +40,16 @@ class ImageStorageService
         }
 
         return $image->store($folder, $disk);
+    }
+
+    /**
+     * Simpan gambar yang sudah ada di disk (bukan unggahan form), mis. foto
+     * produk dari impor data. Nama berkasnya dibuat acak seperti store(),
+     * jadi dua foto bernama sama tidak saling menimpa.
+     */
+    public function storeFromPath(string $path, string $folder, string $disk = 'public'): string
+    {
+        return Storage::disk($disk)->putFile($folder, new File($path));
     }
 
     /**
